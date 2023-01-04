@@ -9,10 +9,18 @@ apt upgrade -y
 # set pihole dns server to cloudflare dns
 mkdir /etc/pihole/
 
+# note - DNSMASQ_LISTENING=all -- only because we are limiting to our external IP address as a source - otherwise this is dangerous.
 cat <<EOF > /etc/pihole/setupVars.conf
+BLOCKING_ENABLED=true
+DNSSEC=false
+REV_SERVER=false
+DNS_FQDN_REQUIRED=true
+DNS_BOGUS_PRIV=true
 PIHOLE_DNS_1=1.1.1.1
 PIHOLE_DNS_2=1.0.0.1
-DNSMASQ_LISTENING=local
+PIHOLE_DNS_3=2606:4700:4700::1111
+PIHOLE_DNS_4=2606:4700:4700::1001
+DNSMASQ_LISTENING=all
 QUERY_LOGGING=true
 EOF
 
