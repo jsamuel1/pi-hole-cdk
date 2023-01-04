@@ -6,7 +6,7 @@ Prerequisites:
 * Your local routers external IP address 
 
 Do deploy, run:
-cdk deploy -c local_ip_cidr=<local_ip/32> -c vpc_name=<vpcNAME> -c keypair=<keypairname>
+cdk deploy -c local_ip_cidr=\<local_ip/32\> -c vpc_name=\<vpcNAME\> -c keypair=\<keypairname\>
 
 eg.
 cdk deploy -c local_ip_cidr=121.121.4.100/32 -c vpc_name=aws-controltower-VPC -c keypair=pihole
