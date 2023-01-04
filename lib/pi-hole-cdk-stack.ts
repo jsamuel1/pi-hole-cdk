@@ -11,6 +11,7 @@ export class PiHoleCdkStack extends cdk.Stack {
 
       const local_ip_cidr = this.node.tryGetContext('local_ip_cidr');
       const vpc_name = this.node.tryGetContext('vpc_name');
+      const keypair = this.node.tryGetContext('keypair'); 
 
       let vpc = aws_ec2.Vpc.fromLookup(this, 'vpc', { vpcName: vpc_name });
 
@@ -18,7 +19,10 @@ export class PiHoleCdkStack extends cdk.Stack {
       let user_data = aws_ec2.UserData.forLinux();
 
       var pwd = new aws_secretsmanager.Secret(this, 'piholepwd', {
-          secretName: 'pihole-pwd'
+          secretName: 'pihole-pwd',
+          generateSecretString: {
+              excludePunctuation: true,
+              includeSpace: false }
       });
 
       user_data.addCommands('#!/bin/bash -x', 'SECRET_ARN=' + pwd.secretArn)
@@ -43,7 +47,8 @@ export class PiHoleCdkStack extends cdk.Stack {
           }),
           vpcSubnets: { subnetType: aws_ec2.SubnetType.PUBLIC },
           userData: user_data,
-          securityGroup: sg
+          securityGroup: sg,
+          keyName: keypair
         }
       )
 
@@ -74,6 +79,7 @@ export class PiHoleCdkStack extends cdk.Stack {
       })
 
       new CfnOutput(this, 'public-ip-address', { value: eip.attrPublicIp })
+      new CfnOutput(this, 'admin-url', { value: "http://" + eip.attrPublicIp + "/admin" });
       new CfnOutput(this, 'local-ip', { value: local_ip_cidr})
       new CfnOutput(this, 'SecretArn', { value: pwd.secretArn })
   }
