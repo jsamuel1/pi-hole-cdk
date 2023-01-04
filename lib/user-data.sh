@@ -20,17 +20,16 @@ EOF
 sudo rm -f /etc/resolv.conf
 sudo ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
 
-# install aws cli
-cd /tmp
-curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
-unzip awscliv2.zip
-sudo ./aws/install
-
-
 # install pihole unattended
 export PIHOLE_SKIP_OS_CHECK=true
 wget -O /tmp/basic-install.sh https://install.pi-hole.net
 bash /tmp/basic-install.sh --unattended
+
+# install aws cli -- after pihole created /usr/local/bin
+cd /tmp
+curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install
 
 # set the pihole web ui password
 /usr/local/bin/pihole -a -p $(/usr/local/bin/aws secretsmanager get-secret-value --secret-id $SECRET_ARN | jq .SecretString -j)
