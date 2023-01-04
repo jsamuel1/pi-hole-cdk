@@ -1,10 +1,12 @@
-# Welcome to your CDK TypeScript project
+# Welcome to CDK PiHole Deployment
 
-This is a blank project for CDK development with TypeScript.
+Do deploy, run:
+cdk deploy -c local_ip_cidr=<local_ip/32> -c vpc_name=<vpcNAME>
 
-The `cdk.json` file tells the CDK Toolkit how to execute your app.
+eg.
+cdk deploy -c local_ip_cidr=121.121.4.100/32 -c vpc_name=aws-controltower-VPC
 
-## Useful commands
+## Other Useful commands
 
 * `npm run build`   compile typescript to js
 * `npm run watch`   watch for changes and compile
