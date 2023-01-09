@@ -3,28 +3,21 @@
 exec > >(tee /var/log/user-data.log|logger -t user-data -s 2>/dev/console) 2>&1
 
 # upgrade yum repo list
-dnf update -y
-dnf upgrade -y
-dnf install -y https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_arm64/amazon-ssm-agent.rpm
-# al2022 efs-utils
-#dnf install amazon-efs-utils -y
-# not amazon linux -- need to build the rpm
-dnf install git rpm-build make wget -y
+apt update -y
+apt upgrade -y
+apt install -y dialog unzip idn2 dns-root-data jq lighttpd php-common php-cgi php-sqlite3 php-xml php-intl php-json git binutils make wget python3-pip
+#chkconfig newt slang cronie nmap-ncat lighttpd-fastcgi
+
+# not amazon linux, so need to build the package
 git clone https://github.com/aws/efs-utils /tmp/efs-utils/
 cd /tmp/efs-utils
-make rpm
-yum -y install build/amazon-efs-utils*rpm
+./build-deb.sh
+apt -y install ./build/amazon-efs-utils*deb
+pip3 install botocore --upgrade
 
 mkdir /etc/pihole/
 echo $EFS_ID:/ /etc/pihole/ efs _netdev,noresvport,tls,iam,nofail 0 0 >> /etc/fstab
 mount -av
-
-# Fedora - disable selinux - pihole doesn't come with an selinux policy
-setenforce 0
-sed -i -e "s/SELINUX=enforcing/SELINUX=permissive/" /etc/selinux/config
-
-# pretend we are fedora on al2022 only
-#echo "Fedora release 36 (Thirty Six)" > /etc/redhat-release
 
 # set pihole dns server to cloudflare dns and initial adlists
 if [ ! -a /etc/pihole/setupVars.conf ] ; then 
@@ -54,19 +47,15 @@ EOF
 fi
 
 # install pihole unattended
-export PIHOLE_SKIP_OS_CHECK=true
+#export PIHOLE_SKIP_OS_CHECK=true
 wget -O /tmp/basic-install.sh https://install.pi-hole.net
-# AL2022 has curl-minimal, not curl.  This breaks package installs if not changed.
-#sed -i -e "s/\(PIHOLE_DEPS=.*\)curl/\1curl-minimal/" /tmp/basic-install.sh
 bash /tmp/basic-install.sh --unattended
-#sed -i -e "s/\(PIHOLE_DEPS=.*\)curl/\1curl-minimal/" "/etc/.pihole/automated install/basic-install.sh"
 
 # install aws cli -- after pihole created /usr/local/bin
-# unneeded on AL2022
 cd /tmp
 curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
 unzip -uq awscliv2.zip
-sudo ./aws/install
+./aws/install
 
 # set the pihole web ui password
 /usr/local/bin/pihole -a -p $(/usr/local/bin/aws secretsmanager get-secret-value --secret-id $SECRET_ARN | jq .SecretString -j)
