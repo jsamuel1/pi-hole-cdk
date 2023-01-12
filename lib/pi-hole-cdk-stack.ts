@@ -1,11 +1,9 @@
 import * as cdk from 'aws-cdk-lib';
 import { aws_ec2, aws_iam, aws_secretsmanager, aws_efs, CfnOutput, aws_autoscaling } from 'aws-cdk-lib';
-import { AutoScalingAction } from 'aws-cdk-lib/aws-cloudwatch-actions';
 import { Effect, PolicyDocument, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { readFileSync } from 'fs';
-import * as http from 'http';
 
 export class PiHoleCdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
@@ -15,6 +13,9 @@ export class PiHoleCdkStack extends cdk.Stack {
     const local_ip_cidr = local_ip + "/32"
     const vpc_name = this.node.tryGetContext('vpc_name');
     const keypair = this.node.tryGetContext('keypair');
+    const public_http = this.node.tryGetContext('public_http');
+    const bPublic_http = (public_http != undefined && (public_http == "True" || public_http == true));
+
 
     let vpc = aws_ec2.Vpc.fromLookup(this, 'vpc', { vpcName: vpc_name });
 
@@ -72,13 +73,6 @@ export class PiHoleCdkStack extends cdk.Stack {
     sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.udp(53), 'Allow_DNS_over_UDP')
     file_system.connections.allowDefaultPortFrom(sgEc2);
 
-    let sgAlbIngress = new aws_ec2.SecurityGroup(this, 'sg-albIngress', { description: 'Security Group for ALB Ingress', vpc: vpc });
-    sgAlbIngress.addIngressRule(aws_ec2.Peer.ipv4(local_ip_cidr), aws_ec2.Port.tcp(80), 'Allow access to ALB to local IP');
-
-    let sgAlbTarget = new aws_ec2.SecurityGroup(this, 'sg-albTarget', { description: 'Security Group for ALB Target', vpc: vpc });
-    sgAlbTarget.addIngressRule(aws_ec2.Peer.anyIpv4(), aws_ec2.Port.tcp(80), 'Allow access to ALB to any IP');
-    sgEc2.addIngressRule(sgAlbTarget, aws_ec2.Port.tcp(80), 'Allow access to ALB to local IP');
-
     let role = new aws_iam.Role(this, 'pihole-role', {
       assumedBy: new aws_iam.ServicePrincipal('ec2.amazonaws.com'),
       managedPolicies: [
@@ -125,15 +119,26 @@ export class PiHoleCdkStack extends cdk.Stack {
       role: role
     });
 
-    let alb = new cdk.aws_elasticloadbalancingv2.ApplicationLoadBalancer(this, 'alb', {
-      vpc: vpc,
-      internetFacing: true,
-      securityGroup: sgAlbTarget
-    });
+    if (bPublic_http) {
+      let sgAlbIngress = new aws_ec2.SecurityGroup(this, 'sg-albIngress', { description: 'Security Group for ALB Ingress', vpc: vpc });
+      sgAlbIngress.addIngressRule(aws_ec2.Peer.ipv4(local_ip_cidr), aws_ec2.Port.tcp(80), 'Allow access to ALB to local IP');
 
-    let albListener = alb.addListener('ALBHttp', { port: 80, open: false });
-    albListener.addTargets('targetgroup', { port: 80, targets: [asg] });
-    albListener.connections.addSecurityGroup(sgAlbIngress);
+      let sgAlbTarget = new aws_ec2.SecurityGroup(this, 'sg-albTarget', { description: 'Security Group for ALB Target', vpc: vpc });
+      sgAlbTarget.addIngressRule(aws_ec2.Peer.anyIpv4(), aws_ec2.Port.tcp(80), 'Allow access to ALB to any IP');
+      sgEc2.addIngressRule(sgAlbTarget, aws_ec2.Port.tcp(80), 'Allow access to ALB to local IP');
+
+      let alb = new cdk.aws_elasticloadbalancingv2.ApplicationLoadBalancer(this, 'alb', {
+        vpc: vpc,
+        internetFacing: true,
+        securityGroup: sgAlbTarget
+      });
+
+      let albListener = alb.addListener('ALBHttp', { port: 80, open: false });
+      albListener.addTargets('targetgroup', { port: 80, targets: [asg] });
+      albListener.connections.addSecurityGroup(sgAlbIngress);
+
+      new CfnOutput(this, 'admin-public-url', { value: `http://${alb.loadBalancerDnsName}/admin` });
+    }
 
     let nlb = new cdk.aws_elasticloadbalancingv2.NetworkLoadBalancer(this, 'nlb', {
       vpc: vpc,
@@ -147,25 +152,24 @@ export class PiHoleCdkStack extends cdk.Stack {
         service: 'EC2',
         action: 'describeNetworkInterfaces',
         parameters: {
-          Filters: [ {Name: "description" ,Values: [`ELB ${nlb.loadBalancerFullName}`]}],
+          Filters: [{ Name: "description", Values: [`ELB ${nlb.loadBalancerFullName}`] }],
         },
         physicalResourceId: PhysicalResourceId.of('GetEndpointIps'),
-        outputPaths: [ 'NetworkInterfaces.0.PrivateIpAddress', 'NetworkInterfaces.1.PrivateIpAddress', 'NetworkInterfaces.2.PrivateIpAddress']
+        outputPaths: ['NetworkInterfaces.0.PrivateIpAddress', 'NetworkInterfaces.1.PrivateIpAddress', 'NetworkInterfaces.2.PrivateIpAddress']
       },
       policy: AwsCustomResourcePolicy.fromSdkCalls({ resources: AwsCustomResourcePolicy.ANY_RESOURCE }),
     });
-    
+
     getEndpointIps.node.addDependency(nlb);
 
     new CfnOutput(this, 'dns1', {
-        value: getEndpointIps.getResponseField('NetworkInterfaces.0.PrivateIpAddress')
-     });
-     new CfnOutput(this, 'dns2', {
+      value: getEndpointIps.getResponseField('NetworkInterfaces.0.PrivateIpAddress')
+    });
+    new CfnOutput(this, 'dns2', {
       value: getEndpointIps.getResponseField('NetworkInterfaces.1.PrivateIpAddress')
-   });
+    });
 
-    new CfnOutput(this, 'admin-url', { value: `http://${alb.loadBalancerDnsName}/admin` });
-    new CfnOutput(this, 'dnsNLB', { value: nlb.loadBalancerFullName });
+    new CfnOutput(this, "admin-url", { value: "http://pi.hole/admin"}); // Only after setting up DNS
     new CfnOutput(this, 'SecretArn', { value: pwd.secretArn })
   }
 }
