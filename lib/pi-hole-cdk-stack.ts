@@ -110,7 +110,7 @@ export class PiHoleCdkStack extends cdk.Stack {
 
     const asg = new aws_autoscaling.AutoScalingGroup(this, 'pihole-asg', {
       vpc: vpc,
-      instanceType: aws_ec2.InstanceType.of(aws_ec2.InstanceClass.BURSTABLE4_GRAVITON, aws_ec2.InstanceSize.SMALL),
+      instanceType: aws_ec2.InstanceType.of(aws_ec2.InstanceClass.BURSTABLE4_GRAVITON, aws_ec2.InstanceSize.MICRO),
       machineImage: aws_ec2.MachineImage.fromSsmParameter('/aws/service/canonical/ubuntu/server/22.04/stable/current/arm64/hvm/ebs-gp2/ami-id'),
       vpcSubnets: { subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS },
       userData: user_data,
