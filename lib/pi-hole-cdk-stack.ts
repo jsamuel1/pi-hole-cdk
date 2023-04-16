@@ -1,5 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
 import { aws_ec2, aws_iam, aws_secretsmanager, aws_efs, CfnOutput, aws_autoscaling } from 'aws-cdk-lib';
+import { LaunchTemplate } from 'aws-cdk-lib/aws-ec2';
 import { Effect, PolicyDocument, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
@@ -72,6 +73,7 @@ export class PiHoleCdkStack extends cdk.Stack {
       sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.tcp(80), 'Allow_HTTP')
       sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.tcp(53), 'Allow_DNS_over_TCP')
       sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.udp(53), 'Allow_DNS_over_UDP')
+      sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.icmpPing(), 'Allow ICMP Ping')
     }
     else
     {
@@ -82,7 +84,8 @@ export class PiHoleCdkStack extends cdk.Stack {
             sgEc2.addIngressRule(aws_ec2.Peer.ipv4(rfc1918[i]), aws_ec2.Port.tcp(80), 'Allow_HTTP')
             sgEc2.addIngressRule(aws_ec2.Peer.ipv4(rfc1918[i]), aws_ec2.Port.tcp(53), 'Allow_DNS_over_TCP')
             sgEc2.addIngressRule(aws_ec2.Peer.ipv4(rfc1918[i]), aws_ec2.Port.udp(53), 'Allow_DNS_over_UDP')
-        }
+            sgEc2.addIngressRule(aws_ec2.Peer.ipv4(rfc1918[i]), aws_ec2.Port.icmpPing(), 'Allow ICMP Ping')
+          }
     }
     file_system.connections.allowDefaultPortFrom(sgEc2);
 
@@ -147,16 +150,20 @@ export class PiHoleCdkStack extends cdk.Stack {
       machineImage = aws_ec2.MachineImage.fromSsmParameter('/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id');
     }
 
-    const asg = new aws_autoscaling.AutoScalingGroup(this, 'pihole-asg', {
-      vpc: vpc,
+    var launchTemplate = new LaunchTemplate(this, 'pihole-asg-launchtemplate', {
       instanceType: instanceType,
       machineImage: machineImage,
-      vpcSubnets: { subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS },
       userData: user_data,
-      keyName: keypair,
-      requireImdsv2: true,
       role: role,
-      securityGroup: sgEc2
+      securityGroup: sgEc2,
+      requireImdsv2: true,
+      keyName: keypair
+    });
+
+    const asg = new aws_autoscaling.AutoScalingGroup(this, 'pihole-asg', {
+      launchTemplate: launchTemplate,
+      vpc: vpc,
+      vpcSubnets: { subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS },
     });
 
     if (bPublic_http) {
