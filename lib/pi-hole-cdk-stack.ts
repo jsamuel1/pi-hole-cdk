@@ -78,10 +78,10 @@ export class PiHoleCdkStack extends cdk.Stack {
         // array of rfc1918 prefixes
         let rfc1918 = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"];
         for (let i = 0; i < rfc1918.length; i++) {
-            sgEc2.addIngressRule(aws_ec2.Peer.prefixList(rfc1918[i]), aws_ec2.Port.tcp(22), 'Allow_SSH')
-            sgEc2.addIngressRule(aws_ec2.Peer.prefixList(rfc1918[i]), aws_ec2.Port.tcp(80), 'Allow_HTTP')
-            sgEc2.addIngressRule(aws_ec2.Peer.prefixList(rfc1918[i]), aws_ec2.Port.tcp(53), 'Allow_DNS_over_TCP')
-            sgEc2.addIngressRule(aws_ec2.Peer.prefixList(rfc1918[i]), aws_ec2.Port.udp(53), 'Allow_DNS_over_UDP')
+            sgEc2.addIngressRule(aws_ec2.Peer.ipv4(rfc1918[i]), aws_ec2.Port.tcp(22), 'Allow_SSH')
+            sgEc2.addIngressRule(aws_ec2.Peer.ipv4(rfc1918[i]), aws_ec2.Port.tcp(80), 'Allow_HTTP')
+            sgEc2.addIngressRule(aws_ec2.Peer.ipv4(rfc1918[i]), aws_ec2.Port.tcp(53), 'Allow_DNS_over_TCP')
+            sgEc2.addIngressRule(aws_ec2.Peer.ipv4(rfc1918[i]), aws_ec2.Port.udp(53), 'Allow_DNS_over_UDP')
         }
     }
     file_system.connections.allowDefaultPortFrom(sgEc2);
@@ -121,15 +121,25 @@ export class PiHoleCdkStack extends cdk.Stack {
       }
     });
 
+    var instanceType = aws_ec2.InstanceType.of(aws_ec2.InstanceClass.BURSTABLE4_GRAVITON, aws_ec2.InstanceSize.MICRO);
+    var machineImage = aws_ec2.MachineImage.fromSsmParameter('/aws/service/canonical/ubuntu/server/22.04/stable/current/arm64/hvm/ebs-gp2/ami-id');
+
+    if (this.region == 'ap-southeast-4')
+    {
+      instanceType = aws_ec2.InstanceType.of(aws_ec2.InstanceClass.BURSTABLE3, aws_ec2.InstanceSize.MICRO);
+      machineImage = aws_ec2.MachineImage.fromSsmParameter('/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id');
+    }
+
     const asg = new aws_autoscaling.AutoScalingGroup(this, 'pihole-asg', {
       vpc: vpc,
-      instanceType: aws_ec2.InstanceType.of(aws_ec2.InstanceClass.BURSTABLE4_GRAVITON, aws_ec2.InstanceSize.MICRO),
-      machineImage: aws_ec2.MachineImage.fromSsmParameter('/aws/service/canonical/ubuntu/server/22.04/stable/current/arm64/hvm/ebs-gp2/ami-id'),
+      instanceType: instanceType,
+      machineImage: machineImage,
       vpcSubnets: { subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS },
       userData: user_data,
       keyName: keypair,
       requireImdsv2: true,
-      role: role
+      role: role,
+      securityGroup: sgEc2
     });
 
     if (bPublic_http) {
