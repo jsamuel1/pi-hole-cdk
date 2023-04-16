@@ -198,6 +198,7 @@ export class PiHoleCdkStack extends cdk.Stack {
         outputPaths: ['NetworkInterfaces.0.PrivateIpAddress', 'NetworkInterfaces.1.PrivateIpAddress', 'NetworkInterfaces.2.PrivateIpAddress']
       },
       policy: AwsCustomResourcePolicy.fromSdkCalls({ resources: AwsCustomResourcePolicy.ANY_RESOURCE }),
+      installLatestAwsSdk: false
     });
 
     getEndpointIps.node.addDependency(nlb);
