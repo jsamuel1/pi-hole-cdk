@@ -117,6 +117,23 @@ export class PiHoleCdkStack extends cdk.Stack {
               })
             ]
           }
+        ),
+        'kmsPolicy': new PolicyDocument(
+          {
+            statements: [
+              new PolicyStatement({
+                actions: [
+                  "kms:Encrypt",
+                  "kms:Decrypt",
+                  "kms:ReEncrypt*",
+                  "kms:GenerateDataKey*",
+                  "kms:DescribeKey"
+                ],
+                effect: Effect.ALLOW,
+                resources: [ '*' ]
+              })
+            ]
+          }
         )
       }
     });

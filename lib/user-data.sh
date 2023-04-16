@@ -51,12 +51,9 @@ fi
 wget -O /tmp/basic-install.sh https://install.pi-hole.net
 bash /tmp/basic-install.sh --unattended
 
-# install aws cli -- after pihole created /usr/local/bin
-cd /tmp
-curl "https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip" -o "awscliv2.zip"
-unzip -uq awscliv2.zip
-./aws/install
+# install aws cli 
+snap install aws-cli --channel=v2/candidate --classic
 
 # set the pihole web ui password
-/usr/local/bin/pihole -a -p $(/usr/local/bin/aws secretsmanager get-secret-value --secret-id $SECRET_ARN | jq .SecretString -j)
+/usr/local/bin/pihole -a -p $(aws secretsmanager get-secret-value --secret-id $SECRET_ARN | jq .SecretString -j)
 
