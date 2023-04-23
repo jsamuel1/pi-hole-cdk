@@ -17,6 +17,9 @@ export class PiHoleCdkStack extends cdk.Stack {
     const public_http = this.node.tryGetContext('public_http');
     const bPublic_http = (public_http != undefined && (public_http == "True" || public_http == true));
 
+    const usePrefixLists = this.node.tryGetContext('usePrefixLists');
+    const bUsePrefixLists = (usePrefixLists == undefined || (usePrefixLists == "True" || usePrefixLists == true));
+    const bUseIntel = (this.region == 'ap-southeast-4');
 
     let vpc = aws_ec2.Vpc.fromLookup(this, 'vpc', { vpcName: vpc_name });
 
@@ -49,7 +52,7 @@ export class PiHoleCdkStack extends cdk.Stack {
     // securityGroup
     let sgEc2 = new aws_ec2.SecurityGroup(this, 'allow_dns_http', { description: 'AllowDNSandSSHfrommyIP', vpc: vpc });
 
-    if (this.region != "ap-southeast-4") {
+    if (bUsePrefixLists) {
       let prefix_list = new aws_ec2.CfnPrefixList(this, "rfc1918prefix", {
         prefixListName: "RFC1918",
         addressFamily: "IPv4",
@@ -144,7 +147,7 @@ export class PiHoleCdkStack extends cdk.Stack {
     var instanceType = aws_ec2.InstanceType.of(aws_ec2.InstanceClass.BURSTABLE4_GRAVITON, aws_ec2.InstanceSize.MICRO);
     var machineImage = aws_ec2.MachineImage.fromSsmParameter('/aws/service/canonical/ubuntu/server/22.04/stable/current/arm64/hvm/ebs-gp2/ami-id');
 
-    if (this.region == 'ap-southeast-4')
+    if (bUseIntel)
     {
       instanceType = aws_ec2.InstanceType.of(aws_ec2.InstanceClass.BURSTABLE3, aws_ec2.InstanceSize.MICRO);
       machineImage = aws_ec2.MachineImage.fromSsmParameter('/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id');
