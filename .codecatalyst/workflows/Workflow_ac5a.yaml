@@ -36,6 +36,9 @@ Actions:
       Name: PiHole-Melbourne
     DependsOn:
       - AWSCDKbootstrap_Syd
+    Inputs:
+      Sources:
+        - WorkflowSource
 
   AWSCDKdeploy_SiteToSite_Syd:
     Identifier: aws/cdk-deploy@v1.0.4
@@ -50,7 +53,9 @@ Actions:
       Name: PiHole-Melbourne
     DependsOn:
       - AWSCDKdeploy_PiHole_Syd
-
+    Inputs:
+      Sources:
+        - WorkflowSource
 
   AWSCDKbootstrap_Mel:
     Identifier: aws/cdk-bootstrap@v1.0.3
@@ -77,6 +82,9 @@ Actions:
       Name: PiHole-Melbourne
     DependsOn:
       - AWSCDKbootstrap_Mel
+    Inputs:
+      Sources:
+        - WorkflowSource
 
   AWSCDKdeploy_SiteToSite_Mel:
     Identifier: aws/cdk-deploy@v1.0.4
@@ -91,3 +99,6 @@ Actions:
       Name: PiHole-Melbourne
     DependsOn:
       - AWSCDKdeploy_PiHole_Mel
+    Inputs:
+      Sources:
+        - WorkflowSource
