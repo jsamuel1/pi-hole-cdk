@@ -3,25 +3,25 @@ import { aws_ec2, aws_iam, aws_secretsmanager, aws_efs, CfnOutput, aws_autoscali
 import { LaunchTemplate } from 'aws-cdk-lib/aws-ec2';
 import { Effect, PolicyDocument, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
-import { Construct } from 'constructs';
+import { Construct, Node } from 'constructs';
 import { readFileSync } from 'fs';
+import { PiHoleProps } from '../bin/pi-hole-cdk';
+
 
 export class PiHoleCdkStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+  constructor(scope: Construct, id: string, props: PiHoleProps) {
     super(scope, id, props);
 
-    const local_ip = this.node.tryGetContext('local_ip');
+    const local_ip = props.appConfig.local_ip;
     const local_ip_cidr = local_ip + "/32"
-    const vpc_name = this.node.tryGetContext('vpc_name');
-    const keypair = this.node.tryGetContext('keypair');
-    const public_http = this.node.tryGetContext('public_http');
-    const bPublic_http = (public_http != undefined && (public_http == "True" || public_http == true));
+    const vpc_name = props.appConfig.vpc_name;
+    const keypair = props.appConfig.keypair;
+    const bPublic_http = props.appConfig.bPublic_http;
 
-    const usePrefixLists = this.node.tryGetContext('usePrefixLists');
-    const bUsePrefixLists = (usePrefixLists == undefined || (usePrefixLists == "True" || usePrefixLists == true));
-    const bUseIntel = (this.region == 'ap-southeast-4');
+    const bUsePrefixLists = props.appConfig.bUsePrefixLists;
+    const bUseIntel = props.appConfig.bUseIntel;
 
-    let vpc = aws_ec2.Vpc.fromLookup(this, 'vpc', { vpcName: vpc_name });
+    let vpc = aws_ec2.Vpc.fromLookup(this, 'vpc', { vpcName: vpc_name, isDefault: false });
 
     // start with default Linux userdata
     let user_data = aws_ec2.UserData.forLinux();
