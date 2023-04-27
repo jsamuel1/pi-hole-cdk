@@ -3,7 +3,6 @@ RunMode: SUPERSEDED
 Compute:
   Type: EC2
   Fleet: Linux.Arm64.Large
-  SharedInstance: true
 SchemaVersion: "1.0"
 
 # Optional - Set automatic triggers.
@@ -12,7 +11,7 @@ Triggers:
     Branches:
       - main
 Actions:
-  AWSCDKbootstrap_d9:
+  AWSCDKbootstrap_Syd:
     Identifier: aws/cdk-bootstrap@v1.0.3
     Configuration:
       Region: ap-southeast-2
@@ -24,10 +23,10 @@ Actions:
     Inputs:
       Sources:
         - WorkflowSource
-  AWSCDKdeploy_PiHole:
+  AWSCDKdeploy_PiHole_Syd:
     Identifier: aws/cdk-deploy@v1.0.4
     Configuration:
-      Context: '{"local_ip":"${Secrets.local_ip}","vpc_name":"${Secrets.vpc_name}","keypair":"pihole","local_internal_cidr":"${Secrets.local_internal_cidr}"}'
+      Context: '{"local_ip":"${Secrets.local_ip}","local_internal_cidr":"${Secrets.local_internal_cidr}"}'
       Region: ap-southeast-2
       StackName: PiHoleCdkStack
     Environment:
@@ -36,12 +35,12 @@ Actions:
           Name: sauhsoj_ct_pihole
       Name: PiHole-Melbourne
     DependsOn:
-      - AWSCDKbootstrap_d9
+      - AWSCDKbootstrap_Syd
 
-  AWSCDKdeploy_SiteToSite:
+  AWSCDKdeploy_SiteToSite_Syd:
     Identifier: aws/cdk-deploy@v1.0.4
     Configuration:
-      Context: '{"local_ip":"${Secrets.local_ip}","vpc_name":"${Secrets.vpc_name}","keypair":"pihole","local_internal_cidr":"${Secrets.local_internal_cidr}"}'
+      Context: '{"local_ip":"${Secrets.local_ip}","local_internal_cidr":"${Secrets.local_internal_cidr}"}'
       Region: ap-southeast-2
       StackName: SiteToSiteVpnStack
     Environment:
@@ -50,5 +49,45 @@ Actions:
           Name: sauhsoj_ct_pihole
       Name: PiHole-Melbourne
     DependsOn:
-      - AWSCDKdeploy_PiHole
+      - AWSCDKdeploy_PiHole_Syd
 
+
+  AWSCDKbootstrap_Mel:
+    Identifier: aws/cdk-bootstrap@v1.0.3
+    Configuration:
+      Region: ap-southeast-4
+    Environment:
+      Connections:
+        - Role: CodeCatalystWorkflowDevelopmentRole-sauhsoj_playground
+          Name: sauhsoj_ct_pihole
+      Name: PiHole-Melbourne
+    Inputs:
+      Sources:
+        - WorkflowSource
+  AWSCDKdeploy_PiHole_Mel:
+    Identifier: aws/cdk-deploy@v1.0.4
+    Configuration:
+      Context: '{"local_ip":"${Secrets.local_ip}","local_internal_cidr":"${Secrets.local_internal_cidr}"}'
+      Region: ap-southeast-4
+      StackName: PiHoleCdkStack
+    Environment:
+      Connections:
+        - Role: CodeCatalystWorkflowDevelopmentRole-sauhsoj_playground
+          Name: sauhsoj_ct_pihole
+      Name: PiHole-Melbourne
+    DependsOn:
+      - AWSCDKbootstrap_Mel
+
+  AWSCDKdeploy_SiteToSite_Mel:
+    Identifier: aws/cdk-deploy@v1.0.4
+    Configuration:
+      Context: '{"local_ip":"${Secrets.local_ip}","local_internal_cidr":"${Secrets.local_internal_cidr}"}'
+      Region: ap-southeast-4
+      StackName: SiteToSiteVpnStack
+    Environment:
+      Connections:
+        - Role: CodeCatalystWorkflowDevelopmentRole-sauhsoj_playground
+          Name: sauhsoj_ct_pihole
+      Name: PiHole-Melbourne
+    DependsOn:
+      - AWSCDKdeploy_PiHole_Mel
