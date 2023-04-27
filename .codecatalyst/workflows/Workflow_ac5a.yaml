@@ -1,12 +1,11 @@
 Name: Workflow_ac5a
+RunMode: SUPERSEDED
+Compute:
+  Type: EC2
+  Fleet: Linux.Arm64.Large
+  SharedInstance: true
 SchemaVersion: "1.0"
-Configuration:
-  AWSRegion:
-    Description: 'AWS Region'
-    Required: false
-    DisplayName: 'AWSRegion'
-    Type: string
-    
+
 # Optional - Set automatic triggers.
 Triggers:
   - Type: Push
@@ -14,49 +13,27 @@ Triggers:
       - main
 Actions:
   AWSCDKbootstrap_d9:
-    # Identifies the action. Do not modify this value.
     Identifier: aws/cdk-bootstrap@v1.0.3
-
-    # Specifies the source and/or artifacts to pass to the action as input.
-    Inputs:
-      # Optional
-      Sources:
-        - WorkflowSource # This specifies that the action requires this Workflow as a source
-        - AWSRegion
-
-    # Required; You can use an environment, AWS account connection, and role to access AWS resources.
-    Environment:
-      Name:
-      Connections:
-        - Name:
-          Role:
-
-            # Defines the action's properties.
     Configuration:
-      # Required; type: string; description: AWS region to bootstrap
-      Region: AWSRegion
-
+      Region: ap-southeast-2
+    Environment:
+      Connections:
+        - Role: CodeCatalystWorkflowDevelopmentRole-sauhsoj_playground
+          Name: sauhsoj_ct_pihole
+      Name: PiHole-Melbourne
 
   AWSCDKdeploy_ed:
-    # Identifies the action. Do not modify this value.
     Identifier: aws/cdk-deploy@v1.0.4
-
-    # Specifies the source and/or artifacts to pass to the action as input.
-    Inputs:
-      # Optional
-      Sources:
-        - WorkflowSource # This specifies that the action requires this Workflow as a source
-
-    # Required; You can use an environment, AWS account connection, and role to access AWS resources.
-    Environment:
-      Name:
-      Connections:
-        - Name:
-          Role:
-
-            # Defines the action's properties.
     Configuration:
-      # Required; type: string; description: Name of the stack to deploy
-      StackName:
-
-
+      Region: ap-southeast-2
+      StackName: PiHole
+    Environment:
+      Connections:
+        - Role: CodeCatalystWorkflowDevelopmentRole-sauhsoj_playground
+          Name: sauhsoj_ct_pihole
+      Name: PiHole-Melbourne
+    DependsOn:
+      - AWSCDKbootstrap_d9
+    Inputs:
+      Sources:
+        - WorkflowSource
