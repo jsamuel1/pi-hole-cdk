@@ -27,6 +27,7 @@ Actions:
   AWSCDKdeploy_PiHole:
     Identifier: aws/cdk-deploy@v1.0.4
     Configuration:
+      Context: '{"local_ip":"${Secrets.local_ip}","vpc_name":"${Secrets.vpc_name}","keypair":"pihole","local_internal_cidr":"${Secrets.local_internal_cidr}"}'
       Region: ap-southeast-2
       StackName: PiHoleCdkStack
     Environment:
@@ -40,6 +41,7 @@ Actions:
   AWSCDKdeploy_SiteToSite:
     Identifier: aws/cdk-deploy@v1.0.4
     Configuration:
+      Context: '{"local_ip":"${Secrets.local_ip}","vpc_name":"${Secrets.vpc_name}","keypair":"pihole","local_internal_cidr":"${Secrets.local_internal_cidr}"}'
       Region: ap-southeast-2
       StackName: SiteToSiteVpnStack
     Environment:
