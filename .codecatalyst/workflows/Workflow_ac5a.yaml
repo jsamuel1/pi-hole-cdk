@@ -1,0 +1,62 @@
+Name: Workflow_ac5a
+SchemaVersion: "1.0"
+Configuration:
+  AWSRegion:
+    Description: 'AWS Region'
+    Required: false
+    DisplayName: 'AWSRegion'
+    Type: string
+    
+# Optional - Set automatic triggers.
+Triggers:
+  - Type: Push
+    Branches:
+      - main
+Actions:
+  AWSCDKbootstrap_d9:
+    # Identifies the action. Do not modify this value.
+    Identifier: aws/cdk-bootstrap@v1.0.3
+
+    # Specifies the source and/or artifacts to pass to the action as input.
+    Inputs:
+      # Optional
+      Sources:
+        - WorkflowSource # This specifies that the action requires this Workflow as a source
+        - AWSRegion
+
+    # Required; You can use an environment, AWS account connection, and role to access AWS resources.
+    Environment:
+      Name:
+      Connections:
+        - Name:
+          Role:
+
+            # Defines the action's properties.
+    Configuration:
+      # Required; type: string; description: AWS region to bootstrap
+      Region: AWSRegion
+
+
+  AWSCDKdeploy_ed:
+    # Identifies the action. Do not modify this value.
+    Identifier: aws/cdk-deploy@v1.0.4
+
+    # Specifies the source and/or artifacts to pass to the action as input.
+    Inputs:
+      # Optional
+      Sources:
+        - WorkflowSource # This specifies that the action requires this Workflow as a source
+
+    # Required; You can use an environment, AWS account connection, and role to access AWS resources.
+    Environment:
+      Name:
+      Connections:
+        - Name:
+          Role:
+
+            # Defines the action's properties.
+    Configuration:
+      # Required; type: string; description: Name of the stack to deploy
+      StackName:
+
+
