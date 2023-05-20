@@ -195,7 +195,8 @@ export class PiHoleCdkStack extends cdk.Stack {
 
     let nlb = new cdk.aws_elasticloadbalancingv2.NetworkLoadBalancer(this, 'nlb', {
       vpc: vpc,
-      internetFacing: false
+      internetFacing: false,
+      crossZoneEnabled: true
     });
     let nlbListener = nlb.addListener('NLBDNS', { port: 53, protocol: cdk.aws_elasticloadbalancingv2.Protocol.TCP_UDP });
     nlbListener.addTargets("piholesTargets", { port: 53, targets: [asg] });
