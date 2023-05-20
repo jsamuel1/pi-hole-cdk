@@ -6,6 +6,7 @@ import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from '
 import { Construct, Node } from 'constructs';
 import { readFileSync } from 'fs';
 import { PiHoleProps } from '../bin/pi-hole-cdk';
+import { UpdatePolicy } from 'aws-cdk-lib/aws-autoscaling';
 
 
 export class PiHoleCdkStack extends cdk.Stack {
@@ -144,12 +145,12 @@ export class PiHoleCdkStack extends cdk.Stack {
       }
     });
 
-    var instanceType = aws_ec2.InstanceType.of(aws_ec2.InstanceClass.BURSTABLE4_GRAVITON, aws_ec2.InstanceSize.MICRO);
+    var instanceType = aws_ec2.InstanceType.of(aws_ec2.InstanceClass.BURSTABLE4_GRAVITON, aws_ec2.InstanceSize.SMALL);
     var machineImage = aws_ec2.MachineImage.fromSsmParameter('/aws/service/canonical/ubuntu/server/22.04/stable/current/arm64/hvm/ebs-gp2/ami-id');
 
     if (bUseIntel)
     {
-      instanceType = aws_ec2.InstanceType.of(aws_ec2.InstanceClass.BURSTABLE3, aws_ec2.InstanceSize.MICRO);
+      instanceType = aws_ec2.InstanceType.of(aws_ec2.InstanceClass.BURSTABLE3, aws_ec2.InstanceSize.SMALL);
       machineImage = aws_ec2.MachineImage.fromSsmParameter('/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id');
     }
 
@@ -167,6 +168,8 @@ export class PiHoleCdkStack extends cdk.Stack {
       launchTemplate: launchTemplate,
       vpc: vpc,
       vpcSubnets: { subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS },
+      maxInstanceLifetime: cdk.Duration.days(7),
+      updatePolicy: UpdatePolicy.rollingUpdate()
     });
 
     if (bPublic_http) {
