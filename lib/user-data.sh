@@ -26,8 +26,8 @@ if [ ! -a /etc/pihole/setupVars.conf ] ; then
 BLOCKING_ENABLED=true
 DNSSEC=false
 REV_SERVER=false
-DNS_FQDN_REQUIRED=true
-DNS_BOGUS_PRIV=true
+DNS_FQDN_REQUIRED=false
+DNS_BOGUS_PRIV=false
 PIHOLE_DNS_1=1.1.1.1
 PIHOLE_DNS_2=1.0.0.1
 PIHOLE_DNS_3=2606:4700:4700::1111
