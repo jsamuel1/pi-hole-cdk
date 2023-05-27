@@ -201,7 +201,7 @@ export class PiHoleCdkStack extends cdk.Stack {
       loadBalancerName: 'pihole'
     });
     let nlbListener = nlb.addListener('NLBDNS', { port: 53, protocol: cdk.aws_elasticloadbalancingv2.Protocol.TCP_UDP });
-    let targetGroup = nlbListener.addTargets("piholesTargets", { port: 53, targets: [asg], deregistrationDelay: cdk.Duration.minutes(2), healthCheck: { timeout: cdk.Duration.seconds(6), healthyThresholdCount: 2, unhealthyThresholdCount: 2}  });
+    let targetGroup = nlbListener.addTargets("piholesTargets", { port: 53, targets: [asg], deregistrationDelay: cdk.Duration.minutes(2), healthCheck: { timeout: cdk.Duration.seconds(10), healthyThresholdCount: 2, unhealthyThresholdCount: 5}  });
 
     targetGroup.setAttribute("deregistration_delay.connection_termination.enabled", "true");
 
