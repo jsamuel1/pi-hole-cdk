@@ -6,7 +6,7 @@ import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from '
 import { Construct, Node } from 'constructs';
 import { readFileSync } from 'fs';
 import { PiHoleProps } from '../bin/pi-hole-cdk';
-import { UpdatePolicy } from 'aws-cdk-lib/aws-autoscaling';
+import { HealthCheck, UpdatePolicy } from 'aws-cdk-lib/aws-autoscaling';
 
 
 export class PiHoleCdkStack extends cdk.Stack {
@@ -169,7 +169,8 @@ export class PiHoleCdkStack extends cdk.Stack {
       vpc: vpc,
       vpcSubnets: { subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS },
       maxInstanceLifetime: cdk.Duration.days(7),
-      updatePolicy: UpdatePolicy.rollingUpdate()
+      updatePolicy: UpdatePolicy.rollingUpdate(),
+      healthCheck: HealthCheck.elb({grace: cdk.Duration.minutes(2)})
     });
 
     if (bPublic_http) {
@@ -196,10 +197,13 @@ export class PiHoleCdkStack extends cdk.Stack {
     let nlb = new cdk.aws_elasticloadbalancingv2.NetworkLoadBalancer(this, 'nlb', {
       vpc: vpc,
       internetFacing: false,
-      crossZoneEnabled: true
+      crossZoneEnabled: true,
+      loadBalancerName: 'pihole'
     });
     let nlbListener = nlb.addListener('NLBDNS', { port: 53, protocol: cdk.aws_elasticloadbalancingv2.Protocol.TCP_UDP });
-    nlbListener.addTargets("piholesTargets", { port: 53, targets: [asg] });
+    let targetGroup = nlbListener.addTargets("piholesTargets", { port: 53, targets: [asg], deregistrationDelay: cdk.Duration.minutes(2)  });
+
+    targetGroup.setAttribute("deregistration_delay.connection_termination.enabled", "true");
 
     const getEndpointIps = new AwsCustomResource(this, 'GetEndpointIps', {
       onUpdate: {
