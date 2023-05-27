@@ -46,7 +46,7 @@ export class PiHoleCdkStack extends cdk.Stack {
     user_data.addCommands('SECRET_ARN=' + pwd.secretArn)
     user_data.addCommands('EFS_ID=' + file_system.fileSystemId);
     user_data.addCommands('REV_SERVER_CIDR=' + local_internal_cidr);
-    user_data.addCommands('REV_SERVER_TARGET=' + local_ip);
+    user_data.addCommands('REV_SERVER_TARGET=' + '192.168.1.1');
 
     // add data from file to user_data
     const userDataScript = readFileSync('./lib/user-data.sh', 'utf8');
