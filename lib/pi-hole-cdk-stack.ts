@@ -14,7 +14,8 @@ export class PiHoleCdkStack extends cdk.Stack {
     super(scope, id, props);
 
     const local_ip = props.appConfig.local_ip;
-    const local_ip_cidr = local_ip + "/32"
+    const local_ip_cidr = props.appConfig.local_ip_cidr;
+    const local_internal_cidr = props.appConfig.local_internal_cidr;
     const vpc_name = props.appConfig.vpc_name;
     const keypair = props.appConfig.keypair;
     const bPublic_http = props.appConfig.bPublic_http;
@@ -44,6 +45,8 @@ export class PiHoleCdkStack extends cdk.Stack {
 
     user_data.addCommands('SECRET_ARN=' + pwd.secretArn)
     user_data.addCommands('EFS_ID=' + file_system.fileSystemId);
+    user_data.addCommands('REV_SERVER_CIDR=' + local_internal_cidr);
+    user_data.addCommands('REV_SERVER_TARGET=' + local_ip);
 
     // add data from file to user_data
     const userDataScript = readFileSync('./lib/user-data.sh', 'utf8');
