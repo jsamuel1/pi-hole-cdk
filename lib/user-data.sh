@@ -25,7 +25,6 @@ if [ ! -a /etc/pihole/setupVars.conf ] ; then
     cat <<EOF > /etc/pihole/setupVars.conf
 BLOCKING_ENABLED=true
 DNSSEC=false
-REV_SERVER=false
 DNS_FQDN_REQUIRED=false
 DNS_BOGUS_PRIV=false
 PIHOLE_DNS_1=1.1.1.1
