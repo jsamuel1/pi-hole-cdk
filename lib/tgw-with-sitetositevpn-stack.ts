@@ -14,8 +14,6 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
       const vpc_name = props.appConfig.vpc_name;
       const local_internal_cidr = props.appConfig.local_internal_cidr;
 
-      let secretName = cdk.aws_secretsmanager.Secret.fromSecretNameV2(this, 'preSharedKeySecret', 'pihole-pwd').secretName;
-
       let vpc = aws_ec2.Vpc.fromLookup(this, 'vpc', { vpcName: vpc_name, isDefault: false });
 
       let tgw = new TransitGateway(this, 'tgw', {
@@ -48,8 +46,8 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
         transitGatewayId: tgw.transitGatewayId,
         staticRoutesOnly: false,
         vpnTunnelOptionsSpecifications: [ 
-                { preSharedKey: secretName, tunnelInsideCidr: '169.254.250.0/30'},
-                { preSharedKey: secretName, tunnelInsideCidr: '169.254.251.0/30'}
+                { preSharedKey: 'pihole-pwd', tunnelInsideCidr: '169.254.250.0/30'},
+                { preSharedKey: 'pihole-pwd', tunnelInsideCidr: '169.254.251.0/30'}
             ]   
       });
     }

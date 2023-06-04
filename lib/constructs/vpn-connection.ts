@@ -94,7 +94,7 @@ export class VpnConnection extends cdk.Resource implements ICfnVpnConnection {
           this,
           `preShareKeySecret-${tunnelItem.preSharedKey}-${tunnelItem.tunnelInsideCidr}`,
           tunnelItem.preSharedKey,
-        ).secretValue.toString();
+        ).secretValue.unsafeUnwrap();
       tunnelSpecifications.push({
         preSharedKey: preSharedKeySecret,
         tunnelInsideCidr: tunnelItem.tunnelInsideCidr,
