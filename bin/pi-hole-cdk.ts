@@ -3,8 +3,9 @@ import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { PiHoleCdkStack } from '../lib/pi-hole-cdk-stack';
 import { SiteToSiteVpnStack } from '../lib/sitetositevpn-stack';
-import { Construct, Node } from 'constructs';
 import { StackProps } from 'aws-cdk-lib/core/lib/stack';
+import { TgwWithSiteToSiteVpnStack } from '../lib/tgw-with-sitetositevpn-stack';
+import { Node } from 'constructs';
 
 const app = new cdk.App();
 
@@ -58,4 +59,6 @@ var piHoleProps : PiHoleProps = {
 new PiHoleCdkStack(app, 'PiHoleCdkStack', piHoleProps);
 
 new SiteToSiteVpnStack(app, 'SiteToSiteVpnStack', piHoleProps);
+
+new TgwWithSiteToSiteVpnStack(app, 'TgwWithSiteToSiteVpnStack', piHoleProps);
 
