@@ -36,7 +36,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
       let cgw = new CfnCustomerGateway(this, 'customer-gateway', {
         ipAddress: local_ip,
         type: 'ipsec.1',
-        bgpAsn: 65000,
+        bgpAsn: 65001,
       });
 
       new VpnConnection(this, 'sitetositevpnConnection', {
