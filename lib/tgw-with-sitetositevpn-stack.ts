@@ -37,7 +37,6 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
         ipAddress: local_ip,
         type: 'ipsec.1',
         bgpAsn: 65000,
-        deviceName: 'pihole-customergateway'
       });
 
       new VpnConnection(this, 'sitetositevpnConnection', {
