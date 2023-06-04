@@ -1,0 +1,69 @@
+Name: Multiregion_TgwWithSiteToSiteVPN_Deploy
+RunMode: SUPERSEDED
+Compute:
+  Type: EC2
+  Fleet: Linux.Arm64.Large
+SchemaVersion: "1.0"
+
+# Optional - Set automatic triggers.
+Triggers: []
+Actions:
+  AWSCDKbootstrap_Syd:
+    Identifier: aws/cdk-bootstrap@v1.0.3
+    Configuration:
+      Region: ap-southeast-2
+    Environment:
+      Connections:
+        - Role: CodeCatalystWorkflowDevelopmentRole-sauhsoj_playground
+          Name: sauhsoj_ct_pihole
+      Name: PiHole-Melbourne
+    Inputs:
+      Sources:
+        - WorkflowSource
+
+  AWSCDKdeploy_SiteToSite_Syd:
+    Identifier: aws/cdk-deploy@v1.0.4
+    Configuration:
+      Context: '{"local_ip":"${Secrets.local_ip}","local_internal_cidr":"${Secrets.local_internal_cidr}"}'
+      Region: ap-southeast-2
+      StackName: TgwWithSiteToSiteVpnStack
+    Environment:
+      Connections:
+        - Role: CodeCatalystWorkflowDevelopmentRole-sauhsoj_playground
+          Name: sauhsoj_ct_pihole
+      Name: PiHole-Melbourne
+    DependsOn:
+      - AWSCDKbootstrap_Syd
+    Inputs:
+      Sources:
+        - WorkflowSource
+
+  AWSCDKbootstrap_Mel:
+    Identifier: aws/cdk-bootstrap@v1.0.3
+    Configuration:
+      Region: ap-southeast-4
+    Environment:
+      Connections:
+        - Role: CodeCatalystWorkflowDevelopmentRole-sauhsoj_playground
+          Name: sauhsoj_ct_pihole
+      Name: PiHole-Melbourne
+    Inputs:
+      Sources:
+        - WorkflowSource
+
+  AWSCDKdeploy_SiteToSite_Mel:
+    Identifier: aws/cdk-deploy@v1.0.4
+    Configuration:
+      Context: '{"local_ip":"${Secrets.local_ip}","local_internal_cidr":"${Secrets.local_internal_cidr}"}'
+      Region: ap-southeast-4
+      StackName: TgwWithSiteToSiteVpnStack
+    Environment:
+      Connections:
+        - Role: CodeCatalystWorkflowDevelopmentRole-sauhsoj_playground
+          Name: sauhsoj_ct_pihole
+      Name: PiHole-Melbourne
+    DependsOn:
+      - AWSCDKbootstrap_Mel
+    Inputs:
+      Sources:
+        - WorkflowSource
