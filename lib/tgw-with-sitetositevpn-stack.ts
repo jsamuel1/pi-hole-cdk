@@ -55,7 +55,10 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
         customerGatewayId: cgw.ref,
         transitGatewayId: tgw.transitGatewayId,
         staticRoutesOnly: false,
-        vpnTunnelOptionsSpecifications: [ { preSharedKey: secretName},{ preSharedKey: secretName}]   
+        vpnTunnelOptionsSpecifications: [ 
+                { preSharedKey: secretName, tunnelInsideCidr: '169.254.250.0/30'},
+                { preSharedKey: secretName, tunnelInsideCidr: '169.254.251.0/30'}
+            ]   
       });
     }
   };
