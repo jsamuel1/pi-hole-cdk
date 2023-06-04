@@ -43,7 +43,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
         name: 'pihole-vpn',
         customerGatewayId: cgw.ref,
         transitGatewayId: tgw.transitGatewayId,
-        staticRoutesOnly: false,
+        staticRoutesOnly: true,
         vpnTunnelOptionsSpecifications: [ 
                 { preSharedKey: 'pihole-pwd', tunnelInsideCidr: '169.254.250.0/30'},
                 { preSharedKey: 'pihole-pwd', tunnelInsideCidr: '169.254.251.0/30'}
