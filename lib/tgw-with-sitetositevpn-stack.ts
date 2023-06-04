@@ -28,7 +28,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
         vpcId: vpc.vpcId,
         options: {
           dnsSupport: 'enable',
-          ipv6Support: 'enable',
+          ipv6Support: 'disable',
           applianceModeSupport: 'disable'
         }
       });
