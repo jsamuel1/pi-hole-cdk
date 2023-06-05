@@ -52,7 +52,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
       new CfnVPNConnectionRoute(this, 'sitetositevpnRoute', {
         destinationCidrBlock: local_internal_cidr,
         vpnConnectionId: vpn.vpnConnectionId});
-        
+
       // todo -- TGW Route to onprem
       // new CfnTransitGatewayRoute(this, 'tgw-vpn-route', {
       //   transitGatewayRouteTableId: '',
@@ -64,7 +64,8 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
       let prefixList = PrefixList.fromPrefixListId(this, 'rfc1918-prefix-list', cdk.Fn.importValue('RFC1918PrefixListId'));
       
       vpc.privateSubnets.forEach(s => { 
-        (s as aws_ec2.Subnet).addRoute('tgw-vpn-route', {
+        let subnet = s as aws_ec2.Subnet;
+        subnet.addRoute(`tgw-vpn-route-${s.subnetId}`, {
           routerId: tgw.transitGatewayId,
           routerType: aws_ec2.RouterType.TRANSIT_GATEWAY,
           destinationCidrBlock: prefixList.prefixListId
