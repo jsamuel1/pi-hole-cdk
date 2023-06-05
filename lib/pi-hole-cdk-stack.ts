@@ -20,7 +20,6 @@ export class PiHoleCdkStack extends cdk.Stack {
     const keypair = props.appConfig.keypair;
     const bPublic_http = props.appConfig.bPublic_http;
 
-    const bUsePrefixLists = props.appConfig.bUsePrefixLists;
     const bUseIntel = props.appConfig.bUseIntel;
 
     let vpc = aws_ec2.Vpc.fromLookup(this, 'vpc', { vpcName: vpc_name, isDefault: false });
@@ -56,44 +55,32 @@ export class PiHoleCdkStack extends cdk.Stack {
     // securityGroup
     let sgEc2 = new aws_ec2.SecurityGroup(this, 'allow_dns_http', { description: 'AllowDNSandSSHfrommyIP', vpc: vpc });
 
-    if (bUsePrefixLists) {
-      let prefix_list = new aws_ec2.CfnPrefixList(this, "rfc1918prefix", {
-        prefixListName: "RFC1918",
-        addressFamily: "IPv4",
-        maxEntries: 3,
-        entries: [
-          {
-            cidr: "10.0.0.0/8",
-            description: "RFC1918 10/8"
-          },
-          {
-            cidr: "172.16.0.0/12",
-            description: "RFC1918 172.16/12"
-          },
-          {
-            cidr: "192.168.0.0/16",
-            description: "RFC1918 192.168/16"
-          }
-        ]
-      });
-      sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.tcp(22), 'Allow_SSH')
-      sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.tcp(80), 'Allow_HTTP')
-      sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.tcp(53), 'Allow_DNS_over_TCP')
-      sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.udp(53), 'Allow_DNS_over_UDP')
-      sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.icmpPing(), 'Allow ICMP Ping')
-    }
-    else
-    {
-        // array of rfc1918 prefixes
-        let rfc1918 = ["10.0.0.0/8", "172.16.0.0/12", "192.168.0.0/16"];
-        for (let i = 0; i < rfc1918.length; i++) {
-            sgEc2.addIngressRule(aws_ec2.Peer.ipv4(rfc1918[i]), aws_ec2.Port.tcp(22), 'Allow_SSH')
-            sgEc2.addIngressRule(aws_ec2.Peer.ipv4(rfc1918[i]), aws_ec2.Port.tcp(80), 'Allow_HTTP')
-            sgEc2.addIngressRule(aws_ec2.Peer.ipv4(rfc1918[i]), aws_ec2.Port.tcp(53), 'Allow_DNS_over_TCP')
-            sgEc2.addIngressRule(aws_ec2.Peer.ipv4(rfc1918[i]), aws_ec2.Port.udp(53), 'Allow_DNS_over_UDP')
-            sgEc2.addIngressRule(aws_ec2.Peer.ipv4(rfc1918[i]), aws_ec2.Port.icmpPing(), 'Allow ICMP Ping')
-          }
-    }
+    let prefix_list = new aws_ec2.CfnPrefixList(this, "rfc1918prefix", {
+      prefixListName: "RFC1918",
+      addressFamily: "IPv4",
+      maxEntries: 3,
+      entries: [
+        {
+          cidr: "10.0.0.0/8",
+          description: "RFC1918 10/8"
+        },
+        {
+          cidr: "172.16.0.0/12",
+          description: "RFC1918 172.16/12"
+        },
+        {
+          cidr: "192.168.0.0/16",
+          description: "RFC1918 192.168/16"
+        }
+      ]
+    });
+    sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.tcp(22), 'Allow_SSH')
+    sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.tcp(80), 'Allow_HTTP')
+    sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.tcp(53), 'Allow_DNS_over_TCP')
+    sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.udp(53), 'Allow_DNS_over_UDP')
+    sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.icmpPing(), 'Allow ICMP Ping')
+
+
     file_system.connections.allowDefaultPortFrom(sgEc2);
 
     let role = new aws_iam.Role(this, 'pihole-role', {
@@ -233,5 +220,6 @@ export class PiHoleCdkStack extends cdk.Stack {
 
     new CfnOutput(this, "admin-url", { value: "http://pi.hole/admin"}); // Only after setting up DNS
     new CfnOutput(this, 'SecretArn', { value: pwd.secretArn })
+    new CfnOutput(this, 'RFC1918PrefixListId', { value: prefix_list.attrPrefixListId})
   }
 }

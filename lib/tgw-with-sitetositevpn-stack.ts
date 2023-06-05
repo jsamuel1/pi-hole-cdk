@@ -2,9 +2,8 @@ import * as cdk from 'aws-cdk-lib';
 import { aws_ec2 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { PiHoleProps } from '../bin/pi-hole-cdk';
-import * as c from './constructs';
 import { TransitGateway, TransitGatewayAttachment, VpnConnection } from './constructs'; 
-import { CfnCustomerGateway, CfnVPNConnectionRoute } from 'aws-cdk-lib/aws-ec2';
+import { CfnCustomerGateway, CfnTransitGatewayRoute, CfnVPNConnectionRoute, PrefixList } from 'aws-cdk-lib/aws-ec2';
 
 export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: PiHoleProps) {
@@ -39,7 +38,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
         bgpAsn: 65001,
       });
 
-      new VpnConnection(this, 'sitetositevpnConnection', {
+      let vpn = new VpnConnection(this, 'sitetositevpnConnection', {
         name: 'pihole-vpn',
         customerGatewayId: cgw.ref,
         transitGatewayId: tgw.transitGatewayId,
@@ -49,5 +48,27 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
                 { preSharedKey: 'pihole-pwd', tunnelInsideCidr: '169.254.251.0/30'}
             ]   
       });
+
+      new CfnVPNConnectionRoute(this, 'sitetositevpnRoute', {
+        destinationCidrBlock: local_internal_cidr,
+        vpnConnectionId: vpn.vpnConnectionId});
+        
+      // todo -- TGW Route to onprem
+      // new CfnTransitGatewayRoute(this, 'tgw-vpn-route', {
+      //   transitGatewayRouteTableId: '',
+      //   blackhole: false,
+      //   destinationCidrBlock: local_internal_cidr,
+      //   transitGatewayAttachmentId: ''
+      // });
+
+      let prefixList = PrefixList.fromPrefixListId(this, 'rfc1918-prefix-list', cdk.Fn.importValue('RFC1918PrefixListId'));
+      
+      vpc.privateSubnets.forEach(s => { 
+        (s as aws_ec2.Subnet).addRoute('tgw-vpn-route', {
+          routerId: tgw.transitGatewayId,
+          routerType: aws_ec2.RouterType.TRANSIT_GATEWAY,
+          destinationCidrBlock: prefixList.prefixListId
+        });
+      } );
     }
   };
