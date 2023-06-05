@@ -63,7 +63,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
 
       let prefixList = PrefixList.fromPrefixListId(this, 'rfc1918-prefix-list', cdk.Fn.importValue('RFC1918PrefixListId'));
       
-      vpc.privateSubnets.forEach(s => { 
+      vpc.isolatedSubnets.forEach(s => { 
         let subnet = s as aws_ec2.Subnet;
         subnet.addRoute(`tgw-vpn-route-${s.subnetId}`, {
           routerId: tgw.transitGatewayId,
