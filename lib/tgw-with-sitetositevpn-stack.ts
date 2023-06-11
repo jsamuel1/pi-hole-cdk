@@ -3,7 +3,7 @@ import { aws_ec2 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { PiHoleProps } from '../bin/pi-hole-cdk';
 import { TransitGateway, TransitGatewayAttachment, VpnConnection } from './constructs'; 
-import { CfnCustomerGateway, CfnTransitGatewayRoute, CfnVPNConnectionRoute, PrefixList, Subnet } from 'aws-cdk-lib/aws-ec2';
+import { CfnCustomerGateway, CfnRoute, CfnTransitGatewayRoute, CfnVPNConnectionRoute, PrefixList, Subnet } from 'aws-cdk-lib/aws-ec2';
 
 export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: PiHoleProps) {
@@ -63,14 +63,12 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
 
       let prefixList = PrefixList.fromPrefixListId(this, 'rfc1918-prefix-list', cdk.Fn.importValue('RFC1918PrefixListId'));
       
-      vpc.isolatedSubnets.forEach(s => { 
-        let subnet = Subnet.fromSubnetAttributes(this, s.subnetId, { subnetId: s.subnetId }) as Subnet;
-        
-        subnet.addRoute(`tgw-vpn-route-${s.subnetId}`, {
-          routerId: tgw.transitGatewayId,
-          routerType: aws_ec2.RouterType.TRANSIT_GATEWAY,
-          destinationCidrBlock: prefixList.prefixListId
+      vpc.isolatedSubnets.forEach(({routeTable: { routeTableId }}, index) => { 
+        new CfnRoute(this, `tgw-vpn-route-${index}`, {
+          transitGatewayId: tgw.transitGatewayId,
+          destinationCidrBlock: prefixList.prefixListId,
+          routeTableId: routeTableId
+          )
         });
-      } );
     }
   };
