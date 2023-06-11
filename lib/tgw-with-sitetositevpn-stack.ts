@@ -54,39 +54,41 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
       let prefixList = PrefixList.fromPrefixListId(this, 'rfc1918-prefix-list', cdk.Fn.importValue('RFC1918PrefixListId'));
       
       vpc.privateSubnets.forEach(({routeTable: { routeTableId }}, index) => { 
-        new CfnRoute(this, `tgw-vpn-route-${index}`, {
-          transitGatewayId: tgw.transitGatewayId,
-          destinationCidrBlock: local_internal_cidr /* prefixList.prefixListId */,
-          routeTableId: routeTableId
+        this.AddTgwRoute(index, routeTableId, prefixList, tgw);
         });
-
-        new AwsCustomResource(this, `tgw-vpn-pl-route-${index}`, {
-          policy: AwsCustomResourcePolicy.fromSdkCalls({resources: AwsCustomResourcePolicy.ANY_RESOURCE}),
-          installLatestAwsSdk: true,
-          onCreate: {
-              action: 'createRoute', 
-              service: 'EC2', 
-              physicalResourceId:PhysicalResourceId.of(`tgw-vpn-pl-route-${index}-${routeTableId}-${prefixList.prefixListId}-${tgw.transitGatewayId}`), 
-              parameters: {
-                  DestinationPrefixListId: prefixList.prefixListId,
-                  TransitGatewayId: tgw.transitGatewayId,
-                  RouteTableId: routeTableId
-                }
-              },
-            onDelete: {
-              action: 'deleteRoute', 
-              service: 'EC2', 
-              physicalResourceId:PhysicalResourceId.of(`tgw-vpn-pl-route-${index}-${routeTableId}-${prefixList.prefixListId}-${tgw.transitGatewayId}`),
-              parameters: {
-                DestinationPrefixListId: prefixList.prefixListId,
-                TransitGatewayId: tgw.transitGatewayId,
-                RouteTableId: routeTableId
-              }          
-            }
-          });
+      vpc.publicSubnets.forEach(({routeTable: { routeTableId }}, index) => {   
+        this.AddTgwRoute(index, routeTableId, prefixList, tgw);
         });
-    }
+  
+      }
 
+
+  private AddTgwRoute(index: number, routeTableId: string, prefixList: cdk.aws_ec2.IPrefixList, tgw: TransitGateway) {
+    new AwsCustomResource(this, `tgw-vpn-pl-route-${index}`, {
+      policy: AwsCustomResourcePolicy.fromSdkCalls({ resources: AwsCustomResourcePolicy.ANY_RESOURCE }),
+      installLatestAwsSdk: true,
+      onCreate: {
+        action: 'createRoute',
+        service: 'EC2',
+        physicalResourceId: PhysicalResourceId.of(`tgw-vpn-pl-route-${index}-${routeTableId}-${prefixList.prefixListId}-${tgw.transitGatewayId}`),
+        parameters: {
+          DestinationPrefixListId: prefixList.prefixListId,
+          TransitGatewayId: tgw.transitGatewayId,
+          RouteTableId: routeTableId
+        }
+      },
+      onDelete: {
+        action: 'deleteRoute',
+        service: 'EC2',
+        physicalResourceId: PhysicalResourceId.of(`tgw-vpn-pl-route-${index}-${routeTableId}-${prefixList.prefixListId}-${tgw.transitGatewayId}`),
+        parameters: {
+          DestinationPrefixListId: prefixList.prefixListId,
+          TransitGatewayId: tgw.transitGatewayId,
+          RouteTableId: routeTableId
+        }
+      }
+    });
+  }
   };
 
 
