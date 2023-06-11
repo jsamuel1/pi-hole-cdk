@@ -83,7 +83,6 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
         physicalResourceId: PhysicalResourceId.of(`tgw-vpn-pl-route-${index}-${routeTableId}-${prefixList.prefixListId}-${tgw.transitGatewayId}`),
         parameters: {
           DestinationPrefixListId: prefixList.prefixListId,
-          TransitGatewayId: tgw.transitGatewayId,
           RouteTableId: routeTableId
         }
       }
