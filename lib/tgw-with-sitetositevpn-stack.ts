@@ -68,7 +68,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
               service: 'EC2', 
               physicalResourceId:PhysicalResourceId.of(`tgw-vpn-pl-route-${index}-${routeTableId}-${prefixList.prefixListId}-${tgw.transitGatewayId}`), 
               parameters: {
-                  DestinationCidrBlock: prefixList.prefixListId,
+                  DestinationPrefixListId: prefixList.prefixListId,
                   TransitGatewayId: tgw.transitGatewayId,
                   RouteTableId: routeTableId
                 }
@@ -78,7 +78,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
               service: 'EC2', 
               physicalResourceId:PhysicalResourceId.of(`tgw-vpn-pl-route-${index}-${routeTableId}-${prefixList.prefixListId}-${tgw.transitGatewayId}`),
               parameters: {
-                DestinationCidrBlock: prefixList.prefixListId,
+                DestinationPrefixListId: prefixList.prefixListId,
                 TransitGatewayId: tgw.transitGatewayId,
                 RouteTableId: routeTableId
               }          
