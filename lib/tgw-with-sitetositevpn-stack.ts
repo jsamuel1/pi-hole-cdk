@@ -62,6 +62,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
 
         new AwsCustomResource(this, `tgw-vpn-pl-route-${index}`, {
           policy: AwsCustomResourcePolicy.fromSdkCalls({resources: AwsCustomResourcePolicy.ANY_RESOURCE}),
+          installLatestAwsSdk: true,
           onCreate: {
               action: 'CreateRoute', 
               service: 'EC2', 
