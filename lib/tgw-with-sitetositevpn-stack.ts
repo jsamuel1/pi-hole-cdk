@@ -71,4 +71,5 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
         });
         });
     }
+    
   };
