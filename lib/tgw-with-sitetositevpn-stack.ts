@@ -4,7 +4,7 @@ import { Construct } from 'constructs';
 import { PiHoleProps } from '../bin/pi-hole-cdk';
 import { TransitGateway, TransitGatewayAttachment, VpnConnection } from './constructs'; 
 import { CfnCustomerGateway, CfnRoute, PrefixList } from 'aws-cdk-lib/aws-ec2';
-import { AwsCustomResource, AwsSdkCall, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
+import { AwsCustomResource, AwsCustomResourcePolicy, AwsSdkCall, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
 
 export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: PiHoleProps) {
@@ -61,6 +61,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
         });
 
         new AwsCustomResource(this, `tgw-vpn-pl-route-${index}`, {
+          policy: AwsCustomResourcePolicy.fromSdkCalls({resources: AwsCustomResourcePolicy.ANY_RESOURCE}),
           onCreate: {
               action: 'CreateRoute', 
               service: 'EC2', 
