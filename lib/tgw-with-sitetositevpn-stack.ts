@@ -68,7 +68,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
           transitGatewayId: tgw.transitGatewayId,
           destinationCidrBlock: prefixList.prefixListId,
           routeTableId: routeTableId
-          )
+        });
         });
     }
   };
