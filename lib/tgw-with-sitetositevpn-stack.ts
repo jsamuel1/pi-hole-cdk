@@ -3,7 +3,7 @@ import { aws_ec2 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { PiHoleProps } from '../bin/pi-hole-cdk';
 import { TransitGateway, TransitGatewayAttachment, VpnConnection } from './constructs'; 
-import { CfnCustomerGateway, CfnRoute, CfnTransitGatewayRoute, CfnVPNConnectionRoute, PrefixList, Subnet } from 'aws-cdk-lib/aws-ec2';
+import { CfnCustomerGateway, CfnRoute, CfnTransitGatewayRoute, CfnTransitGatewayRouteTableAssociation, CfnVPNConnectionRoute, PrefixList, Subnet } from 'aws-cdk-lib/aws-ec2';
 
 export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: PiHoleProps) {
@@ -49,9 +49,9 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
             ]   
       });
 
-      new CfnVPNConnectionRoute(this, 'sitetositevpnRoute', {
-        destinationCidrBlock: local_internal_cidr,
-        vpnConnectionId: vpn.vpnConnectionId});
+      // new CfnVPNConnectionRoute(this, 'sitetositevpnRoute', {
+      //   destinationCidrBlock: local_internal_cidr,
+      //   vpnConnectionId: vpn.vpnConnectionId});
 
       // todo -- TGW Route to onprem
       // new CfnTransitGatewayRoute(this, 'tgw-vpn-route', {
