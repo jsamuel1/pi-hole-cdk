@@ -70,7 +70,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
               parameters: {
                   DestinationCidrBlock: prefixList.prefixListId,
                   TransitGatewayId: tgw.transitGatewayId,
-                  RouteTableid: routeTableId
+                  RouteTableId: routeTableId
                 }
               },
             onDelete: {
@@ -80,7 +80,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
               parameters: {
                 DestinationCidrBlock: prefixList.prefixListId,
                 TransitGatewayId: tgw.transitGatewayId,
-                RouteTableid: routeTableId
+                RouteTableId: routeTableId
               }          
             }
           });
