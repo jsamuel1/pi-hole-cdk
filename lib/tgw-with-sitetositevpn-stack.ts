@@ -64,7 +64,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
           policy: AwsCustomResourcePolicy.fromSdkCalls({resources: AwsCustomResourcePolicy.ANY_RESOURCE}),
           installLatestAwsSdk: true,
           onCreate: {
-              action: 'CreateRoute', 
+              action: 'createRoute', 
               service: 'EC2', 
               physicalResourceId:PhysicalResourceId.of(`tgw-vpn-pl-route-${index}-${routeTableId}-${prefixList.prefixListId}-${tgw.transitGatewayId}`), 
               parameters: {
@@ -74,7 +74,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
                 }
               },
             onDelete: {
-              action: 'DeleteRoute', 
+              action: 'deleteRoute', 
               service: 'EC2', 
               physicalResourceId:PhysicalResourceId.of(`tgw-vpn-pl-route-${index}-${routeTableId}-${prefixList.prefixListId}-${tgw.transitGatewayId}`),
               parameters: {
