@@ -3,7 +3,8 @@ import { aws_ec2 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { PiHoleProps } from '../bin/pi-hole-cdk';
 import { TransitGateway, TransitGatewayAttachment, VpnConnection } from './constructs'; 
-import { CfnCustomerGateway, CfnRoute, CfnTransitGatewayRoute, CfnTransitGatewayRouteTableAssociation, CfnVPNConnectionRoute, PrefixList, Subnet } from 'aws-cdk-lib/aws-ec2';
+import { CfnCustomerGateway, CfnRoute, PrefixList } from 'aws-cdk-lib/aws-ec2';
+import { AwsCustomResource, AwsSdkCall, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
 
 export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: PiHoleProps) {
@@ -50,7 +51,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
       });
 
       // No prefixlist support in CloudFormation/CDK for PrefixLists in Route Tables yet!!
-      //let prefixList = PrefixList.fromPrefixListId(this, 'rfc1918-prefix-list', cdk.Fn.importValue('RFC1918PrefixListId'));
+      let prefixList = PrefixList.fromPrefixListId(this, 'rfc1918-prefix-list', cdk.Fn.importValue('RFC1918PrefixListId'));
       
       vpc.privateSubnets.forEach(({routeTable: { routeTableId }}, index) => { 
         new CfnRoute(this, `tgw-vpn-route-${index}`, {
@@ -58,7 +59,32 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
           destinationCidrBlock: local_internal_cidr /* prefixList.prefixListId */,
           routeTableId: routeTableId
         });
+
+        new AwsCustomResource(this, `tgw-vpn-pl-route-${index}`, {
+          onCreate: {
+              action: 'CreateRoute', 
+              service: 'EC2', 
+              physicalResourceId:PhysicalResourceId.of(`tgw-vpn-pl-route-${index}-${routeTableId}-${prefixList.prefixListId}-${tgw.transitGatewayId}`), 
+              parameters: {
+                  DestinationCidrBlock: prefixList.prefixListId,
+                  TransitGatewayId: tgw.transitGatewayId,
+                  RouteTableid: routeTableId
+                }
+              },
+            onDelete: {
+              action: 'DeleteRoute', 
+              service: 'EC2', 
+              physicalResourceId:PhysicalResourceId.of(`tgw-vpn-pl-route-${index}-${routeTableId}-${prefixList.prefixListId}-${tgw.transitGatewayId}`),
+              parameters: {
+                DestinationCidrBlock: prefixList.prefixListId,
+                TransitGatewayId: tgw.transitGatewayId,
+                RouteTableid: routeTableId
+              }          
+            }
+          });
         });
     }
 
   };
+
+
