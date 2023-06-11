@@ -220,6 +220,6 @@ export class PiHoleCdkStack extends cdk.Stack {
 
     new CfnOutput(this, "admin-url", { value: "http://pi.hole/admin"}); // Only after setting up DNS
     new CfnOutput(this, 'SecretArn', { value: pwd.secretArn })
-    new CfnOutput(this, 'RFC1918PrefixListId', { value: prefix_list.attrPrefixListId})
+    new CfnOutput(this, 'RFC1918PrefixListId', { value: prefix_list.attrPrefixListId, exportName: 'RFC1918PrefixListId'})
   }
 }
