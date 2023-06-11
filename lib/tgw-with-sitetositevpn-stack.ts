@@ -49,24 +49,13 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
             ]   
       });
 
-      // new CfnVPNConnectionRoute(this, 'sitetositevpnRoute', {
-      //   destinationCidrBlock: local_internal_cidr,
-      //   vpnConnectionId: vpn.vpnConnectionId});
-
-      // todo -- TGW Route to onprem
-      // new CfnTransitGatewayRoute(this, 'tgw-vpn-route', {
-      //   transitGatewayRouteTableId: '',
-      //   blackhole: false,
-      //   destinationCidrBlock: local_internal_cidr,
-      //   transitGatewayAttachmentId: ''
-      // });
-
-      let prefixList = PrefixList.fromPrefixListId(this, 'rfc1918-prefix-list', cdk.Fn.importValue('RFC1918PrefixListId'));
+      // No prefixlist support in CloudFormation/CDK for PrefixLists in Route Tables yet!!
+      //let prefixList = PrefixList.fromPrefixListId(this, 'rfc1918-prefix-list', cdk.Fn.importValue('RFC1918PrefixListId'));
       
       vpc.privateSubnets.forEach(({routeTable: { routeTableId }}, index) => { 
         new CfnRoute(this, `tgw-vpn-route-${index}`, {
           transitGatewayId: tgw.transitGatewayId,
-          destinationCidrBlock: prefixList.prefixListId,
+          destinationCidrBlock: local_internal_cidr /* prefixList.prefixListId */,
           routeTableId: routeTableId
         });
         });
