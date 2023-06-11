@@ -2,7 +2,7 @@ Name: Multiregion_TgwWithSiteToSiteVPN_Deploy
 RunMode: SUPERSEDED
 Compute:
   Type: EC2
-  Fleet: Linux.Arm64.Large
+  Fleet: Linux.Arm64.XLarge
 SchemaVersion: "1.0"
 
 # Optional - Set automatic triggers.
