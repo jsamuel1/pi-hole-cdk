@@ -63,7 +63,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
 
       let prefixList = PrefixList.fromPrefixListId(this, 'rfc1918-prefix-list', cdk.Fn.importValue('RFC1918PrefixListId'));
       
-      vpc.isolatedSubnets.forEach(({routeTable: { routeTableId }}, index) => { 
+      vpc.privateSubnets.forEach(({routeTable: { routeTableId }}, index) => { 
         new CfnRoute(this, `tgw-vpn-route-${index}`, {
           transitGatewayId: tgw.transitGatewayId,
           destinationCidrBlock: prefixList.prefixListId,
@@ -71,5 +71,5 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
         });
         });
     }
-    
+
   };
