@@ -36,7 +36,7 @@ export class AppConfig
 
     var usePrefixLists = this.node.tryGetContext('usePrefixLists');
     this.bUsePrefixLists = (usePrefixLists == undefined || (usePrefixLists == "True" || usePrefixLists == true));
-    this.bUseIntel = (env.region == 'ap-southeast-4');
+    this.bUseIntel = false;//(env.region == 'ap-southeast-4');
     
   }
 }
