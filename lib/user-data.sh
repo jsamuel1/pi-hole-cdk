@@ -60,3 +60,5 @@ snap install aws-cli --channel=v2/candidate --classic
 # set the pihole web ui password
 /usr/local/bin/pihole -a -p $(aws secretsmanager get-secret-value --secret-id $SECRET_ARN | jq .SecretString -j)
 
+git clone https://github.com/anudeepND/whitelist.git /tmp/whitelist/
+python3 /tmp/whitelist/scripts/whitelist.py
