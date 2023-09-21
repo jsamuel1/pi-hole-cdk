@@ -80,7 +80,6 @@ export class PiHoleCdkStack extends cdk.Stack {
     sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.udp(53), 'Allow_DNS_over_UDP')
     sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.icmpPing(), 'Allow ICMP Ping')
 
-
     file_system.connections.allowDefaultPortFrom(sgEc2);
 
     let role = new aws_iam.Role(this, 'pihole-role', {
@@ -127,7 +126,7 @@ export class PiHoleCdkStack extends cdk.Stack {
                   "kms:DescribeKey"
                 ],
                 effect: Effect.ALLOW,
-                resources: [ '*' ]
+                resources: ['*']
               })
             ]
           }
@@ -138,8 +137,7 @@ export class PiHoleCdkStack extends cdk.Stack {
     var instanceType = aws_ec2.InstanceType.of(aws_ec2.InstanceClass.BURSTABLE4_GRAVITON, aws_ec2.InstanceSize.SMALL);
     var machineImage = aws_ec2.MachineImage.fromSsmParameter('/aws/service/canonical/ubuntu/server/22.04/stable/current/arm64/hvm/ebs-gp2/ami-id');
 
-    if (bUseIntel)
-    {
+    if (bUseIntel) {
       instanceType = aws_ec2.InstanceType.of(aws_ec2.InstanceClass.BURSTABLE3, aws_ec2.InstanceSize.SMALL);
       machineImage = aws_ec2.MachineImage.fromSsmParameter('/aws/service/canonical/ubuntu/server/22.04/stable/current/amd64/hvm/ebs-gp2/ami-id');
     }
@@ -160,7 +158,7 @@ export class PiHoleCdkStack extends cdk.Stack {
       vpcSubnets: { subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS },
       maxInstanceLifetime: cdk.Duration.days(7),
       updatePolicy: UpdatePolicy.rollingUpdate(),
-      healthCheck: HealthCheck.elb({grace: cdk.Duration.minutes(5)})
+      healthCheck: HealthCheck.elb({ grace: cdk.Duration.minutes(5) })
     });
 
     if (bPublic_http) {
@@ -191,7 +189,7 @@ export class PiHoleCdkStack extends cdk.Stack {
       loadBalancerName: 'pihole'
     });
     let nlbListener = nlb.addListener('NLBDNS', { port: 53, protocol: cdk.aws_elasticloadbalancingv2.Protocol.TCP_UDP });
-    let targetGroup = nlbListener.addTargets("piholesTargets", { port: 53, targets: [asg], deregistrationDelay: cdk.Duration.minutes(2), healthCheck: { timeout: cdk.Duration.seconds(10), healthyThresholdCount: 4, unhealthyThresholdCount: 4}  });
+    let targetGroup = nlbListener.addTargets("piholesTargets", { port: 53, targets: [asg], deregistrationDelay: cdk.Duration.minutes(2), healthCheck: { timeout: cdk.Duration.seconds(10), healthyThresholdCount: 4, unhealthyThresholdCount: 4 } });
 
     targetGroup.setAttribute("deregistration_delay.connection_termination.enabled", "true");
 
@@ -218,8 +216,8 @@ export class PiHoleCdkStack extends cdk.Stack {
       value: getEndpointIps.getResponseField('NetworkInterfaces.1.PrivateIpAddress')
     });
 
-    new CfnOutput(this, "admin-url", { value: "http://pi.hole/admin"}); // Only after setting up DNS
+    new CfnOutput(this, "admin-url", { value: "http://pi.hole/admin" }); // Only after setting up DNS
     new CfnOutput(this, 'SecretArn', { value: pwd.secretArn })
-    new CfnOutput(this, 'RFC1918PrefixListId', { value: prefix_list.attrPrefixListId, exportName: 'RFC1918PrefixListId'})
+    new CfnOutput(this, 'RFC1918PrefixListId', { value: prefix_list.attrPrefixListId, exportName: 'RFC1918PrefixListId' })
   }
 }
