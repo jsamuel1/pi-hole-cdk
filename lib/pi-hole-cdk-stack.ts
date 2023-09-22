@@ -3,7 +3,7 @@ import { aws_ec2, aws_iam, aws_secretsmanager, aws_efs, CfnOutput, aws_autoscali
 import { LaunchTemplate } from 'aws-cdk-lib/aws-ec2';
 import { Effect, PolicyDocument, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
-import { Construct, Node } from 'constructs';
+import { Construct } from 'constructs';
 import { readFileSync } from 'fs';
 import { PiHoleProps } from '../bin/pi-hole-cdk';
 import { HealthCheck, UpdatePolicy } from 'aws-cdk-lib/aws-autoscaling';
@@ -157,8 +157,7 @@ export class PiHoleCdkStack extends cdk.Stack {
       vpc: vpc,
       vpcSubnets: { subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS },
       maxInstanceLifetime: cdk.Duration.days(7),
-      updatePolicy: UpdatePolicy.rollingUpdate(),
-      healthCheck: HealthCheck.elb({ grace: cdk.Duration.minutes(5) })
+      updatePolicy: UpdatePolicy.rollingUpdate()
     });
 
     if (bPublic_http) {
