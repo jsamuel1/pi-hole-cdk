@@ -464,7 +464,7 @@ export class TransitGateway extends cdk.Resource implements ITransitGateway {
     this.routeTableTgwId = getDefaultRouteTableId.getResponseField(
       'TransitGateways.0.Options.AssociationDefaultRouteTableId',
     );
-    this.routeTableId = this.routeTableTgwId.replace(/^(tgw_)/,"");
+    this.routeTableId = this.routeTableTgwId.replace(/^(tgw-)/,"");
 
 
   }
