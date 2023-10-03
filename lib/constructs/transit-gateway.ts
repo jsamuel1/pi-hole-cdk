@@ -461,11 +461,13 @@ export class TransitGateway extends cdk.Resource implements ITransitGateway {
         resources: AwsCustomResourcePolicy.ANY_RESOURCE,
       }),
     });
-    this.routeTableTgwId = getDefaultRouteTableId.getResponseField(
+    this.routeTableId = getDefaultRouteTableId.getResponseField(
       'TransitGateways.0.Options.AssociationDefaultRouteTableId',
-    );
-    this.routeTableId = this.routeTableTgwId.replace(/^(tgw-)/,"");
-
+    ).replace(/^(tgw-)/,"");
+    
+    console.log(`Transit Gateway created:\n transitGatewayId: ${transitGatewayId}\n transitGatewayName: ${transitGatewayName}\n`
+      + `transitGatewayArn: ${transitGatewayArn}\n routeTableTgwId: ${routeTableTgwId}\n routeTableId: ${routeTableId}\n`);
+    
 
   }
 }

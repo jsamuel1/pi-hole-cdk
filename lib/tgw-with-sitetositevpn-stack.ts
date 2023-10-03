@@ -69,6 +69,8 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
       }
 
   private AddVpnRoute(index: number, routeTableId: string, destinationCidr: string, vpn: VpnConnection) {
+    console.log(`AddVpnRoute(index: ${index}, routeTableId: ${routeTableId}, destinationCidr: ${destinationCidr}, vpn: ${vpn})`);
+
     new AwsCustomResource(this, `vpn-route-${index}-${destinationCidr}`, {
       policy: AwsCustomResourcePolicy.fromSdkCalls({ resources: AwsCustomResourcePolicy.ANY_RESOURCE }),
       installLatestAwsSdk: true,
