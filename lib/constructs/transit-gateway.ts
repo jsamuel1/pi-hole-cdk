@@ -16,6 +16,7 @@ import { Construct } from 'constructs';
 import { v4 as uuidv4 } from 'uuid';
 import * as t from './common-types';
 import { NetworkConfigTypes, TransitGatewayAttachmentOptionsConfig, TransitGatewayRouteTableConfig } from './network-config';
+import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
 
 const path = require('path');
 
@@ -419,6 +420,8 @@ export class TransitGateway extends cdk.Resource implements ITransitGateway {
 
   readonly transitGatewayArn: string;
 
+  readonly routeTableId: string;
+
   constructor(scope: Construct, id: string, props: TransitGatewayProps) {
     super(scope, id);
 
@@ -443,5 +446,23 @@ export class TransitGateway extends cdk.Resource implements ITransitGateway {
       arnFormat: cdk.ArnFormat.SLASH_RESOURCE_NAME,
       resourceName: this.transitGatewayId,
     });
+
+    const getDefaultRouteTableId = new AwsCustomResource(this, 'GetDefaultRouteTableId', {
+      onUpdate: {
+        service: 'EC2',
+        action: 'describeTransitGateways',
+        parameters: {
+          TransitGatewayIds: [this.transitGatewayId],
+        },
+        physicalResourceId: PhysicalResourceId.of('GetDefaultRouteTableId'),
+      },
+      policy: AwsCustomResourcePolicy.fromSdkCalls({
+        resources: AwsCustomResourcePolicy.ANY_RESOURCE,
+      }),
+    });
+    this.routeTableId = getDefaultRouteTableId.getResponseField(
+      'TransitGateways.0.Options.AssociationDefaultRouteTableId',
+    );
+
   }
 }

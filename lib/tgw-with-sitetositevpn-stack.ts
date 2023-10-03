@@ -60,18 +60,22 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
         this.AddTgwRoute(index, routeTableId, prefixList, tgw);
         });
 
-      this.AddVpnRoute(0, vpn.vpnConnectionId, local_internal_cidr, vpn);
+
+        // Now add the VPN Route
+
+
+      this.AddVpnRoute(0, tgw.routeTableId, local_internal_cidr, vpn);
   
       }
 
   private AddVpnRoute(index: number, routeTableId: string, destinationCidr: string, vpn: VpnConnection) {
-    new AwsCustomResource(this, `vpn-route-${index}-${routeTableId}-${destinationCidr}`, {
+    new AwsCustomResource(this, `vpn-route-${index}-${destinationCidr}`, {
       policy: AwsCustomResourcePolicy.fromSdkCalls({ resources: AwsCustomResourcePolicy.ANY_RESOURCE }),
       installLatestAwsSdk: true,
       onCreate: {
         action: 'createRoute',
         service: 'EC2',
-        physicalResourceId: PhysicalResourceId.of(`vpn-route-${index}-${routeTableId}-${destinationCidr}`),
+        physicalResourceId: PhysicalResourceId.of(`vpn-route-${index}-${destinationCidr}`),
         parameters: {
           DestinationCidrBlock: destinationCidr,
           VpnConnectionId: vpn.vpnConnectionId,
@@ -81,7 +85,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
       onDelete: {
         action: 'deleteRoute',
         service: 'EC2',
-        physicalResourceId: PhysicalResourceId.of(`vpn-route-${index}-${routeTableId}-${destinationCidr}`),
+        physicalResourceId: PhysicalResourceId.of(`vpn-route-${index}-$${destinationCidr}`),
         parameters: {
           DestinationCidrBlock: destinationCidr,
           VpnConnectionId: vpn.vpnConnectionId,
