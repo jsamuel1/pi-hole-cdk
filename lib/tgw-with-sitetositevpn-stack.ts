@@ -94,7 +94,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
     const vpnTransitGatewayAttachmentId = customResourceGetTgwAttId.getResponseField('TransitGatewayAttachments.0.TransitGatewayAttachmentId')
 
 
-    new CfnTransitGatewayRoute(this, `vpn-route-${index}-${vpn.vpnConnectionId}-${destinationCidr}`, {
+    new CfnTransitGatewayRoute(this, `vpn-route-${index}-${vpn.name}-${destinationCidr}`, {
       destinationCidrBlock: destinationCidr,
       transitGatewayRouteTableId: routeTableId,
       transitGatewayAttachmentId: vpnTransitGatewayAttachmentId
