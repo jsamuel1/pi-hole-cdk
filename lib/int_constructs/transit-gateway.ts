@@ -465,8 +465,8 @@ export class TransitGateway extends cdk.Resource implements ITransitGateway {
       'TransitGateways.0.Options.AssociationDefaultRouteTableId',
     ).replace(/^(tgw-)/,"");
     
-    console.log(`Transit Gateway created:\n transitGatewayId: ${transitGatewayId}\n transitGatewayName: ${transitGatewayName}\n`
-      + `transitGatewayArn: ${transitGatewayArn}\n routeTableTgwId: ${routeTableTgwId}\n routeTableId: ${routeTableId}\n`);
+    console.log(`Transit Gateway created:\n transitGatewayId: ${this.transitGatewayId}\n transitGatewayName: ${this.transitGatewayName}\n`
+      + `transitGatewayArn: ${this.transitGatewayArn}\n routeTableTgwId: ${this.routeTableTgwId}\n routeTableId: ${this.routeTableId}\n`);
     
 
   }

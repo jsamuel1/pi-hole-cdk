@@ -2,7 +2,7 @@ import * as cdk from 'aws-cdk-lib';
 import { aws_ec2 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { PiHoleProps } from '../bin/pi-hole-cdk';
-import { TransitGateway, TransitGatewayAttachment, VpnConnection } from './constructs'; 
+import { TransitGateway, TransitGatewayAttachment, VpnConnection } from './int_constructs'; 
 import { CfnCustomerGateway, CfnRoute, PrefixList } from 'aws-cdk-lib/aws-ec2';
 import { AwsCustomResource, AwsCustomResourcePolicy, AwsSdkCall, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
 
