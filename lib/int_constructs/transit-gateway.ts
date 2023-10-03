@@ -17,6 +17,7 @@ import { v4 as uuidv4 } from 'uuid';
 import * as t from './common-types';
 import { NetworkConfigTypes, TransitGatewayAttachmentOptionsConfig, TransitGatewayRouteTableConfig } from './network-config';
 import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
+import { LinuxBuildImage } from 'aws-cdk-lib/aws-codebuild';
 
 const path = require('path');
 
@@ -457,16 +458,18 @@ export class TransitGateway extends cdk.Resource implements ITransitGateway {
         },
         physicalResourceId: PhysicalResourceId.of('GetDefaultRouteTableId'),
       },
+      installLatestAwsSdk: true,
       policy: AwsCustomResourcePolicy.fromSdkCalls({
         resources: AwsCustomResourcePolicy.ANY_RESOURCE,
       }),
     });
+    
     this.routeTableId = getDefaultRouteTableId.getResponseField(
       'TransitGateways.0.Options.AssociationDefaultRouteTableId',
-    ).replace(/^(tgw-)/,"");
+    );
     
-    console.log(`Transit Gateway created:\n transitGatewayId: ${this.transitGatewayId}\n transitGatewayName: ${this.transitGatewayName}\n`
-      + `transitGatewayArn: ${this.transitGatewayArn}\n routeTableTgwId: ${this.routeTableTgwId}\n routeTableId: ${this.routeTableId}\n`);
+    // console.log(`Transit Gateway created:\n transitGatewayId: ${this.transitGatewayId}\n transitGatewayName: ${this.transitGatewayName}\n`
+    //   + `transitGatewayArn: ${this.transitGatewayArn}\n routeTableTgwId: ${this.routeTableTgwId}\n routeTableId: ${this.routeTableId}\n`);
     
 
   }

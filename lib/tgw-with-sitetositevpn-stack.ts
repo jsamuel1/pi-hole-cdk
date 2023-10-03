@@ -3,7 +3,7 @@ import { aws_ec2 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { PiHoleProps } from '../bin/pi-hole-cdk';
 import { TransitGateway, TransitGatewayAttachment, VpnConnection } from './int_constructs'; 
-import { CfnCustomerGateway, CfnRoute, PrefixList } from 'aws-cdk-lib/aws-ec2';
+import { CfnCustomerGateway, CfnRoute, CfnTransitGatewayRoute, PrefixList } from 'aws-cdk-lib/aws-ec2';
 import { AwsCustomResource, AwsCustomResourcePolicy, AwsSdkCall, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
 
 export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
@@ -69,36 +69,42 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
       }
 
   private AddVpnRoute(index: number, routeTableId: string, destinationCidr: string, vpn: VpnConnection) {
-    console.log(`AddVpnRoute(index: ${index}, routeTableId: ${routeTableId}, destinationCidr: ${destinationCidr}, vpn: ${vpn})`);
-
-    new AwsCustomResource(this, `vpn-route-${index}-${destinationCidr}`, {
-      policy: AwsCustomResourcePolicy.fromSdkCalls({ resources: AwsCustomResourcePolicy.ANY_RESOURCE }),
-      installLatestAwsSdk: true,
-      onCreate: {
-        action: 'createRoute',
-        service: 'EC2',
-        physicalResourceId: PhysicalResourceId.of(`vpn-route-${index}-${destinationCidr}`),
-        parameters: {
-          DestinationCidrBlock: destinationCidr,
-          VpnConnectionId: vpn.vpnConnectionId,
-          RouteTableId: routeTableId
-        }
+    const sdkCall: AwsSdkCall = {
+      service: 'EC2',
+      action: 'describeTransitGatewayAttachments',
+      parameters: {
+        Filters: [{
+          'Name': 'resource-id',
+          'Values': [
+            vpn.vpnConnectionId
+          ]
+        }],
       },
-      onDelete: {
-        action: 'deleteRoute',
-        service: 'EC2',
-        physicalResourceId: PhysicalResourceId.of(`vpn-route-${index}-$${destinationCidr}`),
-        parameters: {
-          DestinationCidrBlock: destinationCidr,
-          VpnConnectionId: vpn.vpnConnectionId,
-          RouteTableId: routeTableId
-        }
-      }
-    });  
+      physicalResourceId: PhysicalResourceId.of(vpn.vpnConnectionId),
+    }
+    const customResourceGetTgwAttId = new AwsCustomResource(this, 'custom-resource-get-tgw-att-id', {
+      onCreate: sdkCall,
+      onUpdate: sdkCall,
+      installLatestAwsSdk: true,
+      policy: AwsCustomResourcePolicy.fromSdkCalls({
+        resources: ['*'],
+      }),
+    })
+
+    const vpnTransitGatewayAttachmentId = customResourceGetTgwAttId.getResponseField('TransitGatewayAttachments.0.TransitGatewayAttachmentId')
+
+
+    new CfnTransitGatewayRoute(this, `vpn-route-${index}-${routeTableId}-${destinationCidr}`, {
+      destinationCidrBlock: destinationCidr,
+      transitGatewayRouteTableId: routeTableId,
+      transitGatewayAttachmentId: vpnTransitGatewayAttachmentId
+    });
+  }
+
   
 
 
-  }
+  
   private AddTgwRoute(index: number, routeTableId: string, prefixList: cdk.aws_ec2.IPrefixList, tgw: TransitGateway) {
     new AwsCustomResource(this, `tgw-vpn-pl-route-${index}-${routeTableId}-prefixlist-transitgateway`, {
       policy: AwsCustomResourcePolicy.fromSdkCalls({ resources: AwsCustomResourcePolicy.ANY_RESOURCE }),
