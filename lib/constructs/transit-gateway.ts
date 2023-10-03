@@ -420,7 +420,8 @@ export class TransitGateway extends cdk.Resource implements ITransitGateway {
 
   readonly transitGatewayArn: string;
 
-  readonly routeTableId: string;
+  readonly routeTableTgwId: string;  // tgw_rtb_xxxxx
+  readonly routeTableId: string;   // rtb_xxxx
 
   constructor(scope: Construct, id: string, props: TransitGatewayProps) {
     super(scope, id);
@@ -460,9 +461,11 @@ export class TransitGateway extends cdk.Resource implements ITransitGateway {
         resources: AwsCustomResourcePolicy.ANY_RESOURCE,
       }),
     });
-    this.routeTableId = getDefaultRouteTableId.getResponseField(
+    this.routeTableTgwId = getDefaultRouteTableId.getResponseField(
       'TransitGateways.0.Options.AssociationDefaultRouteTableId',
     );
+    this.routeTableId = this.routeTableTgwId.replace(/^(tgw_)/,"");
+
 
   }
 }
