@@ -59,10 +59,40 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
       vpc.publicSubnets.forEach(({routeTable: { routeTableId }}, index) => {   
         this.AddTgwRoute(index, routeTableId, prefixList, tgw);
         });
+
+      this.AddVpnRoute(0, vpn.vpnConnectionId, local_internal_cidr, vpn);
   
       }
 
+  private AddVpnRoute(index: number, routeTableId: string, destinationCidr: string, vpn: VpnConnection) {
+    new AwsCustomResource(this, `vpn-route-${index}-${routeTableId}-${destinationCidr}`, {
+      policy: AwsCustomResourcePolicy.fromSdkCalls({ resources: AwsCustomResourcePolicy.ANY_RESOURCE }),
+      installLatestAwsSdk: true,
+      onCreate: {
+        action: 'createRoute',
+        service: 'EC2',
+        physicalResourceId: PhysicalResourceId.of(`vpn-route-${index}-${routeTableId}-${destinationCidr}`),
+        parameters: {
+          DestinationCidrBlock: destinationCidr,
+          VpnConnectionId: vpn.vpnConnectionId,
+          RouteTableId: routeTableId
+        }
+      },
+      onDelete: {
+        action: 'deleteRoute',
+        service: 'EC2',
+        physicalResourceId: PhysicalResourceId.of(`vpn-route-${index}-${routeTableId}-${destinationCidr}`),
+        parameters: {
+          DestinationCidrBlock: destinationCidr,
+          VpnConnectionId: vpn.vpnConnectionId,
+          RouteTableId: routeTableId
+        }
+      }
+    });  
+  
 
+
+  }
   private AddTgwRoute(index: number, routeTableId: string, prefixList: cdk.aws_ec2.IPrefixList, tgw: TransitGateway) {
     new AwsCustomResource(this, `tgw-vpn-pl-route-${index}-${routeTableId}-prefixlist-transitgateway`, {
       policy: AwsCustomResourcePolicy.fromSdkCalls({ resources: AwsCustomResourcePolicy.ANY_RESOURCE }),
