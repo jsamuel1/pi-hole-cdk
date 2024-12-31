@@ -69,7 +69,8 @@ Actions:
     Inputs:
       Sources:
         - WorkflowSource
- AWSCDKbootstrap_Sfo:
+ 
+  AWSCDKbootstrap_Sfo:
     Identifier: aws/cdk-bootstrap@v2
     Configuration:
       Region: us-west-1
