@@ -9,7 +9,7 @@ SchemaVersion: "1.0"
 Triggers: []
 Actions:
   AWSCDKbootstrap_Syd:
-    Identifier: aws/cdk-bootstrap@v1.0.3
+    Identifier: aws/cdk-bootstrap@v2
     Configuration:
       Region: ap-southeast-2
     Environment:
@@ -22,7 +22,7 @@ Actions:
         - WorkflowSource
 
   AWSCDKdeploy_SiteToSite_Syd:
-    Identifier: aws/cdk-deploy@v1.0.4
+    Identifier: aws/cdk-deploy@v2
     Configuration:
       Context: '{"local_ip":"${Secrets.local_ip}","local_internal_cidr":"${Secrets.local_internal_cidr}"}'
       Region: ap-southeast-2
@@ -39,7 +39,7 @@ Actions:
         - WorkflowSource
 
   AWSCDKbootstrap_Mel:
-    Identifier: aws/cdk-bootstrap@v1.0.3
+    Identifier: aws/cdk-bootstrap@v2
     Configuration:
       Region: ap-southeast-4
     Environment:
@@ -52,7 +52,7 @@ Actions:
         - WorkflowSource
 
   AWSCDKdeploy_SiteToSite_Mel:
-    Identifier: aws/cdk-deploy@v1.0.4
+    Identifier: aws/cdk-deploy@v2
     Configuration:
       Context: '{"local_ip":"${Secrets.local_ip}","local_internal_cidr":"${Secrets.local_internal_cidr}"}'
       Region: ap-southeast-4
