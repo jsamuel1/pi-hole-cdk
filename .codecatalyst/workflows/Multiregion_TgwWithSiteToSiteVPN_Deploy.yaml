@@ -67,3 +67,16 @@ Actions:
     Inputs:
       Sources:
         - WorkflowSource
+
+  AWSCDKbootstrap_Cal:
+    Identifier: aws/cdk-bootstrap@v1.0.3
+    Configuration:
+      Region: us-west-1
+    Environment:
+      Connections:
+        - Role: CodeCatalystWorkflowDevelopmentRole-sauhsoj_playground
+          Name: sauhsoj_ct_pihole
+      Name: PiHole-Melbourne
+    Inputs:
+      Sources:
+        - WorkflowSource
