@@ -26,7 +26,7 @@ Actions:
       Fleet: Linux.Arm64.Large
     Configuration:
       Region: ap-southeast-2
-      CdkCliVersion: 2.173.4
+      CdkCliVersion: latest
   AWSCDKdeploy_PiHole_Syd:
     Identifier: aws/cdk-deploy@v2
     Environment:
@@ -43,7 +43,7 @@ Actions:
     Configuration:
       StackName: PiHoleCdkStack
       Region: ap-southeast-2
-      CdkCliVersion: 2.173.4
+      CdkCliVersion: latest
       Context: '{"local_ip":"${Secrets.local_ip}","local_internal_cidr":"${Secrets.local_internal_cidr}"}'
     DependsOn:
       - AWSCDKbootstrap_Syd
@@ -63,7 +63,7 @@ Actions:
       Fleet: Linux.Arm64.Large
     Configuration:
       Region: ap-southeast-4
-      CdkCliVersion: 2.173.4
+      CdkCliVersion: latest
 
   AWSCDKdeploy_PiHole_Mel:
     Identifier: aws/cdk-deploy@v2
@@ -81,7 +81,7 @@ Actions:
     Configuration:
       StackName: PiHoleCdkStack
       Region: ap-southeast-4
-      CdkCliVersion: 2.173.4
+      CdkCliVersion: latest
       Context: '{"local_ip":"${Secrets.local_ip}","local_internal_cidr":"${Secrets.local_internal_cidr}"}'
     DependsOn:
       - AWSCDKbootstrap_Mel
@@ -101,4 +101,4 @@ Actions:
       Fleet: Linux.Arm64.Large
     Configuration:
       Region: us-west-1
-      CdkCliVersion: 2.173.4
+      CdkCliVersion: latest
