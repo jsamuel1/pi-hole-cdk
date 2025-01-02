@@ -13,8 +13,6 @@ Triggers:
 Actions:
   AWSCDKbootstrap_Syd:
     Identifier: aws/cdk-bootstrap@v2
-    Configuration:
-      Region: ap-southeast-2
     Environment:
       Connections:
         - Role: CodeCatalystWorkflowDevelopmentRole-sauhsoj_playground
@@ -23,27 +21,35 @@ Actions:
     Inputs:
       Sources:
         - WorkflowSource
+    Compute:
+      Type: EC2
+      Fleet: Linux.Arm64.Large
+    Configuration:
+      Region: ap-southeast-2
+      CdkCliVersion: 2.173.4
   AWSCDKdeploy_PiHole_Syd:
     Identifier: aws/cdk-deploy@v2
-    Configuration:
-      Context: '{"local_ip":"${Secrets.local_ip}","local_internal_cidr":"${Secrets.local_internal_cidr}"}'
-      Region: ap-southeast-2
-      StackName: PiHoleCdkStack
     Environment:
       Connections:
         - Role: CodeCatalystWorkflowDevelopmentRole-sauhsoj_playground
           Name: sauhsoj_ct_pihole
       Name: PiHole-Melbourne
-    DependsOn:
-      - AWSCDKbootstrap_Syd
     Inputs:
       Sources:
         - WorkflowSource
+    Compute:
+      Type: EC2
+      Fleet: Linux.Arm64.Large
+    Configuration:
+      StackName: PiHoleCdkStack
+      Region: ap-southeast-2
+      CdkCliVersion: 2.173.4
+      Context: '{"local_ip":"${Secrets.local_ip}","local_internal_cidr":"${Secrets.local_internal_cidr}"}'
+    DependsOn:
+      - AWSCDKbootstrap_Syd
 
   AWSCDKbootstrap_Mel:
     Identifier: aws/cdk-bootstrap@v2
-    Configuration:
-      Region: ap-southeast-4
     Environment:
       Connections:
         - Role: CodeCatalystWorkflowDevelopmentRole-sauhsoj_playground
@@ -52,28 +58,36 @@ Actions:
     Inputs:
       Sources:
         - WorkflowSource
+    Compute:
+      Type: EC2
+      Fleet: Linux.Arm64.Large
+    Configuration:
+      Region: ap-southeast-4
+      CdkCliVersion: 2.173.4
 
   AWSCDKdeploy_PiHole_Mel:
     Identifier: aws/cdk-deploy@v2
-    Configuration:
-      Context: '{"local_ip":"${Secrets.local_ip}","local_internal_cidr":"${Secrets.local_internal_cidr}"}'
-      Region: ap-southeast-4
-      StackName: PiHoleCdkStack
     Environment:
       Connections:
         - Role: CodeCatalystWorkflowDevelopmentRole-sauhsoj_playground
           Name: sauhsoj_ct_pihole
       Name: PiHole-Melbourne
+    Inputs:
+      Sources:
+        - WorkflowSource
+    Compute:
+      Type: EC2
+      Fleet: Linux.Arm64.Large
+    Configuration:
+      StackName: PiHoleCdkStack
+      Region: ap-southeast-4
+      CdkCliVersion: 2.173.4
+      Context: '{"local_ip":"${Secrets.local_ip}","local_internal_cidr":"${Secrets.local_internal_cidr}"}'
     DependsOn:
       - AWSCDKbootstrap_Mel
-    Inputs:
-      Sources:
-        - WorkflowSource
- 
+
   AWSCDKbootstrap_Sfo:
     Identifier: aws/cdk-bootstrap@v2
-    Configuration:
-      Region: us-west-1
     Environment:
       Connections:
         - Role: CodeCatalystWorkflowDevelopmentRole-sauhsoj_playground
@@ -82,4 +96,9 @@ Actions:
     Inputs:
       Sources:
         - WorkflowSource
- 
+    Compute:
+      Type: EC2
+      Fleet: Linux.Arm64.Large
+    Configuration:
+      Region: us-west-1
+      CdkCliVersion: 2.173.4
