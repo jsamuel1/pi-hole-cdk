@@ -36,7 +36,8 @@ export class AppConfig
 
     var usePrefixLists = this.node.tryGetContext('usePrefixLists');
     this.bUsePrefixLists = (usePrefixLists == undefined || (usePrefixLists == "True" || usePrefixLists == true));
-    this.bUseIntel = false;//(env.region == 'ap-southeast-4');
+    // Use Intel architecture in Frankfurt region
+    this.bUseIntel = (env.region == 'eu-central-1');
     
   }
 }
@@ -45,9 +46,20 @@ export interface PiHoleProps extends StackProps
 {
   readonly appConfig : AppConfig
 }
+
+// Define available deployment regions
+const regions = {
+  'sydney': 'ap-southeast-2',
+  'melbourne': 'ap-southeast-4',
+  'frankfurt': 'eu-central-1'
+};
+
+// Get the target region from context or use default
+const targetRegion = app.node.tryGetContext('region') || process.env.CDK_DEFAULT_REGION || regions.frankfurt;
+
 var env : cdk.Environment = { 
   account: process.env.CDK_DEFAULT_ACCOUNT, 
-  region: process.env.CDK_DEFAULT_REGION 
+  region: targetRegion 
 };
 
 var appConfig = new AppConfig(app.node, env);
@@ -56,9 +68,13 @@ var piHoleProps : PiHoleProps = {
   env: env
 }
 
-new PiHoleCdkStack(app, 'PiHoleCdkStack', piHoleProps);
+// Create stack with region-specific naming
+const regionName = Object.keys(regions).find(key => regions[key] === targetRegion) || 'default';
+const stackNameSuffix = `-${regionName}`;
 
-new SiteToSiteVpnStack(app, 'SiteToSiteVpnStack', piHoleProps);
+new PiHoleCdkStack(app, `PiHoleCdkStack${stackNameSuffix}`, piHoleProps);
 
-new TgwWithSiteToSiteVpnStack(app, 'TgwWithSiteToSiteVpnStack', piHoleProps);
+new SiteToSiteVpnStack(app, `SiteToSiteVpnStack${stackNameSuffix}`, piHoleProps);
+
+new TgwWithSiteToSiteVpnStack(app, `TgwWithSiteToSiteVpnStack${stackNameSuffix}`, piHoleProps);
 
