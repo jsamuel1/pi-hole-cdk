@@ -77,3 +77,36 @@ snap install aws-cli --channel=v2/candidate --classic
 
 git clone https://github.com/anudeepND/whitelist.git /tmp/whitelist/
 python3 /tmp/whitelist/scripts/whitelist.py
+
+# Post-installation: Replace Pi-hole web interface with MCP-enabled fork
+echo "Installing MCP-enabled Pi-hole web interface..."
+
+# Stop lighttpd service
+systemctl stop lighttpd
+
+# Backup original web interface
+if [ -d /var/www/html/admin ]; then
+    mv /var/www/html/admin /var/www/html/admin.backup.$(date +%Y%m%d_%H%M%S)
+fi
+
+# Clone the MCP-enabled fork
+git clone https://github.com/sauhsoj/pi-hole-web.git /tmp/pi-hole-web-mcp
+
+# Copy the web interface files
+cp -r /tmp/pi-hole-web-mcp/* /var/www/html/admin/
+
+# Set proper ownership and permissions
+chown -R www-data:www-data /var/www/html/admin
+chmod -R 755 /var/www/html/admin
+
+# Ensure Lua files are executable
+find /var/www/html/admin -name "*.lp" -exec chmod 644 {} \;
+
+# Restart lighttpd service
+systemctl start lighttpd
+systemctl enable lighttpd
+
+# Clean up temporary files
+rm -rf /tmp/pi-hole-web-mcp
+
+echo "MCP-enabled Pi-hole web interface installation completed"
