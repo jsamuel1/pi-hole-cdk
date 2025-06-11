@@ -90,7 +90,7 @@ if [ -d /var/www/html/admin ]; then
 fi
 
 # Clone the MCP-enabled fork
-git clone https://github.com/sauhsoj/pi-hole-web.git /tmp/pi-hole-web-mcp
+git clone -b feature/mcp-integration https://github.com/jsamuel1/web.git /tmp/pi-hole-web-mcp
 
 # Copy the web interface files
 cp -r /tmp/pi-hole-web-mcp/* /var/www/html/admin/
