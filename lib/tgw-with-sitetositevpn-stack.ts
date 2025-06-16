@@ -85,7 +85,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
     const customResourceGetTgwAttId = new AwsCustomResource(this, 'custom-resource-get-tgw-att-id', {
       onCreate: sdkCall,
       onUpdate: sdkCall,
-      installLatestAwsSdk: true,
+      installLatestAwsSdk: false,
       policy: AwsCustomResourcePolicy.fromSdkCalls({
         resources: ['*'],
       }),
@@ -108,7 +108,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
   private AddTgwRoute(index: number, routeTableId: string, prefixList: cdk.aws_ec2.IPrefixList, tgw: TransitGateway) {
     new AwsCustomResource(this, `tgw-vpn-pl-route-${index}-${routeTableId}-prefixlist-transitgateway`, {
       policy: AwsCustomResourcePolicy.fromSdkCalls({ resources: AwsCustomResourcePolicy.ANY_RESOURCE }),
-      installLatestAwsSdk: true,
+      installLatestAwsSdk: false,
       onCreate: {
         action: 'createRoute',
         service: 'EC2',

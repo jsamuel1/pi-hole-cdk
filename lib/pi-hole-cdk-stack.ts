@@ -1,12 +1,12 @@
 import * as cdk from 'aws-cdk-lib';
-import { aws_ec2, aws_iam, aws_secretsmanager, aws_efs, CfnOutput, aws_autoscaling } from 'aws-cdk-lib';
+import { aws_ec2, aws_iam, aws_secretsmanager, aws_efs, CfnOutput, aws_autoscaling, aws_elasticloadbalancingv2 } from 'aws-cdk-lib';
 import { LaunchTemplate } from 'aws-cdk-lib/aws-ec2';
 import { Effect, PolicyDocument, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { readFileSync } from 'fs';
 import { PiHoleProps } from '../bin/pi-hole-cdk';
-import { HealthCheck, UpdatePolicy } from 'aws-cdk-lib/aws-autoscaling';
+import { HealthChecks, UpdatePolicy } from 'aws-cdk-lib/aws-autoscaling';
 
 
 export class PiHoleCdkStack extends cdk.Stack {
@@ -149,7 +149,7 @@ export class PiHoleCdkStack extends cdk.Stack {
       role: role,
       securityGroup: sgEc2,
       requireImdsv2: true,
-      keyName: keypair
+      keyPair: aws_ec2.KeyPair.fromKeyPairName(this, 'KeyPair', keypair)
     });
 
     const asg = new aws_autoscaling.AutoScalingGroup(this, 'pihole-asg', {
@@ -158,7 +158,7 @@ export class PiHoleCdkStack extends cdk.Stack {
       vpcSubnets: { subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS },
       maxInstanceLifetime: cdk.Duration.days(7),
       updatePolicy: UpdatePolicy.rollingUpdate(),
-      healthCheck: HealthCheck.ec2()
+      healthChecks: HealthChecks.ec2()
     });
 
     if (bPublic_http) {
@@ -169,7 +169,7 @@ export class PiHoleCdkStack extends cdk.Stack {
       sgAlbTarget.addIngressRule(aws_ec2.Peer.anyIpv4(), aws_ec2.Port.tcp(80), 'Allow access to ALB to any IP');
       sgEc2.addIngressRule(sgAlbTarget, aws_ec2.Port.tcp(80), 'Allow access to ALB to local IP');
 
-      let alb = new cdk.aws_elasticloadbalancingv2.ApplicationLoadBalancer(this, 'alb', {
+      let alb = new aws_elasticloadbalancingv2.ApplicationLoadBalancer(this, 'alb', {
         vpc: vpc,
         internetFacing: true,
         securityGroup: sgAlbTarget
@@ -182,13 +182,13 @@ export class PiHoleCdkStack extends cdk.Stack {
       new CfnOutput(this, 'admin-public-url', { value: `http://${alb.loadBalancerDnsName}/admin` });
     }
 
-    let nlb = new cdk.aws_elasticloadbalancingv2.NetworkLoadBalancer(this, 'nlb', {
+    let nlb = new aws_elasticloadbalancingv2.NetworkLoadBalancer(this, 'nlb', {
       vpc: vpc,
       internetFacing: false,
       crossZoneEnabled: true,
       loadBalancerName: 'pihole'
     });
-    let nlbListener = nlb.addListener('NLBDNS', { port: 53, protocol: cdk.aws_elasticloadbalancingv2.Protocol.TCP_UDP });
+    let nlbListener = nlb.addListener('NLBDNS', { port: 53, protocol: aws_elasticloadbalancingv2.Protocol.TCP_UDP });
     let targetGroup = nlbListener.addTargets("piholesTargets", {
       port: 53, targets: [asg], deregistrationDelay: cdk.Duration.minutes(2),
       // healthCheck: { timeout: cdk.Duration.seconds(10), healthyThresholdCount: 4, unhealthyThresholdCount: 4 } 

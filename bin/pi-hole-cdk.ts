@@ -3,7 +3,7 @@ import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { PiHoleCdkStack } from '../lib/pi-hole-cdk-stack';
 import { SiteToSiteVpnStack } from '../lib/sitetositevpn-stack';
-import { StackProps } from 'aws-cdk-lib/core/lib/stack';
+import { StackProps } from 'aws-cdk-lib';
 import { TgwWithSiteToSiteVpnStack } from '../lib/tgw-with-sitetositevpn-stack';
 import { Node } from 'constructs';
 
