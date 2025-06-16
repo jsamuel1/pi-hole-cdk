@@ -1,12 +1,8 @@
 #!/bin/bash -x
-# Pi-hole installation with MCP (Model Context Protocol) integration
-# This script installs Pi-hole and replaces the web interface with an MCP-enabled version
+# Pi-hole v6 installation script
+# This script installs Pi-hole v6 which includes an embedded web server
+# No longer requires lighttpd or PHP as Pi-hole v6 has these built-in
 # 
-# Key fixes included:
-# - Lua packages installation (lua5.1, liblua5.1-0-dev, lua-cjson) for .lp file processing
-# - MCP endpoint verification and troubleshooting
-# - Service restart coordination to prevent conflicts
-#
 # log user data output to /var/log/user-data.log
 exec > >(tee /var/log/user-data.log | logger -t user-data -s 2>/dev/console) 2>&1
 
@@ -41,17 +37,18 @@ retry_command() {
     return 1
 }
 
-log_message "Starting Pi-hole installation userdata script"
+log_message "Starting Pi-hole v6 installation userdata script"
 
 # upgrade packages
 log_message "Updating package lists and upgrading system"
 retry_command apt update -y
 retry_command apt upgrade -y
 
+# Install essential packages (removed lighttpd, php-* packages, but kept Lua)
 log_message "Installing required packages"
-retry_command apt install -y dialog unzip idn2 dns-root-data jq lighttpd php-common php-cgi php-sqlite3 php-xml php-intl php-json git binutils make wget python3-pip
+retry_command apt install -y dialog unzip idn2 dns-root-data jq git binutils make wget python3-pip curl
 
-# Install Lua packages required for Pi-hole web interface processing
+# Install Lua packages (still needed for web interface extensions and processing)
 log_message "Installing Lua packages for web interface processing"
 retry_command apt install -y lua5.1 liblua5.1-0-dev lua-cjson
 
@@ -83,66 +80,53 @@ else
     log_message "WARNING: EFS not mounted, using local storage"
 fi
 
-# Configure Pi-hole FTL settings
-log_message "Configuring Pi-hole FTL settings"
-if [ ! -a /etc/pihole/pihole-FTL.conf ]; then
-	echo >/etc/pihole/pihole-FTL.conf
-fi
-sed -i '/^REPLY_WHEN_BUSY=/{h;s/=.*/=ALLOW/};${x;/^$/{s//REPLY_WHEN_BUSY=ALLOW/;H};x}' /etc/pihole/pihole-FTL.conf
+# Configure Pi-hole v6 settings using environment variables (preferred method)
+log_message "Setting Pi-hole v6 configuration via environment variables"
 
-# set pihole dns server to cloudflare dns and initial adlists
-log_message "Configuring Pi-hole DNS settings"
-if [ ! -a /etc/pihole/setupVars.conf ]; then
-	echo >/etc/pihole/setupVars.conf #create with a blank line, so that sed will work
-fi
+# Create environment file for Pi-hole FTL configuration
+cat > /etc/environment << EOF
+# Pi-hole v6 Configuration via Environment Variables
+FTLCONF_dns_upstreams=1.1.1.1,1.0.0.1,2606:4700:4700::1111,2606:4700:4700::1001
+FTLCONF_dns_listeningMode=all
+FTLCONF_dns_dnssec=false
+FTLCONF_dns_bogusPriv=false
+FTLCONF_dns_fqdnRequired=false
+FTLCONF_dns_queryLogging=true
+FTLCONF_dns_revServer_enabled=true
+FTLCONF_dns_revServer_cidr=$REV_SERVER_CIDR
+FTLCONF_dns_revServer_target=$REV_SERVER_TARGET
+FTLCONF_dns_revServer_domain=localdomain
+FTLCONF_webserver_port_http=80
+FTLCONF_webserver_port_https=443
+EOF
 
-declare -A kv
+# Source the environment variables
+source /etc/environment
 
-kv[BLOCKING_ENABLED]=true
-kv[DNSSEC]=false
-kv[DNS_FQDN_REQUIRED]=false
-kv[DNS_BOGUS_PRIV]=false
-kv[PIHOLE_DNS_1]=1.1.1.1
-kv[PIHOLE_DNS_2]=1.0.0.1
-kv[PIHOLE_DNS_3]=2606:4700:4700::1111
-kv[PIHOLE_DNS_4]=2606:4700:4700::1001
-# note - DNSMASQ_LISTENING=all -- only because we are limiting to our external IP address as a source - otherwise this is dangerous.
-kv[DNSMASQ_LISTENING]=all
-kv[QUERY_LOGGING]=true
-kv[REV_SERVER]=true
-kv[REV_SERVER_CIDR]=$(printf '%s\n' "$REV_SERVER_CIDR" | sed -e 's/[\/&]/\\&/g')
-kv[REV_SERVER_TARGET]=$REV_SERVER_TARGET
-kv[REV_SERVER_DOMAIN]=localdomain
-
-VARFILE=/etc/pihole/setupVars.conf
-
-for key in "${!kv[@]}"; do
-	sed -i "/^${key}=/{h;s/=.*/=${kv[$key]}/};\${x;/^$/{s//${key}=${kv[$key]}/;H};x}" ${VARFILE}
-done
-
-# Setup initial blocklists
+# Setup initial blocklists for v6
 log_message "Setting up initial Pi-hole blocklists"
-if [ ! -a /etc/pihole/adlists.txt ]; then
+if [ ! -a /etc/pihole/adlists.list ]; then
 	cat <<EOF >/etc/pihole/adlists.list
-https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/SmartTV.txt
 https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
 https://v.firebog.net/hosts/Admiral.txt
 https://v.firebog.net/hosts/Easylist.txt
 https://v.firebog.net/hosts/Easyprivacy.txt
 https://v.firebog.net/hosts/Prigent-Ads.txt
+https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/SmartTV.txt
 EOF
 fi
 
-# Stop lighttpd before Pi-hole installation to prevent port conflicts
-log_message "Stopping lighttpd to prevent port conflicts during Pi-hole installation"
+# Stop any existing lighttpd service (in case it's running from previous installations)
+log_message "Stopping any existing lighttpd service"
 systemctl stop lighttpd 2>/dev/null || true
+systemctl disable lighttpd 2>/dev/null || true
 
-# install pihole unattended
-log_message "Installing Pi-hole"
+# Install Pi-hole v6 unattended
+log_message "Installing Pi-hole v6"
 retry_command wget -O /tmp/basic-install.sh https://install.pi-hole.net
 retry_command bash /tmp/basic-install.sh --unattended
 
-# install aws cli
+# Install AWS CLI
 log_message "Installing AWS CLI"
 retry_command snap install aws-cli --channel=v2/candidate --classic
 
@@ -150,7 +134,7 @@ retry_command snap install aws-cli --channel=v2/candidate --classic
 log_message "Waiting for AWS CLI to be available"
 sleep 10
 
-# set the pihole web ui password
+# Set the Pi-hole web UI password
 log_message "Setting Pi-hole web UI password from Secrets Manager"
 if retry_command aws secretsmanager get-secret-value --secret-id $SECRET_ARN; then
     PASSWORD=$(aws secretsmanager get-secret-value --secret-id $SECRET_ARN | jq .SecretString -j)
@@ -169,123 +153,70 @@ else
     log_message "WARNING: Failed to apply whitelist"
 fi
 
-# Post-installation: Replace Pi-hole web interface with MCP-enabled fork
-log_message "Installing MCP-enabled Pi-hole web interface..."
+# Configure Pi-hole v6 settings using the command line interface
+log_message "Configuring Pi-hole v6 settings via command line"
 
-# Stop both services to prevent conflicts
-log_message "Stopping services to prevent conflicts"
-systemctl stop pihole-FTL || true
-systemctl stop lighttpd || true
+# Set DNS upstream servers
+/usr/local/bin/pihole-FTL --config dns.upstreams "1.1.1.1,1.0.0.1,2606:4700:4700::1111,2606:4700:4700::1001" || true
 
-# Wait a moment for services to stop
-sleep 5
+# Set listening mode to all interfaces (restricted by security groups)
+/usr/local/bin/pihole-FTL --config dns.listeningMode all || true
 
-# Backup original web interface if it exists
-if [ -d /var/www/html/admin ]; then
-    log_message "Backing up original web interface"
-    mv /var/www/html/admin /var/www/html/admin.backup.$(date +%Y%m%d_%H%M%S)
-fi
+# Configure reverse DNS settings
+/usr/local/bin/pihole-FTL --config dns.revServer.enabled true || true
+/usr/local/bin/pihole-FTL --config dns.revServer.cidr "$REV_SERVER_CIDR" || true
+/usr/local/bin/pihole-FTL --config dns.revServer.target "$REV_SERVER_TARGET" || true
+/usr/local/bin/pihole-FTL --config dns.revServer.domain "localdomain" || true
 
-# Ensure the admin directory exists
-log_message "Creating admin directory"
-mkdir -p /var/www/html/admin
+# Enable query logging
+/usr/local/bin/pihole-FTL --config dns.queryLogging true || true
 
-# Clone the MCP-enabled fork with retry logic
-log_message "Cloning MCP-enabled Pi-hole web interface"
-if retry_command git clone -b feature/mcp-integration https://github.com/jsamuel1/web.git /tmp/pi-hole-web-mcp; then
-    # Copy the web interface files
-    log_message "Copying web interface files"
-    if cp -r /tmp/pi-hole-web-mcp/* /var/www/html/admin/ 2>/dev/null; then
-        log_message "Web interface files copied successfully"
-    else
-        log_message "WARNING: Failed to copy web interface files, restoring from backup"
-        # Restore from backup if copy failed
-        if [ -d /var/www/html/admin.backup.* ]; then
-            BACKUP_DIR=$(ls -td /var/www/html/admin.backup.* | head -1)
-            cp -r "$BACKUP_DIR"/* /var/www/html/admin/
-        fi
-    fi
-    
-    # Set proper ownership and permissions
-    log_message "Setting proper ownership and permissions"
-    chown -R www-data:www-data /var/www/html/admin
-    chmod -R 755 /var/www/html/admin
-    
-    # Ensure Lua files have correct permissions
-    find /var/www/html/admin -name "*.lp" -exec chmod 644 {} \; 2>/dev/null || true
-    
-    # Clean up temporary files
-    rm -rf /tmp/pi-hole-web-mcp
-    
-    log_message "MCP-enabled web interface installation completed"
-else
-    log_message "WARNING: Failed to clone MCP-enabled fork, using original interface"
-    # Restore from backup if clone failed
-    if [ -d /var/www/html/admin.backup.* ]; then
-        BACKUP_DIR=$(ls -td /var/www/html/admin.backup.* | head -1)
-        cp -r "$BACKUP_DIR"/* /var/www/html/admin/
-        chown -R www-data:www-data /var/www/html/admin
-        chmod -R 755 /var/www/html/admin
-    fi
-fi
+# Configure web server ports (Pi-hole v6 embedded server)
+/usr/local/bin/pihole-FTL --config webserver.port.http 80 || true
+/usr/local/bin/pihole-FTL --config webserver.port.https 443 || true
 
-# Start services in the correct order to prevent port conflicts
-log_message "Starting lighttpd service"
-systemctl start lighttpd
-systemctl enable lighttpd
-
-# Wait a moment before starting Pi-hole FTL
-sleep 5
-
+# Start and enable Pi-hole FTL service
 log_message "Starting Pi-hole FTL service"
-systemctl start pihole-FTL
+systemctl restart pihole-FTL
 systemctl enable pihole-FTL
 
-# Verify services are running
-log_message "Verifying service status"
-if systemctl is-active --quiet lighttpd; then
-    log_message "Lighttpd is running successfully"
-else
-    log_message "WARNING: Lighttpd failed to start"
-fi
+# Wait for service to start
+sleep 10
 
+# Verify Pi-hole FTL service is running
+log_message "Verifying Pi-hole FTL service status"
 if systemctl is-active --quiet pihole-FTL; then
     log_message "Pi-hole FTL is running successfully"
 else
     log_message "WARNING: Pi-hole FTL failed to start"
+    systemctl status pihole-FTL
 fi
 
-# Verify MCP endpoint is working
-log_message "Verifying MCP endpoint functionality"
-sleep 10  # Give services time to fully start
-if curl -s -f http://localhost/admin/mcp.lp >/dev/null 2>&1; then
-    # Test if it returns Lua code (broken) or processes correctly
-    MCP_RESPONSE=$(curl -s http://localhost/admin/mcp.lp | head -1)
-    if [[ "$MCP_RESPONSE" == *"<?--"* ]]; then
-        log_message "WARNING: MCP endpoint returning raw Lua code - Lua processing may not be working"
-        log_message "Attempting to restart lighttpd to fix Lua processing"
-        systemctl restart lighttpd
-        sleep 5
-    else
-        log_message "MCP endpoint is responding correctly"
-    fi
+# Verify web interface is accessible on port 80
+log_message "Verifying Pi-hole v6 web interface accessibility"
+sleep 5
+if curl -s -f http://localhost/admin/ >/dev/null 2>&1; then
+    log_message "Pi-hole v6 web interface is accessible on port 80"
+elif curl -s -f http://localhost:8080/admin/ >/dev/null 2>&1; then
+    log_message "Pi-hole v6 web interface is accessible on port 8080 (fallback)"
 else
-    log_message "WARNING: MCP endpoint is not accessible"
-fi
-
-# Final verification
-log_message "Performing final verification"
-if [ -d /var/www/html/admin ] && [ "$(ls -A /var/www/html/admin)" ]; then
-    log_message "Web interface directory exists and is not empty"
-else
-    log_message "ERROR: Web interface directory is missing or empty"
+    log_message "WARNING: Pi-hole v6 web interface is not accessible"
 fi
 
 # Test DNS functionality
+log_message "Testing DNS functionality"
 if dig @127.0.0.1 google.com +short >/dev/null 2>&1; then
     log_message "DNS functionality test passed"
 else
     log_message "WARNING: DNS functionality test failed"
 fi
 
-log_message "Pi-hole installation userdata script completed"
+# Display Pi-hole v6 configuration summary
+log_message "Pi-hole v6 configuration summary:"
+/usr/local/bin/pihole-FTL --config --list 2>/dev/null || log_message "Could not retrieve configuration list"
+
+# Check which ports Pi-hole is listening on
+log_message "Checking Pi-hole listening ports:"
+netstat -tlnp | grep pihole-FTL || log_message "Could not determine listening ports"
+
+log_message "Pi-hole v6 installation userdata script completed successfully"
