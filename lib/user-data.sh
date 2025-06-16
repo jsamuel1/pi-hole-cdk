@@ -1,4 +1,12 @@
 #!/bin/bash -x
+# Pi-hole installation with MCP (Model Context Protocol) integration
+# This script installs Pi-hole and replaces the web interface with an MCP-enabled version
+# 
+# Key fixes included:
+# - Lua packages installation (lua5.1, liblua5.1-0-dev, lua-cjson) for .lp file processing
+# - MCP endpoint verification and troubleshooting
+# - Service restart coordination to prevent conflicts
+#
 # log user data output to /var/log/user-data.log
 exec > >(tee /var/log/user-data.log | logger -t user-data -s 2>/dev/console) 2>&1
 
@@ -42,6 +50,10 @@ retry_command apt upgrade -y
 
 log_message "Installing required packages"
 retry_command apt install -y dialog unzip idn2 dns-root-data jq lighttpd php-common php-cgi php-sqlite3 php-xml php-intl php-json git binutils make wget python3-pip
+
+# Install Lua packages required for Pi-hole web interface processing
+log_message "Installing Lua packages for web interface processing"
+retry_command apt install -y lua5.1 liblua5.1-0-dev lua-cjson
 
 # not amazon linux, so need to build the package
 log_message "Building and installing EFS utils"
@@ -241,6 +253,24 @@ if systemctl is-active --quiet pihole-FTL; then
     log_message "Pi-hole FTL is running successfully"
 else
     log_message "WARNING: Pi-hole FTL failed to start"
+fi
+
+# Verify MCP endpoint is working
+log_message "Verifying MCP endpoint functionality"
+sleep 10  # Give services time to fully start
+if curl -s -f http://localhost/admin/mcp.lp >/dev/null 2>&1; then
+    # Test if it returns Lua code (broken) or processes correctly
+    MCP_RESPONSE=$(curl -s http://localhost/admin/mcp.lp | head -1)
+    if [[ "$MCP_RESPONSE" == *"<?--"* ]]; then
+        log_message "WARNING: MCP endpoint returning raw Lua code - Lua processing may not be working"
+        log_message "Attempting to restart lighttpd to fix Lua processing"
+        systemctl restart lighttpd
+        sleep 5
+    else
+        log_message "MCP endpoint is responding correctly"
+    fi
+else
+    log_message "WARNING: MCP endpoint is not accessible"
 fi
 
 # Final verification
