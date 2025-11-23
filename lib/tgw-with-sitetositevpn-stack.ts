@@ -11,13 +11,17 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
     super(scope, id, props);
 
       const local_ip = props.appConfig.local_ip;
-      const vpc_name = props.appConfig.vpc_name;
       const local_internal_cidr = props.appConfig.local_internal_cidr;
+      
+      // Use region-specific configuration
+      const regionConfig = props.regionConfig;
+      const vpc_name = regionConfig.vpc_name || props.appConfig.vpc_name;
+      const regionSuffix = props.env?.region || 'default';
 
       let vpc = aws_ec2.Vpc.fromLookup(this, 'vpc', { vpcName: vpc_name, isDefault: false });
 
       let tgw = new TransitGateway(this, 'tgw', {
-        name: 'pihole-tgw'
+        name: `pihole-tgw-${regionSuffix}`
       })
 
       new TransitGatewayAttachment(this, 'vpc-tgw-attachment', {
@@ -40,7 +44,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
       });
 
       let vpn = new VpnConnection(this, 'sitetositevpnConnection', {
-        name: 'pihole-vpn',
+        name: `pihole-vpn-${regionSuffix}`,
         customerGatewayId: cgw.ref,
         transitGatewayId: tgw.transitGatewayId,
         staticRoutesOnly: true,
@@ -51,7 +55,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
       });
 
       // No prefixlist support in CloudFormation/CDK for PrefixLists in Route Tables yet!!
-      let prefixList = PrefixList.fromPrefixListId(this, 'rfc1918-prefix-list', cdk.Fn.importValue('RFC1918PrefixListId'));
+      let prefixList = PrefixList.fromPrefixListId(this, 'rfc1918-prefix-list', cdk.Fn.importValue(`RFC1918PrefixListId-${regionSuffix}`));
       
       vpc.privateSubnets.forEach(({routeTable: { routeTableId }}, index) => { 
         this.AddTgwRoute(index, routeTableId, prefixList, tgw);
