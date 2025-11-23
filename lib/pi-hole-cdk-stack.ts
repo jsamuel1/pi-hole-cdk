@@ -16,19 +16,25 @@ export class PiHoleCdkStack extends cdk.Stack {
     const local_ip = props.appConfig.local_ip;
     const local_ip_cidr = props.appConfig.local_ip_cidr;
     const local_internal_cidr = props.appConfig.local_internal_cidr;
-    const vpc_name = props.appConfig.vpc_name;
-    const keypair = props.appConfig.keypair;
+    
+    // Use region-specific configuration
+    const regionConfig = props.regionConfig;
+    const vpc_name = regionConfig.vpc_name || props.appConfig.vpc_name;
+    const keypair = regionConfig.keypair || props.appConfig.keypair;
     const bPublic_http = props.appConfig.bPublic_http;
 
-    const bUseIntel = props.appConfig.bUseIntel;
+    const bUseIntel = regionConfig.use_intel || false;
 
     let vpc = aws_ec2.Vpc.fromLookup(this, 'vpc', { vpcName: vpc_name, isDefault: false });
 
     // start with default Linux userdata
     let user_data = aws_ec2.UserData.forLinux();
 
+    // Use region-specific naming to support multi-region deployments
+    const regionSuffix = props.env?.region || 'default';
+    
     var pwd = new aws_secretsmanager.Secret(this, 'piholepwd', {
-      secretName: 'pihole-pwd',
+      secretName: `pihole-pwd-${regionSuffix}`,
       generateSecretString: {
         excludePunctuation: true,
         includeSpace: false
@@ -39,7 +45,7 @@ export class PiHoleCdkStack extends cdk.Stack {
     let file_system = new aws_efs.FileSystem(this, "pihole-fs", {
       vpc: vpc,
       encrypted: true,
-      fileSystemName: "pihole-fs"
+      fileSystemName: `pihole-fs-${regionSuffix}`
     });
 
     user_data.addCommands('SECRET_ARN=' + pwd.secretArn)
@@ -56,7 +62,7 @@ export class PiHoleCdkStack extends cdk.Stack {
     let sgEc2 = new aws_ec2.SecurityGroup(this, 'allow_dns_http', { description: 'AllowDNSandSSHfrommyIP', vpc: vpc });
 
     let prefix_list = new aws_ec2.CfnPrefixList(this, "rfc1918prefix", {
-      prefixListName: "RFC1918",
+      prefixListName: `RFC1918-${regionSuffix}`,
       addressFamily: "IPv4",
       maxEntries: 3,
       entries: [
@@ -186,7 +192,7 @@ export class PiHoleCdkStack extends cdk.Stack {
       vpc: vpc,
       internetFacing: false,
       crossZoneEnabled: true,
-      loadBalancerName: 'pihole'
+      loadBalancerName: `pihole-${regionSuffix}`
     });
     let nlbListener = nlb.addListener('NLBDNS', { port: 53, protocol: aws_elasticloadbalancingv2.Protocol.TCP_UDP });
     let targetGroup = nlbListener.addTargets("piholesTargets", {
@@ -221,6 +227,6 @@ export class PiHoleCdkStack extends cdk.Stack {
 
     new CfnOutput(this, "admin-url", { value: "http://pi.hole/admin" }); // Only after setting up DNS
     new CfnOutput(this, 'SecretArn', { value: pwd.secretArn })
-    new CfnOutput(this, 'RFC1918PrefixListId', { value: prefix_list.attrPrefixListId, exportName: 'RFC1918PrefixListId' })
+    new CfnOutput(this, 'RFC1918PrefixListId', { value: prefix_list.attrPrefixListId, exportName: `RFC1918PrefixListId-${regionSuffix}` })
   }
 }

@@ -1,0 +1,42 @@
+{
+  "_comment": "Example CDK context configuration for multi-region Pi-hole deployment",
+  "_usage": "Copy this file to cdk.context.json and customize for your environment",
+  
+  "local_ip": "YOUR_EXTERNAL_IP_HERE",
+  "local_internal_cidr": "192.168.0.0/16",
+  
+  "_comment_single_region": "For single region deployment, specify vpc_name and keypair directly",
+  "vpc_name": "aws-controltower-VPC",
+  "keypair": "pihole",
+  
+  "_comment_multi_region": "For multi-region deployment, uncomment and configure the following",
+  "deployment_regions": [
+    "ap-southeast-2",
+    "ap-southeast-4", 
+    "eu-central-1"
+  ],
+  
+  "_comment_region_configs": "Optional: Override settings per region",
+  "region_configs": {
+    "ap-southeast-2": {
+      "vpc_name": "sydney-vpc",
+      "keypair": "sydney-keypair",
+      "_comment": "Sydney uses Graviton by default, use_intel not needed"
+    },
+    "ap-southeast-4": {
+      "vpc_name": "melbourne-vpc",
+      "keypair": "melbourne-keypair",
+      "use_intel": true,
+      "_comment": "Melbourne requires Intel instances (Graviton not available)"
+    },
+    "eu-central-1": {
+      "vpc_name": "frankfurt-vpc",
+      "keypair": "frankfurt-keypair",
+      "_comment": "Frankfurt uses Graviton by default for cost optimization"
+    }
+  },
+  
+  "_comment_optional": "Optional settings",
+  "public_http": false,
+  "usePrefixLists": true
+}

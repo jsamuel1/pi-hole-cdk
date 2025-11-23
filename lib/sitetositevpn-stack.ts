@@ -8,8 +8,11 @@ export class SiteToSiteVpnStack extends cdk.Stack {
     super(scope, id, props);
 
       const local_ip = props.appConfig.local_ip;
-      const vpc_name = props.appConfig.vpc_name;
       const local_internal_cidr = props.appConfig.local_internal_cidr;
+      
+      // Use region-specific configuration
+      const regionConfig = props.regionConfig;
+      const vpc_name = regionConfig.vpc_name || props.appConfig.vpc_name;
 
       let vpc = aws_ec2.Vpc.fromLookup(this, 'vpc', { vpcName: vpc_name, isDefault: false });
 

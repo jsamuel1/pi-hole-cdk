@@ -13,7 +13,6 @@
 
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { v4 as uuidv4 } from 'uuid';
 import * as t from './common-types';
 import { NetworkConfigTypes, TransitGatewayAttachmentOptionsConfig, TransitGatewayRouteTableConfig } from './network-config';
 import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
@@ -257,7 +256,7 @@ export class TransitGatewayAttachment extends cdk.Resource implements ITransitGa
             transitGatewayId: options.transitGatewayId,
             type: options.type,
             roleArn,
-            uuid: uuidv4(), // Generates a new UUID to force the resource to update
+            uuid: cdk.Names.uniqueId(this), // Generates a unique ID to force the resource to update
           },
         });
 
