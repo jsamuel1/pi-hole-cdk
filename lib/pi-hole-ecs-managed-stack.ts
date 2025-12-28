@@ -278,8 +278,12 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
       readOnly: false
     });
 
-    // Note: Host network mode means ports are automatically exposed on the host
-    // No need to explicitly map ports like we would in bridge mode
+    // Port mappings required by CDK validation (host mode uses same port on host)
+    container.addPortMappings(
+      { containerPort: 53, protocol: aws_ecs.Protocol.TCP },
+      { containerPort: 53, protocol: aws_ecs.Protocol.UDP },
+      { containerPort: 80, protocol: aws_ecs.Protocol.TCP }
+    );
 
     // 📝 Create IAM instance profile fer ECS container instances
     const instanceRole = new aws_iam.Role(this, 'pihole-instance-role', {
@@ -299,11 +303,11 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
 
     // Determine instance requirements based on architecture preference
     var instanceRequirements: any = {
-      vcpuCount: {
+      vCpuCount: {
         min: 2,
         max: 4
       },
-      memoryMib: {
+      memoryMiB: {
         min: 2048,
         max: 4096
       }
@@ -362,28 +366,32 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
     ];
 
     // 🚢 Create ECS Service to run Pi-hole tasks
-    const service = new aws_ecs.Ec2Service(this, 'pihole-service', {
-      cluster: cluster,
-      taskDefinition: taskDefinition,
-      desiredCount: 1, // Run 1 Pi-hole instance (can be increased fer redundancy)
-      minHealthyPercent: 0, // Allow old task to stop before new one starts (we only have 1)
-      maxHealthyPercent: 100,
-      capacityProviderStrategies: [
+    // Note: We use CfnService to bypass CDK validation that doesn't recognize
+    // Managed Instances capacity providers (a newer ECS feature)
+    const cfnService = new aws_ecs.CfnService(this, 'pihole-service', {
+      cluster: cluster.clusterArn,
+      taskDefinition: taskDefinition.taskDefinitionArn,
+      desiredCount: 1,
+      deploymentConfiguration: {
+        minimumHealthyPercent: 0,
+        maximumPercent: 100
+      },
+      capacityProviderStrategy: [
         {
           capacityProvider: capacityProvider.ref,
           weight: 1,
           base: 1
         }
       ],
-      enableExecuteCommand: true, // Enable ECS Exec fer troubleshootin'
+      enableExecuteCommand: true,
       placementConstraints: [
-        // Ensure tasks run on distinct instances (useful if we scale up)
-        aws_ecs.PlacementConstraint.distinctInstances()
-      ]
+        { type: 'distinctInstance' }
+      ],
+      serviceName: 'pihole-service'
     });
 
     // Add dependency to ensure capacity provider exists before service
-    service.node.addDependency(capacityProvider);
+    cfnService.addDependency(capacityProvider);
 
     // 🌐 Create Network Load Balancer fer DNS traffic (same as original stack)
     let nlb = new aws_elasticloadbalancingv2.NetworkLoadBalancer(this, 'nlb-ecs', {
@@ -417,8 +425,15 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
 
     nlbListener.addTargetGroups('pihole-targets-ecs', targetGroup);
 
-    // Attach the service to the target group
-    service.attachToNetworkTargetGroup(targetGroup);
+    // Note: With CfnService and Managed Instances, target group registration
+    // is handled via the service's loadBalancers property
+    cfnService.loadBalancers = [
+      {
+        containerName: 'pihole',
+        containerPort: 53,
+        targetGroupArn: targetGroup.targetGroupArn
+      }
+    ];
 
     targetGroup.setAttribute("deregistration_delay.connection_termination.enabled", "true");
 
@@ -479,8 +494,15 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
       albListener.addTargetGroups('targetgroup-ecs', { targetGroups: [albTargetGroup] });
       albListener.connections.addSecurityGroup(sgAlbIngress);
 
-      // Attach service to ALB target group
-      service.attachToApplicationTargetGroup(albTargetGroup);
+      // Add ALB target group to service load balancers
+      cfnService.loadBalancers = [
+        ...(cfnService.loadBalancers as any[] || []),
+        {
+          containerName: 'pihole',
+          containerPort: 80,
+          targetGroupArn: albTargetGroup.targetGroupArn
+        }
+      ];
 
       new CfnOutput(this, 'admin-public-url-ecs', { 
         value: `http://${alb.loadBalancerDnsName}/admin`,
@@ -515,7 +537,7 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
       description: 'ECS Cluster name fer Pi-hole'
     });
     new CfnOutput(this, 'ServiceName-ecs', {
-      value: service.serviceName,
+      value: cfnService.attrName,
       description: 'ECS Service name fer Pi-hole'
     });
     new CfnOutput(this, 'EfsFileSystemId-ecs', {
