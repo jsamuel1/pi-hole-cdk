@@ -24,6 +24,7 @@ jobs:
     env:
       AWS_REGION: ap-southeast-2
       CDK_DEFAULT_REGION: ap-southeast-2
+      CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
     steps:
       - name: Checkout code ⚓
         uses: actions/checkout@v4
@@ -74,6 +75,7 @@ jobs:
     env:
       AWS_REGION: ap-southeast-4
       CDK_DEFAULT_REGION: ap-southeast-4
+      CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
     steps:
       - name: Checkout code ⚓
         uses: actions/checkout@v4
@@ -125,6 +127,7 @@ jobs:
     env:
       AWS_REGION: us-west-1
       CDK_DEFAULT_REGION: us-west-1
+      CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
     steps:
       - name: Checkout code ⚓
         uses: actions/checkout@v4
