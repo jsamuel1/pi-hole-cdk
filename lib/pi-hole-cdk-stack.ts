@@ -186,7 +186,8 @@ export class PiHoleCdkStack extends cdk.Stack {
       vpc: vpc,
       internetFacing: false,
       crossZoneEnabled: true,
-      loadBalancerName: 'pihole'
+      loadBalancerName: 'pihole',
+      securityGroups: []  // NLB was created without SGs, can't add them later
     });
     let nlbListener = nlb.addListener('NLBDNS', { port: 53, protocol: aws_elasticloadbalancingv2.Protocol.TCP_UDP });
     let targetGroup = nlbListener.addTargets("piholesTargets", {
