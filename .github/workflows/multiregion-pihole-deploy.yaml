@@ -42,27 +42,27 @@ jobs:
 
       - name: CDK Bootstrap Sydney
         run: |
-          npx cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
+          npx cdk --no-notices bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
 
       - name: CDK Synth - Verify templates
         run: |
-          npx cdk synth PiHoleCdkStack \
+          npx cdk --no-notices synth PiHoleCdkStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}"
-          npx cdk synth PiHoleEcsManagedStack \
+          npx cdk --no-notices synth PiHoleEcsManagedStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}"
 
       - name: Deploy Original EC2 Stack (PiHoleCdkStack) to Sydney 🚢
         run: |
-          npx cdk deploy PiHoleCdkStack \
+          npx cdk --no-notices deploy PiHoleCdkStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
             --require-approval never
 
       - name: Deploy ECS Stack (PiHoleEcsManagedStack) to Sydney ⚓
         run: |
-          npx cdk deploy PiHoleEcsManagedStack \
+          npx cdk --no-notices deploy PiHoleEcsManagedStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
             --require-approval never
@@ -92,27 +92,27 @@ jobs:
 
       - name: CDK Bootstrap Melbourne
         run: |
-          npx cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
+          npx cdk --no-notices bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
 
       - name: CDK Synth - Verify templates
         run: |
-          npx cdk synth PiHoleCdkStack \
+          npx cdk --no-notices synth PiHoleCdkStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}"
-          npx cdk synth PiHoleEcsManagedStack \
+          npx cdk --no-notices synth PiHoleEcsManagedStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}"
 
       - name: Deploy Original EC2 Stack (PiHoleCdkStack) to Melbourne 🚢
         run: |
-          npx cdk deploy PiHoleCdkStack \
+          npx cdk --no-notices deploy PiHoleCdkStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
             --require-approval never
 
       - name: Deploy ECS Stack (PiHoleEcsManagedStack) to Melbourne ⚓
         run: |
-          npx cdk deploy PiHoleEcsManagedStack \
+          npx cdk --no-notices deploy PiHoleEcsManagedStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
             --require-approval never
@@ -143,27 +143,27 @@ jobs:
 
       - name: CDK Bootstrap San Francisco
         run: |
-          npx cdk bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
+          npx cdk --no-notices bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
 
       - name: CDK Synth - Verify templates
         run: |
-          npx cdk synth PiHoleCdkStack \
+          npx cdk --no-notices synth PiHoleCdkStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}"
-          npx cdk synth PiHoleEcsManagedStack \
+          npx cdk --no-notices synth PiHoleEcsManagedStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}"
 
       - name: Deploy Original EC2 Stack (PiHoleCdkStack) to San Francisco 🚢
         run: |
-          npx cdk deploy PiHoleCdkStack \
+          npx cdk --no-notices deploy PiHoleCdkStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
             --require-approval never
 
       - name: Deploy ECS Stack (PiHoleEcsManagedStack) to San Francisco ⚓
         run: |
-          npx cdk deploy PiHoleEcsManagedStack \
+          npx cdk --no-notices deploy PiHoleEcsManagedStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
             --require-approval never
