@@ -344,7 +344,7 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
             storageSizeGiB: 30
           },
           // Enable detailed monitoring fer better observability
-          monitoring: 'ENABLED'
+          monitoring: 'DETAILED'
         },
         // Enable infrastructure optimization - AWS will manage instance lifecycle
         // Scale in after 5 minutes of idle time (300 seconds)
