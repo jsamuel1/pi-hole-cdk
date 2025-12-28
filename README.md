@@ -1,26 +1,78 @@
-# Welcome to CDK PiHole Deployment
+# Welcome to CDK PiHole Deployment ⚓
 
-Prerequisites:
+Ahoy, matey! This treasure chest contains two Pi-hole deployment approaches fer AWS:
+
+## 📦 Available Stacks
+
+### 1. **PiHoleCdkStack** (Original EC2 Auto Scaling)
+The traditional approach using EC2 Auto Scaling Groups with user-data scripts.
+
+### 2. **PiHoleEcsManagedStack** (NEW! ⚓ ECS Managed Instances)
+Modern containerized approach using AWS ECS Managed Instances. See [ECS-MIGRATION-GUIDE.md](./ECS-MIGRATION-GUIDE.md) fer details.
+
+### 3. **SiteToSiteVpnStack** & **TgwWithSiteToSiteVpnStack**
+VPN configurations fer secure connectivity.
+
+## Prerequisites:
 * An existing VPC with internet access
 * A named SSH keypair
-* Your local routers external & internal IP addresses 
+* Your local router's external & internal IP addresses 
 
-Do deploy, run:
-cdk deploy -c local_ip=\<local_ip\> -c vpc_name=\<vpcNAME\> -c keypair=\<keypairname\> --local_internal_cidr=<internalcide/range>--all
+## Deployment Instructions
 
-eg.
+### Deploy Original EC2 Stack
+```bash
+cdk deploy PiHoleCdkStack -c local_ip=<local_ip> -c vpc_name=<vpcNAME> -c keypair=<keypairname> -c local_internal_cidr=<internalcidr/range>
+```
+
+### Deploy NEW ECS Managed Instances Stack (Recommended fer new deployments)
+```bash
+cdk deploy PiHoleEcsManagedStack -c local_ip=<local_ip> -c vpc_name=<vpcNAME> -c keypair=<keypairname> -c local_internal_cidr=<internalcidr/range>
+```
+
+### Example:
+```bash
+cdk deploy PiHoleEcsManagedStack -c local_ip=121.121.4.100 -c vpc_name=aws-controltower-VPC -c keypair=pihole -c local_internal_cidr=192.168.0.0/16
+```
+
+### Deploy All Stacks (includes VPN)
+```bash
 cdk deploy -c local_ip=121.121.4.100 -c vpc_name=aws-controltower-VPC -c keypair=pihole -c local_internal_cidr=192.168.0.0/16 --all
+```
 
 This will deploy both a Site To Site VPN and the pihole.
-You should then set up your local router to talk to the Site to Site VPN before configuring the routers DNS to use the IP addresses provided (which export DNS endpoints to the local network only)
+You should then set up your local router to talk to the Site to Site VPN before configuring the router's DNS to use the IP addresses provided (which export DNS endpoints to the local network only).
 
-Add the optional context parameter: `public_http=True` if you want to create an internet facing Application Load Balancer for the web interface, locked down to your external local ip address.  You may want to enable this during the setup phase, until you have your VPN going, or if you have automations that you want to run against the PiHole from the internet (in which case, you will need to change the security group of this load balancer to accept connections from elsewhere)
+Add the optional context parameter: `public_http=True` if you want to create an internet facing Application Load Balancer fer the web interface, locked down to yer external local IP address. Ye may want to enable this during the setup phase, until ye have yer VPN going, or if ye have automation.
 
-Optionally, you may wish to set up a conditional forwarder back to your local DHCP servers DNS, if you are not moving DHCP onto the pihole.
-Do this from the PiHole web UI, or add in the following variables into the PiHole setupVars.conf and reload the config:
+## Post-Deployment Configuration
+
+Optionally, ye may wish to set up a conditional forwarder back to yer local DHCP server's DNS, if ye are not moving DHCP onto the pihole.
+Do this from the PiHole web UI, or add the following variables into the PiHole setupVars.conf and reload the config:
+```
 REV_SERVER=true
-REV_SERVER_CIDR=
-REV_SERVER_TARGET=
-REV_SERVER_DOMAIN=
+REV_SERVER_CIDR=<your_internal_cidr>
+REV_SERVER_TARGET=<your_router_ip>
+REV_SERVER_DOMAIN=<your_domain>
+```
 
-For Unifi devices, the Unifi dnsmasq is not configured to listen to the tunnel interface.  See the notes in the unifi-vpndns folder for instructions to fix this, before setting up the conditional forwarding.
+For Unifi devices, the Unifi dnsmasq is not configured to listen to the tunnel interface. See the notes in the unifi-vpndns folder fer instructions to fix this, before setting up the conditional forwarding.
+
+## 🗺️ Migration to ECS Managed Instances
+
+If ye currently use the EC2 Auto Scaling approach and want to migrate to ECS Managed Instances:
+
+1. Read the comprehensive [ECS-MIGRATION-GUIDE.md](./ECS-MIGRATION-GUIDE.md)
+2. Test in a non-production region first
+3. Gradually migrate production regions
+4. Both stacks can coexist during migration
+
+## Documentation
+
+- [ECS Migration Guide](./ECS-MIGRATION-GUIDE.md) - Complete guide fer migrating to ECS Managed Instances
+- [Original Stack](./lib/pi-hole-cdk-stack.ts) - EC2 Auto Scaling implementation
+- [ECS Stack](./lib/pi-hole-ecs-managed-stack.ts) - ECS Managed Instances implementation
+
+---
+
+Arrr! Fair winds and happy sailin'! 🏴‍☠️
