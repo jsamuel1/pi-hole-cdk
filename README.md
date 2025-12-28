@@ -18,7 +18,17 @@ VPN configurations fer secure connectivity.
 * A named SSH keypair
 * Your local router's external & internal IP addresses 
 
-## Deployment Instructions
+## 🤖 GitHub Actions CI/CD
+
+This repository includes GitHub Actions workflows fer automated multi-region deployment! See [.github/workflows/README.md](./.github/workflows/README.md) fer details on:
+- Automatic deployments on push to `main` branch
+- Manual VPN deployment workflows
+- Self-hosted runner configuration
+- Migration strategy fer ECS (addresses issue #20)
+
+**Quick Start with GitHub Actions**: Configure yer self-hosted runners with the `pi-hole-cdk` label and set the required secrets (`AWS_ACCOUNT_ID`, `LOCAL_IP`, `LOCAL_INTERNAL_CIDR`), then push to main! ⚓
+
+## Deployment Instructions (Manual CDK)
 
 ### Deploy Original EC2 Stack
 ```bash
