@@ -152,7 +152,7 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
     const infrastructureRole = new aws_iam.Role(this, 'pihole-infrastructure-role', {
       assumedBy: new aws_iam.ServicePrincipal('ecs.amazonaws.com'),
       managedPolicies: [
-        aws_iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSInfrastructureRolePolicyForManagedInstances')
+        aws_iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonECSInfrastructureRolePolicyForManagedInstances')
       ],
       roleName: 'pihole-ecs-infrastructure-role'
     });
