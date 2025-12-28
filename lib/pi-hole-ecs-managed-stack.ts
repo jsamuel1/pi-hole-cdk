@@ -88,6 +88,20 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
     // Look up the existing VPC, just like the original stack
     let vpc = aws_ec2.Vpc.fromLookup(this, 'vpc', { vpcName: vpc_name, isDefault: false });
 
+    // 🧭 Calculate VPC gateway IP fer reverse DNS (REV_SERVER_TARGET)
+    // In AWS VPCs, the router/gateway be at the +1 address of the network base
+    // For example: 10.0.0.0/16 -> gateway at 10.0.0.1
+    // This approach splits the CIDR block and replaces the last octet with '1'
+    // NOTE: This assumes the VPC gateway is the correct target fer reverse DNS queries
+    // fer the local_internal_cidr range. Verify this matches yer network topology! 🗺️
+    const vpcGatewayIp = (() => {
+      const cidrBlock = vpc.vpcCidrBlock;
+      const baseIp = cidrBlock.split('/')[0]; // Extract IP portion (e.g., "10.0.0.0")
+      const octets = baseIp.split('.');
+      octets[3] = '1'; // Replace last octet with '1'
+      return octets.join('.');
+    })();
+
     // 🗝️ Create Secrets Manager secret fer Pi-hole password
     var pwd = new aws_secretsmanager.Secret(this, 'piholepwd-ecs', {
       secretName: 'pihole-pwd-ecs',
@@ -204,7 +218,9 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
                 "kms:DescribeKey"
               ],
               effect: Effect.ALLOW,
-              resources: ['*']
+              // Restrict to the specific KMS key used by the secret instead of all keys (*)
+              // This addresses CWE-732: Incorrect Permission Assignment for Critical Resource
+              resources: [`arn:aws:kms:${this.region}:${this.account}:alias/aws/secretsmanager`]
             })
           ]
         })
@@ -247,7 +263,7 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
         TZ: 'UTC',
         REV_SERVER: 'true',
         REV_SERVER_CIDR: local_internal_cidr,
-        REV_SERVER_TARGET: '192.168.1.1',
+        REV_SERVER_TARGET: vpcGatewayIp, // Dynamically calculated from VPC CIDR
         REV_SERVER_DOMAIN: 'localdomain',
         DNS1: '1.1.1.1',
         DNS2: '1.0.0.1',
@@ -366,7 +382,7 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
       cluster: cluster,
       taskDefinition: taskDefinition,
       desiredCount: 1, // Run 1 Pi-hole instance (can be increased fer redundancy)
-      minHealthyPercent: 0, // Allow old task to stop before new one starts (we only have 1)
+      minHealthyPercent: 50, // Maintain at least 50% capacity during deployments to prevent DNS outage
       maxHealthyPercent: 100,
       capacityProviderStrategies: [
         {

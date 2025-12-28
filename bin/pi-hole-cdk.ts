@@ -57,13 +57,36 @@ var piHoleProps : PiHoleProps = {
   env: env
 }
 
+// 🏴‍☠️ Conditional deployment logic to prevent resource conflicts, arr! ⚓
+// Context flags control which stack(s) get deployed to prevent accidental
+// deployment of both EC2 and ECS stacks to the same region simultaneously
+const deployEcs = app.node.tryGetContext('deploy_ecs');
+const deployEcsOnly = app.node.tryGetContext('deploy_ecs_only');
+
+// Validate that both flags aren't set simultaneously (would be confusin', matey!)
+if (deployEcs && deployEcsOnly) {
+  throw new Error("Arr! Ye can't set both 'deploy_ecs' and 'deploy_ecs_only' flags at the same time, matey! ⚠️");
+}
+
 // 🏴‍☠️ Original EC2 Auto Scaling Group stack (preserved fer current deployments)
-new PiHoleCdkStack(app, 'PiHoleCdkStack', piHoleProps);
+// Deploy by default, or when deploy_ecs is true, but NOT when deploy_ecs_only is true
+if (!deployEcsOnly) {
+  new PiHoleCdkStack(app, 'PiHoleCdkStack', piHoleProps);
+  console.log('🏴‍☠️ Deploying EC2 Auto Scaling Group stack (PiHoleCdkStack)');
+} else {
+  console.log('⚓ Skippin\' EC2 stack - deploy_ecs_only flag be set, arr!');
+}
 
 // ⚓ New ECS Managed Instances stack (fer gradual regional migration)
 // This stack uses containerized Pi-hole with ECS Managed Instances
 // Deploy this to new regions or gradually migrate existing regions
-new PiHoleEcsManagedStack(app, 'PiHoleEcsManagedStack', piHoleProps);
+// Only deploy when deploy_ecs or deploy_ecs_only flags are explicitly set
+if (deployEcs || deployEcsOnly) {
+  new PiHoleEcsManagedStack(app, 'PiHoleEcsManagedStack', piHoleProps);
+  console.log('⚓ Deploying ECS Managed Instances stack (PiHoleEcsManagedStack)');
+} else {
+  console.log('🏴‍☠️ Skippin\' ECS stack - use deploy_ecs or deploy_ecs_only flag to enable, matey!');
+}
 
 new SiteToSiteVpnStack(app, 'SiteToSiteVpnStack', piHoleProps);
 

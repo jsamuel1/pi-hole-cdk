@@ -20,25 +20,58 @@ VPN configurations fer secure connectivity.
 
 ## Deployment Instructions
 
-### Deploy Original EC2 Stack
+### 🚨 Conditional Deployment Logic (Prevents Resource Conflicts!)
+
+**IMPORTANT**: To prevent accidental deployment of both EC2 and ECS stacks to the same region simultaneously (which could cause resource conflicts), use these context flags:
+
+#### Default Behavior (No flags)
+Deploys **only EC2 stack** (backward compatible with existing deployments)
 ```bash
 cdk deploy PiHoleCdkStack -c local_ip=<local_ip> -c vpc_name=<vpcNAME> -c keypair=<keypairname> -c local_internal_cidr=<internalcidr/range>
 ```
 
-### Deploy NEW ECS Managed Instances Stack (Recommended fer new deployments)
+#### Deploy ECS Stack Only (Recommended fer new regions or full migration)
+Use `deploy_ecs_only=true` to deploy **only ECS stack** (skips EC2 stack)
 ```bash
-cdk deploy PiHoleEcsManagedStack -c local_ip=<local_ip> -c vpc_name=<vpcNAME> -c keypair=<keypairname> -c local_internal_cidr=<internalcidr/range>
+cdk deploy PiHoleEcsManagedStack -c deploy_ecs_only=true -c local_ip=<local_ip> -c vpc_name=<vpcNAME> -c keypair=<keypairname> -c local_internal_cidr=<internalcidr/range>
 ```
 
-### Example:
+#### Deploy Both Stacks (Fer gradual regional migration)
+Use `deploy_ecs=true` to deploy **both EC2 and ECS stacks** (fer parallel testing)
 ```bash
-cdk deploy PiHoleEcsManagedStack -c local_ip=121.121.4.100 -c vpc_name=aws-controltower-VPC -c keypair=pihole -c local_internal_cidr=192.168.0.0/16
+cdk deploy --all -c deploy_ecs=true -c local_ip=<local_ip> -c vpc_name=<vpcNAME> -c keypair=<keypairname> -c local_internal_cidr=<internalcidr/range>
+```
+
+**⚠️ WARNING**: Deploying both EC2 and ECS Pi-hole stacks simultaneously should **only** be used in the following scenarios:
+- When deploying to **separate regions** (e.g., EC2 in us-east-1, ECS in us-west-2)
+- When ye **intentionally want both stacks deployed** in the same region fer testing or gradual migration purposes
+
+Deploying both stacks to the same region can cause resource conflicts, confusion with DNS endpoints, and increased costs. Make sure this is yer intended configuration before proceeding! 🏴‍☠️
+
+**Note**: You cannot set both `deploy_ecs` and `deploy_ecs_only` simultaneously - this will throw an error! ⚠️
+
+### Example Deployments:
+
+#### Example 1: Fresh ECS deployment (new region)
+```bash
+cdk deploy PiHoleEcsManagedStack -c deploy_ecs_only=true -c local_ip=121.121.4.100 -c vpc_name=aws-controltower-VPC -c keypair=pihole -c local_internal_cidr=192.168.0.0/16
+```
+
+#### Example 2: Gradual migration (both stacks fer testing)
+```bash
+cdk deploy --all -c deploy_ecs=true -c local_ip=121.121.4.100 -c vpc_name=aws-controltower-VPC -c keypair=pihole -c local_internal_cidr=192.168.0.0/16
+```
+
+#### Example 3: Traditional EC2 deployment (default, no flags needed)
+```bash
+cdk deploy PiHoleCdkStack -c local_ip=121.121.4.100 -c vpc_name=aws-controltower-VPC -c keypair=pihole -c local_internal_cidr=192.168.0.0/16
 ```
 
 ### Deploy All Stacks (includes VPN)
 ```bash
 cdk deploy -c local_ip=121.121.4.100 -c vpc_name=aws-controltower-VPC -c keypair=pihole -c local_internal_cidr=192.168.0.0/16 --all
 ```
+**Note**: Without flags, this deploys EC2 stack + VPN stacks (ECS stack skipped)
 
 This will deploy both a Site To Site VPN and the pihole.
 You should then set up your local router to talk to the Site to Site VPN before configuring the router's DNS to use the IP addresses provided (which export DNS endpoints to the local network only).
