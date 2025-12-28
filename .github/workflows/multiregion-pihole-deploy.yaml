@@ -8,11 +8,17 @@ on:
       - main
   workflow_dispatch:  # Manual trigger fer on-demand deployments
 
+# Limit to 1 concurrent job to prevent OOM on self-hosted runners
+concurrency:
+  group: pi-hole-deploy
+  cancel-in-progress: false
+
 # Run exclusively on self-hosted runners with pi-hole-cdk label
 # The runners be configured in the target AWS account with CDK deployment permissions
 jobs:
   # Bootstrap and Deploy to Sydney (ap-southeast-2) 🗺️
   deploy-sydney:
+    needs: deploy-melbourne
     name: Deploy to Sydney (ap-southeast-2)
     runs-on: [self-hosted, pi-hole-cdk]
     env:
@@ -113,6 +119,7 @@ jobs:
 
   # Bootstrap and Deploy to San Francisco (us-west-1) 🗺️
   deploy-san-francisco:
+    needs: deploy-sydney
     name: Deploy to San Francisco (us-west-1)
     runs-on: [self-hosted, pi-hole-cdk]
     env:
