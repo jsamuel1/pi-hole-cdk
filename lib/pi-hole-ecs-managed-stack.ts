@@ -323,6 +323,8 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
     // This be the magic that replaces the EC2 Auto Scaling Group!
     const capacityProvider = new aws_ecs.CfnCapacityProvider(this, 'pihole-capacity-provider', {
       name: 'pihole-managed-instances',
+      // Cluster name is required for Managed Instances Provider (at top level, not inside managedInstancesProvider)
+      clusterName: cluster.clusterName,
       managedInstancesProvider: {
         // Infrastructure role ARN fer ECS to manage instances
         infrastructureRoleArn: infrastructureRole.roleArn,
