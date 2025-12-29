@@ -124,8 +124,13 @@ systemctl disable lighttpd 2>/dev/null || true
 # Create Pi-hole setup variables file for truly unattended installation
 log_message "Creating Pi-hole setup variables file"
 mkdir -p /etc/pihole
+
+# Detect the primary network interface (exclude loopback)
+PIHOLE_INTERFACE=$(ip -o link show up | awk -F': ' '!/lo/ {print $2; exit}')
+log_message "Detected network interface: $PIHOLE_INTERFACE"
+
 cat > /etc/pihole/setupVars.conf << EOF
-PIHOLE_INTERFACE=ens5
+PIHOLE_INTERFACE=${PIHOLE_INTERFACE}
 QUERY_LOGGING=true
 INSTALL_WEB_SERVER=true
 INSTALL_WEB_INTERFACE=true
