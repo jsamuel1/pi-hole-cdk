@@ -7,8 +7,10 @@ import {
   CfnOutput, 
   aws_ecs,
   aws_elasticloadbalancingv2,
-  aws_logs
+  aws_logs,
+  Size
 } from 'aws-cdk-lib';
+import { CpuManufacturer } from 'aws-cdk-lib/aws-ec2';
 import { Effect, PolicyDocument, PolicyStatement } from 'aws-cdk-lib/aws-iam';
 import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
@@ -146,15 +148,6 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
       clusterName: 'pihole-cluster',
       vpc: vpc,
       enableFargateCapacityProviders: false, // We be usin' Managed Instances, not Fargate
-    });
-
-    // 🏗️ Create IAM role fer ECS infrastructure management (required by Managed Instances)
-    const infrastructureRole = new aws_iam.Role(this, 'pihole-infrastructure-role', {
-      assumedBy: new aws_iam.ServicePrincipal('ecs.amazonaws.com'),
-      managedPolicies: [
-        aws_iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonECSInfrastructureRolePolicyForManagedInstances')
-      ],
-      roleName: 'pihole-ecs-infrastructure-role'
     });
 
     // 🏗️ Create IAM role fer ECS Task Execution (pulls images, writes logs)
@@ -296,112 +289,51 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
       ]
     });
 
-    const instanceProfile = new aws_iam.CfnInstanceProfile(this, 'pihole-instance-profile', {
-      roles: [instanceRole.roleName],
+    const instanceProfile = new aws_iam.InstanceProfile(this, 'pihole-instance-profile', {
+      role: instanceRole,
       instanceProfileName: 'pihole-ecs-instance-profile'
     });
 
-    // Determine instance requirements based on architecture preference
-    var instanceRequirements: any = {
-      vCpuCount: {
-        min: 2,
-        max: 4
-      },
-      memoryMiB: {
-        min: 2048,
-        max: 4096
-      }
-    };
-
-    if (bUseIntel) {
-      instanceRequirements.cpuManufacturers = ['intel', 'amd'];
-    } else {
-      instanceRequirements.cpuManufacturers = ['amazon-web-services']; // Graviton
-    }
-
-    // ⚓ Create ECS Capacity Provider with Managed Instances
-    // This be the magic that replaces the EC2 Auto Scaling Group!
-    const capacityProvider = new aws_ecs.CfnCapacityProvider(this, 'pihole-capacity-provider', {
-      name: 'pihole-managed-instances',
-      // Cluster name is required for Managed Instances Provider (at top level, not inside managedInstancesProvider)
-      clusterName: cluster.clusterName,
-      managedInstancesProvider: {
-        // Infrastructure role ARN fer ECS to manage instances
-        infrastructureRoleArn: infrastructureRole.roleArn,
-        // Launch template configuration fer Managed Instances
-        instanceLaunchTemplate: {
-          // Instance profile with permissions fer ECS agent and tasks
-          ec2InstanceProfileArn: instanceProfile.attrArn,
-          // Network configuration
-          networkConfiguration: {
-            securityGroups: [sgEc2.securityGroupId],
-            subnets: vpc.selectSubnets({ 
-              subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS 
-            }).subnetIds
-          },
-          // Instance requirements fer flexible instance type selection
-          instanceRequirements: instanceRequirements,
-          // Storage configuration
-          storageConfiguration: {
-            storageSizeGiB: 30
-          },
-          // Enable detailed monitoring fer better observability
-          monitoring: 'DETAILED'
-        },
-        // Enable infrastructure optimization - AWS will manage instance lifecycle
-        // Scale in after 5 minutes of idle time (300 seconds)
-        infrastructureOptimization: {
-          scaleInAfter: 300
-        }
+    // ⚓ Create ECS Capacity Provider with Managed Instances (L2 construct)
+    const capacityProvider = new aws_ecs.ManagedInstancesCapacityProvider(this, 'pihole-capacity-provider', {
+      capacityProviderName: 'pihole-managed-instances',
+      ec2InstanceProfile: instanceProfile,
+      subnets: vpc.selectSubnets({ subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS }).subnets,
+      securityGroups: [sgEc2],
+      taskVolumeStorage: Size.gibibytes(30),
+      monitoring: aws_ecs.InstanceMonitoring.DETAILED,
+      instanceRequirements: {
+        vCpuCountMin: 2,
+        vCpuCountMax: 4,
+        memoryMin: Size.mebibytes(2048),
+        memoryMax: Size.mebibytes(4096),
+        cpuManufacturers: bUseIntel ? [CpuManufacturer.INTEL, CpuManufacturer.AMD] : [CpuManufacturer.AWS]
       }
     });
 
-    // Ensure cluster is created before capacity provider
-    capacityProvider.node.addDependency(cluster);
-
-    // Associate capacity provider with the cluster using separate resource
-    // This avoids circular dependency between cluster and capacity provider
-    const clusterAssociation = new aws_ecs.CfnClusterCapacityProviderAssociations(this, 'pihole-cluster-cp-assoc', {
-      cluster: cluster.clusterName,
-      capacityProviders: [capacityProvider.ref],
-      defaultCapacityProviderStrategy: [
-        {
-          capacityProvider: capacityProvider.ref,
-          weight: 1,
-          base: 1 // Always keep at least 1 instance runnin'
-        }
-      ]
-    });
-    clusterAssociation.node.addDependency(capacityProvider);
+    // Add capacity provider to cluster
+    cluster.addManagedInstancesCapacityProvider(capacityProvider);
+    // Workaround: CDK bug - addManagedInstancesCapacityProvider doesn't set hasEc2Capacity
+    (cluster as any)._hasEc2Capacity = true;
 
     // 🚢 Create ECS Service to run Pi-hole tasks
-    // Note: We use CfnService to bypass CDK validation that doesn't recognize
-    // Managed Instances capacity providers (a newer ECS feature)
-    const cfnService = new aws_ecs.CfnService(this, 'pihole-service', {
-      cluster: cluster.clusterArn,
-      taskDefinition: taskDefinition.taskDefinitionArn,
+    const service = new aws_ecs.Ec2Service(this, 'pihole-service', {
+      cluster: cluster,
+      taskDefinition: taskDefinition,
       desiredCount: 1,
-      deploymentConfiguration: {
-        minimumHealthyPercent: 0,
-        maximumPercent: 100
-      },
-      capacityProviderStrategy: [
+      minHealthyPercent: 0,
+      maxHealthyPercent: 100,
+      capacityProviderStrategies: [
         {
-          capacityProvider: capacityProvider.ref,
+          capacityProvider: capacityProvider.capacityProviderName,
           weight: 1,
           base: 1
         }
       ],
       enableExecuteCommand: true,
-      placementConstraints: [
-        { type: 'distinctInstance' }
-      ],
+      placementConstraints: [aws_ecs.PlacementConstraint.distinctInstances()],
       serviceName: 'pihole-service'
     });
-
-    // Add dependency to ensure capacity provider exists before service
-    cfnService.addDependency(capacityProvider);
-    cfnService.addDependency(clusterAssociation);
 
     // 🌐 Create Network Load Balancer fer DNS traffic (same as original stack)
     let nlb = new aws_elasticloadbalancingv2.NetworkLoadBalancer(this, 'nlb-ecs', {
@@ -417,9 +349,7 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
       protocol: aws_elasticloadbalancingv2.Protocol.TCP_UDP 
     });
 
-    // Note: ECS Service can be added as a target, but with host networking
-    // we need to manually register the underlying instances. For simplicity,
-    // we'll create a target group and let ECS handle the registration.
+    // Create target group and attach service to it
     const targetGroup = new aws_elasticloadbalancingv2.NetworkTargetGroup(this, 'pihole-tg-ecs', {
       vpc: vpc,
       port: 53,
@@ -434,18 +364,10 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
     });
 
     nlbListener.addTargetGroups('pihole-targets-ecs', targetGroup);
-
-    // Note: With CfnService and Managed Instances, target group registration
-    // is handled via the service's loadBalancers property
-    cfnService.loadBalancers = [
-      {
-        containerName: 'pihole',
-        containerPort: 53,
-        targetGroupArn: targetGroup.targetGroupArn
-      }
-    ];
-
     targetGroup.setAttribute("deregistration_delay.connection_termination.enabled", "true");
+
+    // Attach service to target group
+    service.attachToNetworkTargetGroup(targetGroup);
 
     // 🔍 Get NLB private IP addresses fer client configuration
     const getEndpointIps = new AwsCustomResource(this, 'GetEndpointIps-ecs', {
@@ -504,15 +426,8 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
       albListener.addTargetGroups('targetgroup-ecs', { targetGroups: [albTargetGroup] });
       albListener.connections.addSecurityGroup(sgAlbIngress);
 
-      // Add ALB target group to service load balancers
-      cfnService.loadBalancers = [
-        ...(cfnService.loadBalancers as any[] || []),
-        {
-          containerName: 'pihole',
-          containerPort: 80,
-          targetGroupArn: albTargetGroup.targetGroupArn
-        }
-      ];
+      // Attach service to ALB target group
+      service.attachToApplicationTargetGroup(albTargetGroup);
 
       new CfnOutput(this, 'admin-public-url-ecs', { 
         value: `http://${alb.loadBalancerDnsName}/admin`,
@@ -547,7 +462,7 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
       description: 'ECS Cluster name fer Pi-hole'
     });
     new CfnOutput(this, 'ServiceName-ecs', {
-      value: cfnService.attrName,
+      value: service.serviceName,
       description: 'ECS Service name fer Pi-hole'
     });
     new CfnOutput(this, 'EfsFileSystemId-ecs', {
