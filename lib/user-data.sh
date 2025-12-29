@@ -121,6 +121,28 @@ log_message "Stopping any existing lighttpd service"
 systemctl stop lighttpd 2>/dev/null || true
 systemctl disable lighttpd 2>/dev/null || true
 
+# Create Pi-hole setup variables file for truly unattended installation
+log_message "Creating Pi-hole setup variables file"
+mkdir -p /etc/pihole
+cat > /etc/pihole/setupVars.conf << EOF
+PIHOLE_INTERFACE=ens5
+QUERY_LOGGING=true
+INSTALL_WEB_SERVER=true
+INSTALL_WEB_INTERFACE=true
+LIGHTTPD_ENABLED=false
+CACHE_SIZE=10000
+DNS_FQDN_REQUIRED=false
+DNS_BOGUS_PRIV=false
+DNSMASQ_LISTENING=all
+WEBPASSWORD=
+PIHOLE_DNS_1=1.1.1.1
+PIHOLE_DNS_2=1.0.0.1
+REV_SERVER=true
+REV_SERVER_CIDR=$REV_SERVER_CIDR
+REV_SERVER_TARGET=$REV_SERVER_TARGET
+REV_SERVER_DOMAIN=localdomain
+EOF
+
 # Install Pi-hole v6 unattended
 log_message "Installing Pi-hole v6"
 retry_command wget -O /tmp/basic-install.sh https://install.pi-hole.net
