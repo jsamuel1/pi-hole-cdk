@@ -323,7 +323,6 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
     // This be the magic that replaces the EC2 Auto Scaling Group!
     const capacityProvider = new aws_ecs.CfnCapacityProvider(this, 'pihole-capacity-provider', {
       name: 'pihole-managed-instances',
-      clusterName: cluster.clusterName,  // Required for Managed Instances
       managedInstancesProvider: {
         // Infrastructure role ARN fer ECS to manage instances
         infrastructureRoleArn: infrastructureRole.roleArn,
@@ -358,16 +357,20 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
     // Ensure cluster is created before capacity provider
     capacityProvider.node.addDependency(cluster);
 
-    // Associate capacity provider with the cluster
-    const cfnCluster = cluster.node.defaultChild as aws_ecs.CfnCluster;
-    cfnCluster.capacityProviders = [capacityProvider.ref];
-    cfnCluster.defaultCapacityProviderStrategy = [
-      {
-        capacityProvider: capacityProvider.ref,
-        weight: 1,
-        base: 1 // Always keep at least 1 instance runnin'
-      }
-    ];
+    // Associate capacity provider with the cluster using separate resource
+    // This avoids circular dependency between cluster and capacity provider
+    const clusterAssociation = new aws_ecs.CfnClusterCapacityProviderAssociations(this, 'pihole-cluster-cp-assoc', {
+      cluster: cluster.clusterName,
+      capacityProviders: [capacityProvider.ref],
+      defaultCapacityProviderStrategy: [
+        {
+          capacityProvider: capacityProvider.ref,
+          weight: 1,
+          base: 1 // Always keep at least 1 instance runnin'
+        }
+      ]
+    });
+    clusterAssociation.node.addDependency(capacityProvider);
 
     // 🚢 Create ECS Service to run Pi-hole tasks
     // Note: We use CfnService to bypass CDK validation that doesn't recognize
@@ -396,6 +399,7 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
 
     // Add dependency to ensure capacity provider exists before service
     cfnService.addDependency(capacityProvider);
+    cfnService.addDependency(clusterAssociation);
 
     // 🌐 Create Network Load Balancer fer DNS traffic (same as original stack)
     let nlb = new aws_elasticloadbalancingv2.NetworkLoadBalancer(this, 'nlb-ecs', {
