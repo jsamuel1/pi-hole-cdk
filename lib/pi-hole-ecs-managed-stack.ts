@@ -14,90 +14,37 @@ import { PiHoleProps } from '../bin/pi-hole-cdk';
 import { PiHoleNetworking, PiHoleStorage, PiHoleLoadBalancer, PiHoleIamPolicies } from './constructs';
 
 /**
- * 🏴‍☠️ Pi-hole ECS Managed Instances Stack, matey! ⚓
+ * Pi-hole ECS Managed Instances Stack
  * 
- * This stack be implementin' Pi-hole as an ECS containerized workload runnin' on
- * AWS ECS Managed Instances instead of the traditional EC2 Auto Scaling approach.
- * 
- * ARCHITECTURAL OVERVIEW:
- * ======================
- * 
- * AWS ECS Managed Instances Suitability fer Pi-hole:
- * --------------------------------------------------
- * ✅ SUITABLE - ECS Managed Instances provide:
- *    - Fully managed EC2 infrastructure (no ASG management needed)
- *    - Automatic instance provisioning and optimization
- *    - Support fer EFS mounts (critical fer Pi-hole persistent storage)
- *    - Native container orchestration with health checks
- *    - Network mode "host" support (required fer DNS on port 53)
- *    - Cost optimization through intelligent instance selection
- * 
- * KEY DIFFERENCES FROM EC2 ASG APPROACH:
- * -------------------------------------
- * 1. Container-based: Pi-hole runs in a Docker container instead of directly on EC2
- * 2. ECS Service management: Health checks, scaling, and deployment handled by ECS
- * 3. Task Definition: Container configuration defined declaratively
- * 4. Capacity Provider: AWS manages the underlying EC2 instances automatically
- * 5. No user-data scripts: Container entrypoint handles initialization
- * 
- * RESOURCE COMPATIBILITY:
- * ----------------------
- * ✅ EFS File System: Mounted as ECS volume to /etc/pihole in container
- * ✅ Secrets Manager: Passed as environment variable to container
- * ✅ VPC Configuration: Same VPC, subnets, and security groups
- * ✅ Network Load Balancer: Same NLB configuration fer DNS traffic
- * ✅ IAM Roles: Task Execution Role (ECR, logs) + Task Role (EFS, Secrets, SSM)
- * 
- * MIGRATION STRATEGY:
- * ------------------
- * This stack be designed as a separate file to enable gradual regional migration:
- * 1. Deploy this stack to a test/dev region first
- * 2. Validate Pi-hole functionality (DNS resolution, web UI, blocklists)
- * 3. Once validated, deploy to production regions one at a time
- * 4. Keep existing EC2 ASG stack runnin' in other regions during migration
- * 5. Eventually deprecate pi-hole-cdk-stack.ts once all regions migrated
- * 
- * NETWORKING CONSIDERATIONS:
- * -------------------------
- * - Uses "host" network mode to bind directly to instance ports (53, 80)
- * - This be required fer DNS to work properly on port 53/UDP and 53/TCP
- * - Security groups control access just like the EC2 ASG approach
- * - NLB continues to provide static IP addresses fer DNS clients
- * 
- * FUTURE ENHANCEMENTS:
- * -------------------
- * - Consider Fargate support (would require ALB/NLB TCP mode adjustments)
- * - Add CloudWatch Container Insights fer detailed monitoring
- * - Implement blue/green deployments fer zero-downtime updates
- * - Add Service Discovery fer multi-region DNS failover
+ * Deploys Pi-hole as a containerized ECS workload on managed EC2 instances.
+ * Uses host network mode for DNS port 53 access.
  */
 export class PiHoleEcsManagedStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: PiHoleProps) {
     super(scope, id, props);
 
-    // Ahoy! Extract configuration from props
+    // Extract configuration from props
     const local_ip = props.appConfig.local_ip;
     const local_ip_cidr = props.appConfig.local_ip_cidr;
     const local_internal_cidr = props.appConfig.local_internal_cidr;
     const vpc_name = props.appConfig.vpc_name;
-    const keypair = props.appConfig.keypair;
     const bPublic_http = props.appConfig.bPublic_http;
     const bUseIntel = props.appConfig.bUseIntel;
 
-    // 🌐 Create shared networking resources
+    // Create shared networking resources
     const networking = new PiHoleNetworking(this, 'networking', {
       vpcName: vpc_name || 'default',
       resourceSuffix: '-ecs'
     });
 
-    // 💾 Create shared storage resources
+    // Create shared storage resources
     const storage = new PiHoleStorage(this, 'storage', {
       vpc: networking.vpc,
       securityGroup: networking.securityGroup,
       resourceSuffix: '-ecs'
     });
 
-    // 🎭 Create ECS Cluster
+    // Create ECS Cluster
     const cluster = new aws_ecs.Cluster(this, 'pihole-ecs-cluster', {
       clusterName: 'pihole-cluster',
       vpc: networking.vpc,
@@ -122,14 +69,14 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
       }
     });
 
-    // 📋 Create CloudWatch Log Group fer Pi-hole logs
+    // Create CloudWatch Log Group for Pi-hole logs
     const logGroup = new aws_logs.LogGroup(this, 'pihole-logs', {
       logGroupName: '/ecs/pihole',
       retention: props.appConfig.piHoleConfig.logRetentionDays as aws_logs.RetentionDays,
       removalPolicy: cdk.RemovalPolicy.DESTROY
     });
 
-    // 🐋 Create ECS Task Definition fer Pi-hole
+    // Create ECS Task Definition for Pi-hole
     const taskDefinition = new aws_ecs.Ec2TaskDefinition(this, 'pihole-task-def', {
       networkMode: aws_ecs.NetworkMode.HOST, // Required fer DNS on port 53
       taskRole: taskRole,
@@ -258,7 +205,7 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
       serviceName: 'pihole-service'
     });
 
-    // 🌐 Create shared load balancer resources
+    // Create shared load balancer resources
     const loadBalancer = new PiHoleLoadBalancer(this, 'loadbalancer', {
       vpc: networking.vpc,
       config: props.appConfig.piHoleConfig,
@@ -315,7 +262,7 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
 
       new CfnOutput(this, 'admin-public-url-ecs', { 
         value: `http://${alb.loadBalancerDnsName}/admin`,
-        description: 'Public URL fer Pi-hole admin interface (Ahoy!)'
+        description: 'Public URL for Pi-hole admin interface'
       });
     }
 
@@ -334,7 +281,7 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
     });
     new CfnOutput(this, 'SecretArn-ecs', { 
       value: storage.secret.secretArn,
-      description: 'Secrets Manager ARN fer Pi-hole password'
+      description: 'Secrets Manager ARN for Pi-hole password'
     });
     new CfnOutput(this, 'RFC1918PrefixListId-ecs', { 
       value: networking.prefixList.attrPrefixListId, 
@@ -343,7 +290,7 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
     });
     new CfnOutput(this, 'ClusterName-ecs', {
       value: cluster.clusterName,
-      description: 'ECS Cluster name fer Pi-hole'
+      description: 'ECS Cluster name for Pi-hole'
     });
     new CfnOutput(this, 'ServiceName-ecs', {
       value: service.serviceName || 'pihole-service',
