@@ -1,0 +1,36 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "bc8ef58951f4c88e641dd23090e9d2e2e61c7530a07960e767522941e959b625": {
+      "displayName": "AWS679f53fac002430cb0da5b7982bd2287/Code",
+      "source": {
+        "path": "asset.bc8ef58951f4c88e641dd23090e9d2e2e61c7530a07960e767522941e959b625",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "717494614307-us-west-2-f5e38c8d": {
+          "bucketName": "cdk-hnb659fds-assets-717494614307-us-west-2",
+          "objectKey": "bc8ef58951f4c88e641dd23090e9d2e2e61c7530a07960e767522941e959b625.zip",
+          "region": "us-west-2",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::717494614307:role/cdk-hnb659fds-file-publishing-role-717494614307-us-west-2"
+        }
+      }
+    },
+    "2b4f853c08c9fe2f4adb05e1c1a7e81dd6bf30f550751a0c357f3ddc27121329": {
+      "displayName": "PiHoleCdkStack Template",
+      "source": {
+        "path": "PiHoleCdkStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "717494614307-us-west-2-404c06f9": {
+          "bucketName": "cdk-hnb659fds-assets-717494614307-us-west-2",
+          "objectKey": "2b4f853c08c9fe2f4adb05e1c1a7e81dd6bf30f550751a0c357f3ddc27121329.json",
+          "region": "us-west-2",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::717494614307:role/cdk-hnb659fds-file-publishing-role-717494614307-us-west-2"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

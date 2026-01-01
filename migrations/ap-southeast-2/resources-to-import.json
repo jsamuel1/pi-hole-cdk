@@ -1,0 +1,72 @@
+[
+  {
+    "ResourceType": "AWS::EC2::PrefixList",
+    "LogicalResourceId": "networkingrfc1918prefixB68305A2",
+    "ResourceIdentifier": {
+      "PrefixListId": "pl-0c883cfc9fd86d087"
+    }
+  },
+  {
+    "ResourceType": "AWS::EC2::SecurityGroup",
+    "LogicalResourceId": "networkingallowdnshttp984E9584",
+    "ResourceIdentifier": {
+      "GroupId": "sg-02ab0401266f0f3b0"
+    }
+  },
+  {
+    "ResourceType": "AWS::SecretsManager::Secret",
+    "LogicalResourceId": "storagepiholepwd56AA2350",
+    "ResourceIdentifier": {
+      "SecretId": "pihole-pwd"
+    }
+  },
+  {
+    "ResourceType": "AWS::EFS::FileSystem",
+    "LogicalResourceId": "storagepiholefs1643C501",
+    "ResourceIdentifier": {
+      "FileSystemId": "fs-06d79a94d5822cc9f"
+    }
+  },
+  {
+    "ResourceType": "AWS::EC2::SecurityGroup",
+    "LogicalResourceId": "storagepiholefsEfsSecurityGroupACBC1060",
+    "ResourceIdentifier": {
+      "GroupId": "sg-08f48e5eca75263eb"
+    }
+  },
+  {
+    "ResourceType": "AWS::EFS::MountTarget",
+    "LogicalResourceId": "storagepiholefsEfsMountTargetPrivateSubnet13D991399",
+    "ResourceIdentifier": {
+      "MountTargetId": "fsmt-021133dc579579e91"
+    }
+  },
+  {
+    "ResourceType": "AWS::EFS::MountTarget",
+    "LogicalResourceId": "storagepiholefsEfsMountTargetPrivateSubnet252655C50",
+    "ResourceIdentifier": {
+      "MountTargetId": "fsmt-06c132f16592b3ce7"
+    }
+  },
+  {
+    "ResourceType": "AWS::EFS::MountTarget",
+    "LogicalResourceId": "storagepiholefsEfsMountTargetPrivateSubnet31E5741F8",
+    "ResourceIdentifier": {
+      "MountTargetId": "fsmt-0becb2f2222e193ea"
+    }
+  },
+  {
+    "ResourceType": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+    "LogicalResourceId": "loadbalancernlbCB05B3A6",
+    "ResourceIdentifier": {
+      "LoadBalancerArn": "arn:aws:elasticloadbalancing:ap-southeast-2:717494614307:loadbalancer/net/pihole/9a6e7a2d39e235f6"
+    }
+  },
+  {
+    "ResourceType": "AWS::ElasticLoadBalancingV2::TargetGroup",
+    "LogicalResourceId": "loadbalancernlbNLBDNSpiholesTargetsGroupBADD8C1A",
+    "ResourceIdentifier": {
+      "TargetGroupArn": "arn:aws:elasticloadbalancing:ap-southeast-2:717494614307:targetgroup/PiHole-nlbNL-DITF7F7H6944/88db297e9fd76fd8"
+    }
+  }
+]

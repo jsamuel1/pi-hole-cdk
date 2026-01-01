@@ -1,0 +1,1325 @@
+{
+ "Resources": {
+  "networkingrfc1918prefixecs1B769745": {
+   "Type": "AWS::EC2::PrefixList",
+   "Properties": {
+    "AddressFamily": "IPv4",
+    "Entries": [
+     {
+      "Cidr": "10.0.0.0/8",
+      "Description": "RFC1918 10/8"
+     },
+     {
+      "Cidr": "172.16.0.0/12",
+      "Description": "RFC1918 172.16/12"
+     },
+     {
+      "Cidr": "192.168.0.0/16",
+      "Description": "RFC1918 192.168/16"
+     }
+    ],
+    "MaxEntries": 3,
+    "PrefixListName": "RFC1918-ecs"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/networking/rfc1918prefix-ecs"
+   }
+  },
+  "networkingallowdnshttpecs207FEFBB": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "AllowDNSandSSH-ecs",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": "vpc-069f286e8b8ca3d57"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/networking/allow_dns_http-ecs/Resource"
+   }
+  },
+  "networkingallowdnshttpecsfromIndirectPeer222551E3BD": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Allow_SSH",
+    "FromPort": 22,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "networkingallowdnshttpecs207FEFBB",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourcePrefixListId": {
+     "Fn::GetAtt": [
+      "networkingrfc1918prefixecs1B769745",
+      "PrefixListId"
+     ]
+    },
+    "ToPort": 22
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/networking/allow_dns_http-ecs/from {IndirectPeer}:22"
+   }
+  },
+  "networkingallowdnshttpecsfromIndirectPeer2808174E954": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Allow_HTTP",
+    "FromPort": 80,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "networkingallowdnshttpecs207FEFBB",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourcePrefixListId": {
+     "Fn::GetAtt": [
+      "networkingrfc1918prefixecs1B769745",
+      "PrefixListId"
+     ]
+    },
+    "ToPort": 80
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/networking/allow_dns_http-ecs/from '{IndirectPeer2}':80"
+   }
+  },
+  "networkingallowdnshttpecsfromIndirectPeer3539088F1C6": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Allow_DNS_over_TCP",
+    "FromPort": 53,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "networkingallowdnshttpecs207FEFBB",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourcePrefixListId": {
+     "Fn::GetAtt": [
+      "networkingrfc1918prefixecs1B769745",
+      "PrefixListId"
+     ]
+    },
+    "ToPort": 53
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/networking/allow_dns_http-ecs/from '{IndirectPeer3}':53"
+   }
+  },
+  "networkingallowdnshttpecsfromIndirectPeer4UDP53D2135A24": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Allow_DNS_over_UDP",
+    "FromPort": 53,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "networkingallowdnshttpecs207FEFBB",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "udp",
+    "SourcePrefixListId": {
+     "Fn::GetAtt": [
+      "networkingrfc1918prefixecs1B769745",
+      "PrefixListId"
+     ]
+    },
+    "ToPort": 53
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/networking/allow_dns_http-ecs/from '{IndirectPeer4}':UDP 53"
+   }
+  },
+  "networkingallowdnshttpecsfromIndirectPeer5ICMPType8923B89BA": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Allow ICMP Ping",
+    "FromPort": 8,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "networkingallowdnshttpecs207FEFBB",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "icmp",
+    "SourcePrefixListId": {
+     "Fn::GetAtt": [
+      "networkingrfc1918prefixecs1B769745",
+      "PrefixListId"
+     ]
+    },
+    "ToPort": -1
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/networking/allow_dns_http-ecs/from '{IndirectPeer5}':ICMP Type 8"
+   }
+  },
+  "storagepiholepwdecsCA268013": {
+   "Type": "AWS::SecretsManager::Secret",
+   "Properties": {
+    "GenerateSecretString": {
+     "ExcludePunctuation": true,
+     "IncludeSpace": false
+    },
+    "Name": "pihole-pwd-ecs"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/storage/piholepwd-ecs/Resource"
+   }
+  },
+  "storagepiholefsecs89BA1EFE": {
+   "Type": "AWS::EFS::FileSystem",
+   "Properties": {
+    "Encrypted": true,
+    "FileSystemPolicy": {
+     "Statement": [
+      {
+       "Action": [
+        "elasticfilesystem:ClientRootAccess",
+        "elasticfilesystem:ClientWrite"
+       ],
+       "Condition": {
+        "Bool": {
+         "elasticfilesystem:AccessedViaMountTarget": "true"
+        }
+       },
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": "*"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "FileSystemTags": [
+     {
+      "Key": "Name",
+      "Value": "pihole-fs-ecs"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/storage/pihole-fs-ecs/Resource"
+   }
+  },
+  "storagepiholefsecsEfsSecurityGroupDAFFAD23": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "PiHoleEcsManagedStack/storage/pihole-fs-ecs/EfsSecurityGroup",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "pihole-fs-ecs"
+     }
+    ],
+    "VpcId": "vpc-069f286e8b8ca3d57"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/storage/pihole-fs-ecs/EfsSecurityGroup/Resource"
+   }
+  },
+  "storagepiholefsecsEfsSecurityGroupfromPiHoleEcsManagedStacknetworkingallowdnshttpecs7854684B2049A67F0B89": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "from PiHoleEcsManagedStacknetworkingallowdnshttpecs7854684B:2049",
+    "FromPort": 2049,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "storagepiholefsecsEfsSecurityGroupDAFFAD23",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "networkingallowdnshttpecs207FEFBB",
+      "GroupId"
+     ]
+    },
+    "ToPort": 2049
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/storage/pihole-fs-ecs/EfsSecurityGroup/from PiHoleEcsManagedStacknetworkingallowdnshttpecs7854684B:2049"
+   }
+  },
+  "storagepiholefsecsEfsMountTargetPrivateSubnet191AA1156": {
+   "Type": "AWS::EFS::MountTarget",
+   "Properties": {
+    "FileSystemId": {
+     "Ref": "storagepiholefsecs89BA1EFE"
+    },
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "storagepiholefsecsEfsSecurityGroupDAFFAD23",
+       "GroupId"
+      ]
+     }
+    ],
+    "SubnetId": "subnet-095b069ea2f8dae96"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/storage/pihole-fs-ecs/EfsMountTarget-PrivateSubnet1"
+   }
+  },
+  "storagepiholefsecsEfsMountTargetPrivateSubnet23119CD1A": {
+   "Type": "AWS::EFS::MountTarget",
+   "Properties": {
+    "FileSystemId": {
+     "Ref": "storagepiholefsecs89BA1EFE"
+    },
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "storagepiholefsecsEfsSecurityGroupDAFFAD23",
+       "GroupId"
+      ]
+     }
+    ],
+    "SubnetId": "subnet-0640a0a54147e3239"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/storage/pihole-fs-ecs/EfsMountTarget-PrivateSubnet2"
+   }
+  },
+  "storagepiholefsecsEfsMountTargetPrivateSubnet3EFF7CE2B": {
+   "Type": "AWS::EFS::MountTarget",
+   "Properties": {
+    "FileSystemId": {
+     "Ref": "storagepiholefsecs89BA1EFE"
+    },
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "storagepiholefsecsEfsSecurityGroupDAFFAD23",
+       "GroupId"
+      ]
+     }
+    ],
+    "SubnetId": "subnet-017bb34117eab1589"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/storage/pihole-fs-ecs/EfsMountTarget-PrivateSubnet3"
+   }
+  },
+  "piholeecscluster1D110B90": {
+   "Type": "AWS::ECS::Cluster",
+   "Properties": {
+    "ClusterName": "pihole-cluster"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/pihole-ecs-cluster/Resource"
+   }
+  },
+  "piholetaskexecutionrole1FC77441": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AmazonECSTaskExecutionRolePolicy"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/pihole-task-execution-role/Resource"
+   }
+  },
+  "piholetaskexecutionroleDefaultPolicyDA0A6144": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "piholelogs4B59571B",
+         "Arn"
+        ]
+       }
+      },
+      {
+       "Action": [
+        "secretsmanager:DescribeSecret",
+        "secretsmanager:GetSecretValue"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Ref": "storagepiholepwdecsCA268013"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "piholetaskexecutionroleDefaultPolicyDA0A6144",
+    "Roles": [
+     {
+      "Ref": "piholetaskexecutionrole1FC77441"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/pihole-task-execution-role/DefaultPolicy/Resource"
+   }
+  },
+  "piholetaskroleEB827945": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/AmazonSSMManagedInstanceCore"
+       ]
+      ]
+     },
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/AmazonElasticFileSystemClientReadWriteAccess"
+       ]
+      ]
+     },
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/AmazonSSMPatchAssociation"
+       ]
+      ]
+     },
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/CloudWatchAgentServerPolicy"
+       ]
+      ]
+     }
+    ],
+    "Policies": [
+     {
+      "PolicyDocument": {
+       "Statement": [
+        {
+         "Action": [
+          "secretsmanager:DescribeSecret",
+          "secretsmanager:GetResourcePolicy",
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:ListSecretVersionIds"
+         ],
+         "Effect": "Allow",
+         "Resource": {
+          "Ref": "storagepiholepwdecsCA268013"
+         }
+        },
+        {
+         "Action": "secretsmanager:ListSecrets",
+         "Effect": "Allow",
+         "Resource": "*"
+        }
+       ],
+       "Version": "2012-10-17"
+      },
+      "PolicyName": "secretPolicy"
+     },
+     {
+      "PolicyDocument": {
+       "Statement": [
+        {
+         "Action": [
+          "kms:Decrypt",
+          "kms:DescribeKey",
+          "kms:Encrypt",
+          "kms:GenerateDataKey*",
+          "kms:ReEncrypt*"
+         ],
+         "Effect": "Allow",
+         "Resource": "*"
+        }
+       ],
+       "Version": "2012-10-17"
+      },
+      "PolicyName": "kmsPolicy"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/pihole-task-role/Resource"
+   }
+  },
+  "piholetaskroleDefaultPolicy3071A014": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "ssmmessages:CreateControlChannel",
+        "ssmmessages:CreateDataChannel",
+        "ssmmessages:OpenControlChannel",
+        "ssmmessages:OpenDataChannel"
+       ],
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "piholetaskroleDefaultPolicy3071A014",
+    "Roles": [
+     {
+      "Ref": "piholetaskroleEB827945"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/pihole-task-role/DefaultPolicy/Resource"
+   }
+  },
+  "piholelogs4B59571B": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": "/ecs/pihole",
+    "RetentionInDays": 7
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/pihole-logs/Resource"
+   }
+  },
+  "piholetaskdefF10C26F3": {
+   "Type": "AWS::ECS::TaskDefinition",
+   "Properties": {
+    "ContainerDefinitions": [
+     {
+      "Cpu": 256,
+      "Environment": [
+       {
+        "Name": "TZ",
+        "Value": "UTC"
+       },
+       {
+        "Name": "REV_SERVER",
+        "Value": "true"
+       },
+       {
+        "Name": "REV_SERVER_CIDR",
+        "Value": "192.168.0.0/16"
+       },
+       {
+        "Name": "REV_SERVER_TARGET",
+        "Value": "192.168.1.1"
+       },
+       {
+        "Name": "REV_SERVER_DOMAIN",
+        "Value": "localdomain"
+       },
+       {
+        "Name": "DNS1",
+        "Value": "1.1.1.1"
+       },
+       {
+        "Name": "DNS2",
+        "Value": "1.0.0.1"
+       },
+       {
+        "Name": "DNSMASQ_LISTENING",
+        "Value": "all"
+       }
+      ],
+      "Essential": true,
+      "HealthCheck": {
+       "Command": [
+        "CMD-SHELL",
+        "dig @127.0.0.1 google.com +short || exit 1"
+       ],
+       "Interval": 30,
+       "Retries": 3,
+       "StartPeriod": 60,
+       "Timeout": 5
+      },
+      "Image": "pihole/pihole:latest",
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "piholelogs4B59571B"
+        },
+        "awslogs-stream-prefix": "pihole",
+        "awslogs-region": "us-west-2"
+       }
+      },
+      "MemoryReservation": 512,
+      "MountPoints": [
+       {
+        "ContainerPath": "/etc/pihole",
+        "ReadOnly": false,
+        "SourceVolume": "pihole-config"
+       }
+      ],
+      "Name": "pihole",
+      "PortMappings": [
+       {
+        "ContainerPort": 53,
+        "Protocol": "tcp"
+       },
+       {
+        "ContainerPort": 53,
+        "Protocol": "udp"
+       },
+       {
+        "ContainerPort": 80,
+        "Protocol": "tcp"
+       }
+      ],
+      "Secrets": [
+       {
+        "Name": "WEBPASSWORD",
+        "ValueFrom": {
+         "Ref": "storagepiholepwdecsCA268013"
+        }
+       }
+      ]
+     }
+    ],
+    "ExecutionRoleArn": {
+     "Fn::GetAtt": [
+      "piholetaskexecutionrole1FC77441",
+      "Arn"
+     ]
+    },
+    "Family": "PiHoleEcsManagedStackpiholetaskdef48D30F16",
+    "NetworkMode": "host",
+    "RequiresCompatibilities": [
+     "EC2"
+    ],
+    "TaskRoleArn": {
+     "Fn::GetAtt": [
+      "piholetaskroleEB827945",
+      "Arn"
+     ]
+    },
+    "Volumes": [
+     {
+      "EFSVolumeConfiguration": {
+       "AuthorizationConfig": {
+        "IAM": "ENABLED"
+       },
+       "FilesystemId": {
+        "Ref": "storagepiholefsecs89BA1EFE"
+       },
+       "TransitEncryption": "ENABLED"
+      },
+      "Name": "pihole-config"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/pihole-task-def/Resource"
+   }
+  },
+  "piholeinstancerole686FA222": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ec2.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AmazonEC2ContainerServiceforEC2Role"
+       ]
+      ]
+     },
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/AmazonSSMManagedInstanceCore"
+       ]
+      ]
+     },
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/AmazonElasticFileSystemClientReadWriteAccess"
+       ]
+      ]
+     },
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/AmazonSSMPatchAssociation"
+       ]
+      ]
+     },
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/CloudWatchAgentServerPolicy"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/pihole-instance-role/Resource"
+   }
+  },
+  "piholeinstanceprofile394DFD0D": {
+   "Type": "AWS::IAM::InstanceProfile",
+   "Properties": {
+    "InstanceProfileName": "pihole-ecs-instance-profile",
+    "Roles": [
+     {
+      "Ref": "piholeinstancerole686FA222"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/pihole-instance-profile/Resource"
+   }
+  },
+  "piholecapacityproviderpiholecapacityproviderRole1D67EF27": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/AmazonECSInfrastructureRolePolicyForManagedInstances"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/pihole-capacity-provider/pihole-capacity-providerRole/Resource"
+   }
+  },
+  "piholecapacityprovider817635A6": {
+   "Type": "AWS::ECS::CapacityProvider",
+   "Properties": {
+    "ClusterName": {
+     "Ref": "piholeecscluster1D110B90"
+    },
+    "ManagedInstancesProvider": {
+     "InfrastructureRoleArn": {
+      "Fn::GetAtt": [
+       "piholecapacityproviderpiholecapacityproviderRole1D67EF27",
+       "Arn"
+      ]
+     },
+     "InstanceLaunchTemplate": {
+      "Ec2InstanceProfileArn": {
+       "Fn::GetAtt": [
+        "piholeinstanceprofile394DFD0D",
+        "Arn"
+       ]
+      },
+      "InstanceRequirements": {
+       "CpuManufacturers": [
+        "amazon-web-services"
+       ],
+       "MemoryMiB": {
+        "Max": 4096,
+        "Min": 2048
+       },
+       "VCpuCount": {
+        "Max": 4,
+        "Min": 2
+       }
+      },
+      "Monitoring": "DETAILED",
+      "NetworkConfiguration": {
+       "SecurityGroups": [
+        {
+         "Fn::GetAtt": [
+          "networkingallowdnshttpecs207FEFBB",
+          "GroupId"
+         ]
+        }
+       ],
+       "Subnets": [
+        "subnet-095b069ea2f8dae96",
+        "subnet-0640a0a54147e3239",
+        "subnet-017bb34117eab1589"
+       ]
+      },
+      "StorageConfiguration": {
+       "StorageSizeGiB": 30
+      }
+     }
+    },
+    "Name": "pihole-managed-instances"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/pihole-capacity-provider/pihole-capacity-provider"
+   }
+  },
+  "piholeserviceServiceA1FF5D56": {
+   "Type": "AWS::ECS::Service",
+   "Properties": {
+    "CapacityProviderStrategy": [
+     {
+      "Base": 1,
+      "CapacityProvider": {
+       "Ref": "piholecapacityprovider817635A6"
+      },
+      "Weight": 1
+     }
+    ],
+    "Cluster": {
+     "Ref": "piholeecscluster1D110B90"
+    },
+    "DeploymentConfiguration": {
+     "MaximumPercent": 100,
+     "MinimumHealthyPercent": 0
+    },
+    "DesiredCount": 1,
+    "EnableECSManagedTags": false,
+    "EnableExecuteCommand": true,
+    "HealthCheckGracePeriodSeconds": 60,
+    "LoadBalancers": [
+     {
+      "ContainerName": "pihole",
+      "ContainerPort": 53,
+      "TargetGroupArn": {
+       "Ref": "loadbalancernlbNLBDNSpiholesTargetsGroupBADD8C1A"
+      }
+     }
+    ],
+    "PlacementConstraints": [
+     {
+      "Type": "distinctInstance"
+     }
+    ],
+    "SchedulingStrategy": "REPLICA",
+    "ServiceName": "pihole-service",
+    "TaskDefinition": {
+     "Ref": "piholetaskdefF10C26F3"
+    }
+   },
+   "DependsOn": [
+    "loadbalancernlbNLBDNSpiholesTargetsGroupBADD8C1A",
+    "loadbalancernlbNLBDNSA035D5D5",
+    "piholetaskroleDefaultPolicy3071A014",
+    "piholetaskroleEB827945"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/pihole-service/Service"
+   }
+  },
+  "loadbalancernlbCB05B3A6": {
+   "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+   "Properties": {
+    "LoadBalancerAttributes": [
+     {
+      "Key": "deletion_protection.enabled",
+      "Value": "false"
+     },
+     {
+      "Key": "load_balancing.cross_zone.enabled",
+      "Value": "true"
+     }
+    ],
+    "Name": "pihole-ecs",
+    "Scheme": "internal",
+    "SecurityGroups": [],
+    "Subnets": [
+     "subnet-095b069ea2f8dae96",
+     "subnet-0640a0a54147e3239",
+     "subnet-017bb34117eab1589"
+    ],
+    "Type": "network"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/loadbalancer/nlb/Resource"
+   }
+  },
+  "loadbalancernlbNLBDNSA035D5D5": {
+   "Type": "AWS::ElasticLoadBalancingV2::Listener",
+   "Properties": {
+    "DefaultActions": [
+     {
+      "TargetGroupArn": {
+       "Ref": "loadbalancernlbNLBDNSpiholesTargetsGroupBADD8C1A"
+      },
+      "Type": "forward"
+     }
+    ],
+    "LoadBalancerArn": {
+     "Ref": "loadbalancernlbCB05B3A6"
+    },
+    "Port": 53,
+    "Protocol": "TCP_UDP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/loadbalancer/nlb/NLBDNS/Resource"
+   }
+  },
+  "loadbalancernlbNLBDNSpiholesTargetsGroupBADD8C1A": {
+   "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+   "Properties": {
+    "Port": 53,
+    "Protocol": "TCP_UDP",
+    "TargetGroupAttributes": [
+     {
+      "Key": "deregistration_delay.timeout_seconds",
+      "Value": "120"
+     },
+     {
+      "Key": "deregistration_delay.connection_termination.enabled",
+      "Value": "true"
+     }
+    ],
+    "VpcId": "vpc-069f286e8b8ca3d57"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/loadbalancer/nlb/NLBDNS/piholesTargetsGroup/Resource"
+   }
+  },
+  "loadbalancernlbNLBHTTP2327CFDA": {
+   "Type": "AWS::ElasticLoadBalancingV2::Listener",
+   "Properties": {
+    "DefaultActions": [
+     {
+      "TargetGroupArn": {
+       "Ref": "loadbalancernlbNLBHTTPpiholeHttpTargetsGroup59493487"
+      },
+      "Type": "forward"
+     }
+    ],
+    "LoadBalancerArn": {
+     "Ref": "loadbalancernlbCB05B3A6"
+    },
+    "Port": 80,
+    "Protocol": "TCP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/loadbalancer/nlb/NLBHTTP/Resource"
+   }
+  },
+  "loadbalancernlbNLBHTTPpiholeHttpTargetsGroup59493487": {
+   "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+   "Properties": {
+    "HealthCheckPath": "/admin/",
+    "HealthCheckProtocol": "HTTP",
+    "Port": 80,
+    "Protocol": "TCP",
+    "TargetGroupAttributes": [
+     {
+      "Key": "deregistration_delay.timeout_seconds",
+      "Value": "120"
+     }
+    ],
+    "VpcId": "vpc-069f286e8b8ca3d57"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/loadbalancer/nlb/NLBHTTP/piholeHttpTargetsGroup/Resource"
+   }
+  },
+  "loadbalancerGetEndpointIpsC39C9DEF": {
+   "Type": "Custom::AWS",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "AWS679f53fac002430cb0da5b7982bd22872D164C4C",
+      "Arn"
+     ]
+    },
+    "Create": {
+     "Fn::Join": [
+      "",
+      [
+       "{\"service\":\"EC2\",\"action\":\"describeNetworkInterfaces\",\"parameters\":{\"Filters\":[{\"Name\":\"description\",\"Values\":[\"ELB ",
+       {
+        "Fn::GetAtt": [
+         "loadbalancernlbCB05B3A6",
+         "LoadBalancerFullName"
+        ]
+       },
+       "\"]}]},\"physicalResourceId\":{\"id\":\"GetEndpointIps\"},\"outputPaths\":[\"NetworkInterfaces.0.PrivateIpAddress\",\"NetworkInterfaces.1.PrivateIpAddress\",\"NetworkInterfaces.2.PrivateIpAddress\"]}"
+      ]
+     ]
+    },
+    "Update": {
+     "Fn::Join": [
+      "",
+      [
+       "{\"service\":\"EC2\",\"action\":\"describeNetworkInterfaces\",\"parameters\":{\"Filters\":[{\"Name\":\"description\",\"Values\":[\"ELB ",
+       {
+        "Fn::GetAtt": [
+         "loadbalancernlbCB05B3A6",
+         "LoadBalancerFullName"
+        ]
+       },
+       "\"]}]},\"physicalResourceId\":{\"id\":\"GetEndpointIps\"},\"outputPaths\":[\"NetworkInterfaces.0.PrivateIpAddress\",\"NetworkInterfaces.1.PrivateIpAddress\",\"NetworkInterfaces.2.PrivateIpAddress\"]}"
+      ]
+     ]
+    },
+    "InstallLatestAwsSdk": false
+   },
+   "DependsOn": [
+    "loadbalancerGetEndpointIpsCustomResourcePolicy4ECFB2FD",
+    "loadbalancernlbNLBDNSpiholesTargetsGroupBADD8C1A",
+    "loadbalancernlbNLBDNSA035D5D5",
+    "loadbalancernlbNLBHTTPpiholeHttpTargetsGroup59493487",
+    "loadbalancernlbNLBHTTP2327CFDA",
+    "loadbalancernlbCB05B3A6"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/loadbalancer/GetEndpointIps/Resource/Default"
+   }
+  },
+  "loadbalancerGetEndpointIpsCustomResourcePolicy4ECFB2FD": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "ec2:DescribeNetworkInterfaces",
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "loadbalancerGetEndpointIpsCustomResourcePolicy4ECFB2FD",
+    "Roles": [
+     {
+      "Ref": "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2"
+     }
+    ]
+   },
+   "DependsOn": [
+    "loadbalancernlbNLBDNSpiholesTargetsGroupBADD8C1A",
+    "loadbalancernlbNLBDNSA035D5D5",
+    "loadbalancernlbNLBHTTPpiholeHttpTargetsGroup59493487",
+    "loadbalancernlbNLBHTTP2327CFDA",
+    "loadbalancernlbCB05B3A6"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/loadbalancer/GetEndpointIps/CustomResourcePolicy/Resource"
+   }
+  },
+  "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/AWS679f53fac002430cb0da5b7982bd2287/ServiceRole/Resource"
+   }
+  },
+  "AWS679f53fac002430cb0da5b7982bd22872D164C4C": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-717494614307-us-west-2",
+     "S3Key": "bc8ef58951f4c88e641dd23090e9d2e2e61c7530a07960e767522941e959b625.zip"
+    },
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Timeout": 120
+   },
+   "DependsOn": [
+    "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/AWS679f53fac002430cb0da5b7982bd2287/Resource",
+    "aws:asset:path": "asset.bc8ef58951f4c88e641dd23090e9d2e2e61c7530a07960e767522941e959b625",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "AWS679f53fac002430cb0da5b7982bd2287LogGroup449FB7C2": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "AWS679f53fac002430cb0da5b7982bd22872D164C4C"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 731
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/AWS679f53fac002430cb0da5b7982bd2287/LogGroup/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/+1W3W/bNhD/W6rHgeEWZ8CAvDVeMgRIOiPKmxAEZ/KssqZIjTw69QT97wNJyZbtNG2BFdjDHgSJ9/G776NmfHZxwX95By/+TMj1mVZL3pUEYs0e0NvgBFbFTwX7jueJwYt/7lDMeDdfmYXDlfp8pzyxEkVwirZ/OBvaqiskeuFUS8qa4jJpb1qRvnrWFSDlrakdev8QNBaXVVcIMLdGK4OZsgLtkRXCGoMiovgBJhj1V8BbOWL1ya//QX8Y6PUUM4pnNiMXMMm8WdiJQjL/1D+x+coctMsJYYDomUfhkHwDBmp0vCvTueqKzPgADQ4h1GjQAWGWKMkpUxeXXYGfhQ4SF8EICpDbMXrOCmUSp2xBjLnpd845pJ7hyvPuRmkst56wqfahsgKNcNuWUI5wq53czquMtgeIp3sbDD2Cq5MB4Xk318ETuliu/DWJamoPlhpvwNVAOIcWhKLtwtmNkuj86H+uwH1Kl7w1nsAI9MfiuSxDJQbz7FrMHsGvf8eVMirm6Wu7IWkfqrC5NQTKoJvQvuZNcuKYdi1mJbqN2q+ooTKJ1jMFDe8erMYqRfxoF04ZoVrQC6uV2Mb273MHE4H4mMdgx9u195vMt3F/lNUvMlMGYsws0/NsDQqPNnJOcE7JUpYEhA0a8gfRnJL/RXw/oe1XxauefLu5lJCcCza218LZOIlVV7gkmbpHHTKPBvRItWfa1p53d7YeLzM9fE4m0yGhyevkt3hq7GbfBfH2I2e3Kc4T5Wx1hO8ZavCkhLYgl6DBCGXqzYx3H5BerFvfWZBXiY6uOp6/KZONCspT3IZfGuCsOAiNSnkl7dbx5NgzDc1SAu9KZWqNZM1N3KZxRXRFCEoOKclii+Ba68c0NdhYty3V3yOBVIM20JjFfY3GNA3H1WDi1WW4aUUZlgZpvMCElaPURzBSxx2XDQQTLU6b7h4JJBAMl9PuGjtlDU02ifY/FU6+XQbgnvmLZ/AeyfP38cX8Bb8KYo10BR6rp56J4Mk2z2749/P8/YufJ9r4O8gOj681UF5Co3yyVBLUytSR8WegNlDPjJXIP/mfN7Nf+fk5P3/3ySt1NnjPH/L7H4II70qgCgAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleEcsManagedStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "dns1ecs": {
+   "Description": "Primary DNS server IP address",
+   "Value": {
+    "Fn::GetAtt": [
+     "loadbalancerGetEndpointIpsC39C9DEF",
+     "NetworkInterfaces.0.PrivateIpAddress"
+    ]
+   }
+  },
+  "dns2ecs": {
+   "Description": "Secondary DNS server IP address",
+   "Value": {
+    "Fn::GetAtt": [
+     "loadbalancerGetEndpointIpsC39C9DEF",
+     "NetworkInterfaces.1.PrivateIpAddress"
+    ]
+   }
+  },
+  "adminurlecs": {
+   "Description": "Admin URL (configure DNS to point to NLB IPs first)",
+   "Value": "http://pi.hole/admin"
+  },
+  "SecretArnecs": {
+   "Description": "Secrets Manager ARN for Pi-hole password",
+   "Value": {
+    "Ref": "storagepiholepwdecsCA268013"
+   }
+  },
+  "RFC1918PrefixListIdecs": {
+   "Description": "Prefix list ID fer RFC1918 private IP ranges",
+   "Value": {
+    "Fn::GetAtt": [
+     "networkingrfc1918prefixecs1B769745",
+     "PrefixListId"
+    ]
+   },
+   "Export": {
+    "Name": "RFC1918PrefixListId-ECS"
+   }
+  },
+  "ClusterNameecs": {
+   "Description": "ECS Cluster name for Pi-hole",
+   "Value": {
+    "Ref": "piholeecscluster1D110B90"
+   }
+  },
+  "ServiceNameecs": {
+   "Description": "ECS Service name fer Pi-hole",
+   "Value": {
+    "Fn::GetAtt": [
+     "piholeserviceServiceA1FF5D56",
+     "Name"
+    ]
+   }
+  },
+  "EfsFileSystemIdecs": {
+   "Description": "EFS File System ID fer Pi-hole persistent storage",
+   "Value": {
+    "Ref": "storagepiholefsecs89BA1EFE"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

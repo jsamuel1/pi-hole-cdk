@@ -21,11 +21,11 @@ export class PiHoleCdkStack extends cdk.Stack {
     const bUseIntel = props.appConfig.bUseIntel;
 
     // Use shared constructs
-    const networking = new PiHoleNetworking(this, 'PiHoleNetworking', {
+    const networking = new PiHoleNetworking(this, 'networking', {
       vpcName: vpc_name!
     });
 
-    const storage = new PiHoleStorage(this, 'PiHoleStorage', {
+    const storage = new PiHoleStorage(this, 'storage', {
       vpc: networking.vpc,
       securityGroup: networking.securityGroup
     });
@@ -104,7 +104,7 @@ export class PiHoleCdkStack extends cdk.Stack {
       new CfnOutput(this, 'admin-public-url', { value: `http://${alb.loadBalancerDnsName}/admin` });
     }
 
-    const loadBalancer = new PiHoleLoadBalancer(this, 'PiHoleLoadBalancer', {
+    const loadBalancer = new PiHoleLoadBalancer(this, 'loadbalancer', {
       vpc: networking.vpc,
       config: props.appConfig.piHoleConfig
     });

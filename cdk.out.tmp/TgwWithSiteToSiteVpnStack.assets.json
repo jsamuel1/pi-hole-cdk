@@ -1,0 +1,36 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "bc8ef58951f4c88e641dd23090e9d2e2e61c7530a07960e767522941e959b625": {
+      "displayName": "AWS679f53fac002430cb0da5b7982bd2287/Code",
+      "source": {
+        "path": "asset.bc8ef58951f4c88e641dd23090e9d2e2e61c7530a07960e767522941e959b625",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "717494614307-us-west-2-f5e38c8d": {
+          "bucketName": "cdk-hnb659fds-assets-717494614307-us-west-2",
+          "objectKey": "bc8ef58951f4c88e641dd23090e9d2e2e61c7530a07960e767522941e959b625.zip",
+          "region": "us-west-2",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::717494614307:role/cdk-hnb659fds-file-publishing-role-717494614307-us-west-2"
+        }
+      }
+    },
+    "1003f903c4d875d6b3926b34109263fe13934abc18f06004685145c28ff41c7e": {
+      "displayName": "TgwWithSiteToSiteVpnStack Template",
+      "source": {
+        "path": "TgwWithSiteToSiteVpnStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "717494614307-us-west-2-c8ded3d2": {
+          "bucketName": "cdk-hnb659fds-assets-717494614307-us-west-2",
+          "objectKey": "1003f903c4d875d6b3926b34109263fe13934abc18f06004685145c28ff41c7e.json",
+          "region": "us-west-2",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::717494614307:role/cdk-hnb659fds-file-publishing-role-717494614307-us-west-2"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}
