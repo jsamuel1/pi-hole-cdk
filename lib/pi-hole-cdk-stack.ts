@@ -1,12 +1,11 @@
 import * as cdk from 'aws-cdk-lib';
-import { aws_ec2, aws_iam, aws_secretsmanager, aws_efs, CfnOutput, aws_autoscaling, aws_elasticloadbalancingv2 } from 'aws-cdk-lib';
+import { aws_ec2, aws_iam, CfnOutput, aws_autoscaling, aws_elasticloadbalancingv2 } from 'aws-cdk-lib';
 import { LaunchTemplate } from 'aws-cdk-lib/aws-ec2';
-import { Effect, PolicyDocument, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { readFileSync } from 'fs';
 import { PiHoleProps } from '../bin/pi-hole-cdk';
 import { HealthChecks, UpdatePolicy } from 'aws-cdk-lib/aws-autoscaling';
+import { PiHoleNetworking, PiHoleStorage, PiHoleLoadBalancer, PiHoleIamPolicies } from './constructs';
 
 
 export class PiHoleCdkStack extends cdk.Stack {
@@ -19,68 +18,29 @@ export class PiHoleCdkStack extends cdk.Stack {
     const vpc_name = props.appConfig.vpc_name;
     const keypair = props.appConfig.keypair;
     const bPublic_http = props.appConfig.bPublic_http;
-
     const bUseIntel = props.appConfig.bUseIntel;
 
-    let vpc = aws_ec2.Vpc.fromLookup(this, 'vpc', { vpcName: vpc_name, isDefault: false });
+    // Use shared constructs
+    const networking = new PiHoleNetworking(this, 'PiHoleNetworking', {
+      vpcName: vpc_name!
+    });
+
+    const storage = new PiHoleStorage(this, 'PiHoleStorage', {
+      vpc: networking.vpc,
+      securityGroup: networking.securityGroup
+    });
 
     // start with default Linux userdata
     let user_data = aws_ec2.UserData.forLinux();
 
-    var pwd = new aws_secretsmanager.Secret(this, 'piholepwd', {
-      secretName: 'pihole-pwd',
-      generateSecretString: {
-        excludePunctuation: true,
-        includeSpace: false
-      }
-    });
-
-
-    let file_system = new aws_efs.FileSystem(this, "pihole-fs", {
-      vpc: vpc,
-      encrypted: true,
-      fileSystemName: "pihole-fs"
-    });
-
-    user_data.addCommands('SECRET_ARN=' + pwd.secretArn)
-    user_data.addCommands('EFS_ID=' + file_system.fileSystemId);
+    user_data.addCommands('SECRET_ARN=' + storage.secret.secretArn)
+    user_data.addCommands('EFS_ID=' + storage.fileSystem.fileSystemId);
     user_data.addCommands('REV_SERVER_CIDR=' + local_internal_cidr);
-    user_data.addCommands('REV_SERVER_TARGET=' + '192.168.1.1');
+    user_data.addCommands('REV_SERVER_TARGET=' + props.appConfig.piHoleConfig.revServerTarget);
 
     // add data from file to user_data
     const userDataScript = readFileSync('./lib/user-data.sh', 'utf8');
     user_data.addCommands(userDataScript);
-
-
-    // securityGroup
-    let sgEc2 = new aws_ec2.SecurityGroup(this, 'allow_dns_http', { description: 'AllowDNSandSSHfrommyIP', vpc: vpc });
-
-    let prefix_list = new aws_ec2.CfnPrefixList(this, "rfc1918prefix", {
-      prefixListName: "RFC1918",
-      addressFamily: "IPv4",
-      maxEntries: 3,
-      entries: [
-        {
-          cidr: "10.0.0.0/8",
-          description: "RFC1918 10/8"
-        },
-        {
-          cidr: "172.16.0.0/12",
-          description: "RFC1918 172.16/12"
-        },
-        {
-          cidr: "192.168.0.0/16",
-          description: "RFC1918 192.168/16"
-        }
-      ]
-    });
-    sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.tcp(22), 'Allow_SSH')
-    sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.tcp(80), 'Allow_HTTP')
-    sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.tcp(53), 'Allow_DNS_over_TCP')
-    sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.udp(53), 'Allow_DNS_over_UDP')
-    sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.icmpPing(), 'Allow ICMP Ping')
-
-    file_system.connections.allowDefaultPortFrom(sgEc2);
 
     let role = new aws_iam.Role(this, 'pihole-role', {
       assumedBy: new aws_iam.ServicePrincipal('ec2.amazonaws.com'),
@@ -91,46 +51,8 @@ export class PiHoleCdkStack extends cdk.Stack {
         aws_iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchAgentServerPolicy')
       ],
       inlinePolicies: {
-        'secretPolicy': new PolicyDocument(
-          {
-            statements: [
-              new PolicyStatement({
-                actions: [
-                  "secretsmanager:GetResourcePolicy",
-                  "secretsmanager:GetSecretValue",
-                  "secretsmanager:DescribeSecret",
-                  "secretsmanager:ListSecretVersionIds"
-                ],
-                effect: Effect.ALLOW,
-                resources: [pwd.secretArn]
-              }),
-              new PolicyStatement({
-                actions: [
-                  "secretsmanager:ListSecrets",
-                ],
-                effect: Effect.ALLOW,
-                resources: ["*"]
-              })
-            ]
-          }
-        ),
-        'kmsPolicy': new PolicyDocument(
-          {
-            statements: [
-              new PolicyStatement({
-                actions: [
-                  "kms:Encrypt",
-                  "kms:Decrypt",
-                  "kms:ReEncrypt*",
-                  "kms:GenerateDataKey*",
-                  "kms:DescribeKey"
-                ],
-                effect: Effect.ALLOW,
-                resources: ['*']
-              })
-            ]
-          }
-        )
+        'secretPolicy': PiHoleIamPolicies.createSecretsPolicy(storage.secret.secretArn),
+        'kmsPolicy': PiHoleIamPolicies.createKmsPolicy()
       }
     });
 
@@ -147,14 +69,14 @@ export class PiHoleCdkStack extends cdk.Stack {
       machineImage: machineImage,
       userData: user_data,
       role: role,
-      securityGroup: sgEc2,
+      securityGroup: networking.securityGroup,
       requireImdsv2: true,
       keyPair: aws_ec2.KeyPair.fromKeyPairName(this, 'KeyPair', keypair)
     });
 
     const asg = new aws_autoscaling.AutoScalingGroup(this, 'pihole-asg', {
       launchTemplate: launchTemplate,
-      vpc: vpc,
+      vpc: networking.vpc,
       vpcSubnets: { subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS },
       maxInstanceLifetime: cdk.Duration.days(7),
       updatePolicy: UpdatePolicy.rollingUpdate(),
@@ -162,15 +84,15 @@ export class PiHoleCdkStack extends cdk.Stack {
     });
 
     if (bPublic_http) {
-      let sgAlbIngress = new aws_ec2.SecurityGroup(this, 'sg-albIngress', { description: 'Security Group for ALB Ingress', vpc: vpc });
+      let sgAlbIngress = new aws_ec2.SecurityGroup(this, 'sg-albIngress', { description: 'Security Group for ALB Ingress', vpc: networking.vpc });
       sgAlbIngress.addIngressRule(aws_ec2.Peer.ipv4(local_ip_cidr), aws_ec2.Port.tcp(80), 'Allow access to ALB to local IP');
 
-      let sgAlbTarget = new aws_ec2.SecurityGroup(this, 'sg-albTarget', { description: 'Security Group for ALB Target', vpc: vpc });
+      let sgAlbTarget = new aws_ec2.SecurityGroup(this, 'sg-albTarget', { description: 'Security Group for ALB Target', vpc: networking.vpc });
       sgAlbTarget.addIngressRule(aws_ec2.Peer.anyIpv4(), aws_ec2.Port.tcp(80), 'Allow access to ALB to any IP');
-      sgEc2.addIngressRule(sgAlbTarget, aws_ec2.Port.tcp(80), 'Allow access to ALB to local IP');
+      networking.securityGroup.addIngressRule(sgAlbTarget, aws_ec2.Port.tcp(80), 'Allow access to ALB to local IP');
 
       let alb = new aws_elasticloadbalancingv2.ApplicationLoadBalancer(this, 'alb', {
-        vpc: vpc,
+        vpc: networking.vpc,
         internetFacing: true,
         securityGroup: sgAlbTarget
       });
@@ -182,51 +104,24 @@ export class PiHoleCdkStack extends cdk.Stack {
       new CfnOutput(this, 'admin-public-url', { value: `http://${alb.loadBalancerDnsName}/admin` });
     }
 
-    let nlb = new aws_elasticloadbalancingv2.NetworkLoadBalancer(this, 'nlb', {
-      vpc: vpc,
-      internetFacing: false,
-      crossZoneEnabled: true,
-      loadBalancerName: 'pihole',
-      securityGroups: []  // NLB was created without SGs, can't add them later
-    });
-    let nlbListener = nlb.addListener('NLBDNS', { port: 53, protocol: aws_elasticloadbalancingv2.Protocol.TCP_UDP });
-    let targetGroup = nlbListener.addTargets("piholesTargets", {
-      port: 53, targets: [asg], deregistrationDelay: cdk.Duration.minutes(2),
-    });
-    targetGroup.setAttribute("deregistration_delay.connection_termination.enabled", "true");
-
-    // HTTP listener for Pi-hole admin web UI
-    let nlbHttpListener = nlb.addListener('NLBHTTP', { port: 80, protocol: aws_elasticloadbalancingv2.Protocol.TCP });
-    nlbHttpListener.addTargets("piholeHttpTargets", {
-      port: 80, targets: [asg], deregistrationDelay: cdk.Duration.minutes(2),
-      healthCheck: { protocol: aws_elasticloadbalancingv2.Protocol.HTTP, path: '/admin/' }
+    const loadBalancer = new PiHoleLoadBalancer(this, 'PiHoleLoadBalancer', {
+      vpc: networking.vpc,
+      config: props.appConfig.piHoleConfig
     });
 
-    const getEndpointIps = new AwsCustomResource(this, 'GetEndpointIps', {
-      onUpdate: {
-        service: 'EC2',
-        action: 'describeNetworkInterfaces',
-        parameters: {
-          Filters: [{ Name: "description", Values: [`ELB ${nlb.loadBalancerFullName}`] }],
-        },
-        physicalResourceId: PhysicalResourceId.of('GetEndpointIps'),
-        outputPaths: ['NetworkInterfaces.0.PrivateIpAddress', 'NetworkInterfaces.1.PrivateIpAddress', 'NetworkInterfaces.2.PrivateIpAddress']
-      },
-      policy: AwsCustomResourcePolicy.fromSdkCalls({ resources: AwsCustomResourcePolicy.ANY_RESOURCE }),
-      installLatestAwsSdk: false
-    });
-
-    getEndpointIps.node.addDependency(nlb);
+    // Add targets to the load balancer
+    loadBalancer.dnsTargetGroup.addTarget(asg);
+    loadBalancer.httpTargetGroup.addTarget(asg);
 
     new CfnOutput(this, 'dns1', {
-      value: getEndpointIps.getResponseField('NetworkInterfaces.0.PrivateIpAddress')
+      value: loadBalancer.getEndpointIps.getResponseField('NetworkInterfaces.0.PrivateIpAddress')
     });
     new CfnOutput(this, 'dns2', {
-      value: getEndpointIps.getResponseField('NetworkInterfaces.1.PrivateIpAddress')
+      value: loadBalancer.getEndpointIps.getResponseField('NetworkInterfaces.1.PrivateIpAddress')
     });
 
     new CfnOutput(this, "admin-url", { value: "http://pi.hole/admin" }); // Only after setting up DNS
-    new CfnOutput(this, 'SecretArn', { value: pwd.secretArn })
-    new CfnOutput(this, 'RFC1918PrefixListId', { value: prefix_list.attrPrefixListId, exportName: 'RFC1918PrefixListId' })
+    new CfnOutput(this, 'SecretArn', { value: storage.secret.secretArn })
+    new CfnOutput(this, 'RFC1918PrefixListId', { value: networking.prefixList.attrPrefixListId, exportName: 'RFC1918PrefixListId' })
   }
 }
