@@ -7,6 +7,7 @@ import { SiteToSiteVpnStack } from '../lib/sitetositevpn-stack';
 import { StackProps } from 'aws-cdk-lib';
 import { TgwWithSiteToSiteVpnStack } from '../lib/tgw-with-sitetositevpn-stack';
 import { Node } from 'constructs';
+import { PiHoleConfig, DEFAULT_PIHOLE_CONFIG } from '../lib/config/pihole-config';
 
 const app = new cdk.App();
 
@@ -21,6 +22,7 @@ export class AppConfig
   readonly bUsePrefixLists : boolean; 
   readonly bUseIntel : boolean;
   readonly node : Node;
+  readonly piHoleConfig : PiHoleConfig;
 
   constructor(scope: Node, env: cdk.Environment)
   {
@@ -39,6 +41,7 @@ export class AppConfig
     this.bUsePrefixLists = (usePrefixLists == undefined || (usePrefixLists == "True" || usePrefixLists == true));
     this.bUseIntel = false;//(env.region == 'ap-southeast-4');
     
+    this.piHoleConfig = DEFAULT_PIHOLE_CONFIG;
   }
 }
 
