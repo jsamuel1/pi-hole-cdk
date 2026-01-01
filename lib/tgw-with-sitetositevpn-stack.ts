@@ -20,7 +20,7 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
         name: 'pihole-tgw'
       })
 
-      new TransitGatewayAttachment(this, 'vpc-tgw-attachment', {
+      const vpcAttachment = new TransitGatewayAttachment(this, 'vpc-tgw-attachment', {
         partition: 'aws',
         name: 'vpc-attachment',
         transitGatewayId: tgw.transitGatewayId,
@@ -52,13 +52,12 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
 
       // Use prefix list ID from parameter or context (no longer using cross-stack import)
       const prefixListId = this.node.tryGetContext('rfc1918PrefixListId') || props.appConfig.rfc1918PrefixListId;
-      let prefixList = PrefixList.fromPrefixListId(this, 'rfc1918-prefix-list', prefixListId);
       
       vpc.privateSubnets.forEach(({routeTable: { routeTableId }}, index) => { 
-        this.AddTgwRoute(index, routeTableId, prefixList, tgw);
+        this.AddTgwRoute(index, routeTableId, prefixListId, tgw, vpcAttachment);
         });
       vpc.publicSubnets.forEach(({routeTable: { routeTableId }}, index) => {   
-        this.AddTgwRoute(index, routeTableId, prefixList, tgw);
+        this.AddTgwRoute(index, routeTableId, prefixListId, tgw, vpcAttachment);
         });
 
 
@@ -106,30 +105,32 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
 
 
   
-  private AddTgwRoute(index: number, routeTableId: string, prefixList: cdk.aws_ec2.IPrefixList, tgw: TransitGateway) {
-    new AwsCustomResource(this, `tgw-vpn-pl-route-${index}-${routeTableId}-prefixlist-transitgateway`, {
+  private AddTgwRoute(index: number, routeTableId: string, prefixListId: string, tgw: TransitGateway, vpcAttachment: TransitGatewayAttachment) {
+    const customResource = new AwsCustomResource(this, `tgw-vpn-pl-route-${index}-${routeTableId}-prefixlist-transitgateway`, {
       policy: AwsCustomResourcePolicy.fromSdkCalls({ resources: AwsCustomResourcePolicy.ANY_RESOURCE }),
       installLatestAwsSdk: false,
       onCreate: {
-        action: 'createRoute',
-        service: 'EC2',
-        physicalResourceId: PhysicalResourceId.of(`tgw-vpn-pl-route-${index}-${routeTableId}-${prefixList.prefixListId}-${tgw.transitGatewayId}`),
+        action: 'CreateRoute',
+        service: 'ec2',
+        physicalResourceId: PhysicalResourceId.of(`tgw-vpn-pl-route-${index}-${routeTableId}-${prefixListId}-${tgw.transitGatewayId}`),
         parameters: {
-          DestinationPrefixListId: prefixList.prefixListId,
+          DestinationPrefixListId: prefixListId,
           TransitGatewayId: tgw.transitGatewayId,
           RouteTableId: routeTableId
         }
       },
       onDelete: {
-        action: 'deleteRoute',
-        service: 'EC2',
-        physicalResourceId: PhysicalResourceId.of(`tgw-vpn-pl-route-${index}-${routeTableId}-${prefixList.prefixListId}-${tgw.transitGatewayId}`),
+        action: 'DeleteRoute',
+        service: 'ec2',
+        physicalResourceId: PhysicalResourceId.of(`tgw-vpn-pl-route-${index}-${routeTableId}-${prefixListId}-${tgw.transitGatewayId}`),
         parameters: {
-          DestinationPrefixListId: prefixList.prefixListId,
+          DestinationPrefixListId: prefixListId,
           RouteTableId: routeTableId
         }
       }
     });
+    // Must wait for VPC attachment to be available before creating routes
+    customResource.node.addDependency(vpcAttachment);
   }
   };
 
