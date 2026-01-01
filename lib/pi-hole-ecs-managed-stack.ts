@@ -2,8 +2,6 @@ import * as cdk from 'aws-cdk-lib';
 import { 
   aws_ec2, 
   aws_iam, 
-  aws_secretsmanager, 
-  aws_efs, 
   CfnOutput, 
   aws_ecs,
   aws_elasticloadbalancingv2,
@@ -11,10 +9,9 @@ import {
   Size
 } from 'aws-cdk-lib';
 import { CpuManufacturer } from 'aws-cdk-lib/aws-ec2';
-import { Effect, PolicyDocument, PolicyStatement } from 'aws-cdk-lib/aws-iam';
-import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from 'aws-cdk-lib/custom-resources';
 import { Construct } from 'constructs';
 import { PiHoleProps } from '../bin/pi-hole-cdk';
+import { PiHoleNetworking, PiHoleStorage, PiHoleLoadBalancer, PiHoleIamPolicies } from './constructs';
 
 /**
  * 🏴‍☠️ Pi-hole ECS Managed Instances Stack, matey! ⚓
@@ -87,66 +84,23 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
     const bPublic_http = props.appConfig.bPublic_http;
     const bUseIntel = props.appConfig.bUseIntel;
 
-    // Look up the existing VPC, just like the original stack
-    let vpc = aws_ec2.Vpc.fromLookup(this, 'vpc', { vpcName: vpc_name, isDefault: false });
-
-    // 🗝️ Create Secrets Manager secret fer Pi-hole password
-    var pwd = new aws_secretsmanager.Secret(this, 'piholepwd-ecs', {
-      secretName: 'pihole-pwd-ecs',
-      generateSecretString: {
-        excludePunctuation: true,
-        includeSpace: false
-      }
+    // 🌐 Create shared networking resources
+    const networking = new PiHoleNetworking(this, 'networking', {
+      vpcName: vpc_name || 'default',
+      resourceSuffix: '-ecs'
     });
 
-    // 💾 Create EFS file system fer persistent Pi-hole configuration
-    let file_system = new aws_efs.FileSystem(this, "pihole-fs-ecs", {
-      vpc: vpc,
-      encrypted: true,
-      fileSystemName: "pihole-fs-ecs"
+    // 💾 Create shared storage resources
+    const storage = new PiHoleStorage(this, 'storage', {
+      vpc: networking.vpc,
+      securityGroup: networking.securityGroup,
+      resourceSuffix: '-ecs'
     });
-
-    // 🛡️ Security Group fer Pi-hole containers (same rules as EC2 approach)
-    let sgEc2 = new aws_ec2.SecurityGroup(this, 'allow_dns_http_ecs', { 
-      description: 'AllowDNSandSSHforECSPihole', 
-      vpc: vpc 
-    });
-
-    // Create RFC1918 prefix list fer private IP ranges
-    let prefix_list = new aws_ec2.CfnPrefixList(this, "rfc1918prefix-ecs", {
-      prefixListName: "RFC1918-ECS",
-      addressFamily: "IPv4",
-      maxEntries: 3,
-      entries: [
-        {
-          cidr: "10.0.0.0/8",
-          description: "RFC1918 10/8"
-        },
-        {
-          cidr: "172.16.0.0/12",
-          description: "RFC1918 172.16/12"
-        },
-        {
-          cidr: "192.168.0.0/16",
-          description: "RFC1918 192.168/16"
-        }
-      ]
-    });
-
-    // Add ingress rules fer DNS and HTTP
-    sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.tcp(22), 'Allow_SSH')
-    sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.tcp(80), 'Allow_HTTP')
-    sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.tcp(53), 'Allow_DNS_over_TCP')
-    sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.udp(53), 'Allow_DNS_over_UDP')
-    sgEc2.addIngressRule(aws_ec2.Peer.prefixList(prefix_list.attrPrefixListId), aws_ec2.Port.icmpPing(), 'Allow ICMP Ping')
-
-    // Allow EFS access from containers
-    file_system.connections.allowDefaultPortFrom(sgEc2);
 
     // 🎭 Create ECS Cluster
     const cluster = new aws_ecs.Cluster(this, 'pihole-ecs-cluster', {
       clusterName: 'pihole-cluster',
-      vpc: vpc,
+      vpc: networking.vpc,
       enableFargateCapacityProviders: false, // We be usin' Managed Instances, not Fargate
     });
 
@@ -161,53 +115,17 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
     // 🎯 Create IAM role fer ECS Task (container's runtime permissions)
     const taskRole = new aws_iam.Role(this, 'pihole-task-role', {
       assumedBy: new aws_iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
-      managedPolicies: [
-        aws_iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore'),
-        aws_iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonElasticFileSystemClientReadWriteAccess'),
-        aws_iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchAgentServerPolicy')
-      ],
+      managedPolicies: PiHoleIamPolicies.getManagedPolicies(),
       inlinePolicies: {
-        'secretPolicy': new PolicyDocument({
-          statements: [
-            new PolicyStatement({
-              actions: [
-                "secretsmanager:GetResourcePolicy",
-                "secretsmanager:GetSecretValue",
-                "secretsmanager:DescribeSecret",
-                "secretsmanager:ListSecretVersionIds"
-              ],
-              effect: Effect.ALLOW,
-              resources: [pwd.secretArn]
-            }),
-            new PolicyStatement({
-              actions: ["secretsmanager:ListSecrets"],
-              effect: Effect.ALLOW,
-              resources: ["*"]
-            })
-          ]
-        }),
-        'kmsPolicy': new PolicyDocument({
-          statements: [
-            new PolicyStatement({
-              actions: [
-                "kms:Encrypt",
-                "kms:Decrypt",
-                "kms:ReEncrypt*",
-                "kms:GenerateDataKey*",
-                "kms:DescribeKey"
-              ],
-              effect: Effect.ALLOW,
-              resources: ['*']
-            })
-          ]
-        })
+        'secretPolicy': PiHoleIamPolicies.createSecretsPolicy(storage.secret.secretArn),
+        'kmsPolicy': PiHoleIamPolicies.createKmsPolicy()
       }
     });
 
     // 📋 Create CloudWatch Log Group fer Pi-hole logs
     const logGroup = new aws_logs.LogGroup(this, 'pihole-logs', {
       logGroupName: '/ecs/pihole',
-      retention: aws_logs.RetentionDays.ONE_WEEK,
+      retention: props.appConfig.piHoleConfig.logRetentionDays as aws_logs.RetentionDays,
       removalPolicy: cdk.RemovalPolicy.DESTROY
     });
 
@@ -220,7 +138,7 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
         {
           name: 'pihole-config',
           efsVolumeConfiguration: {
-            fileSystemId: file_system.fileSystemId,
+            fileSystemId: storage.fileSystem.fileSystemId,
             transitEncryption: 'ENABLED',
             authorizationConfig: {
               iam: 'ENABLED'
@@ -233,22 +151,22 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
     // 📦 Add Pi-hole container to task definition
     const container = taskDefinition.addContainer('pihole', {
       image: aws_ecs.ContainerImage.fromRegistry('pihole/pihole:latest'), // Official Pi-hole Docker image
-      memoryReservationMiB: 512,
-      cpu: 256,
+      memoryReservationMiB: props.appConfig.piHoleConfig.containerMemory,
+      cpu: props.appConfig.piHoleConfig.containerCpu,
       essential: true,
       environment: {
         TZ: 'UTC',
         REV_SERVER: 'true',
         REV_SERVER_CIDR: local_internal_cidr,
-        REV_SERVER_TARGET: '192.168.1.1',
-        REV_SERVER_DOMAIN: 'localdomain',
-        DNS1: '1.1.1.1',
-        DNS2: '1.0.0.1',
+        REV_SERVER_TARGET: props.appConfig.piHoleConfig.revServerTarget,
+        REV_SERVER_DOMAIN: props.appConfig.piHoleConfig.revServerDomain,
+        DNS1: props.appConfig.piHoleConfig.dns1,
+        DNS2: props.appConfig.piHoleConfig.dns2,
         DNSMASQ_LISTENING: 'all',
       },
       secrets: {
         // Pass the Pi-hole password from Secrets Manager
-        WEBPASSWORD: aws_ecs.Secret.fromSecretsManager(pwd)
+        WEBPASSWORD: aws_ecs.Secret.fromSecretsManager(storage.secret)
       },
       logging: aws_ecs.LogDrivers.awsLogs({
         streamPrefix: 'pihole',
@@ -271,17 +189,26 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
       readOnly: false
     });
 
-    // Host network mode: container shares host's network namespace
-    // No port mappings needed - all container ports are directly accessible on host
+    // Add port mappings for host network mode (required by CDK validation)
+    container.addPortMappings({
+      containerPort: 53,
+      protocol: aws_ecs.Protocol.TCP
+    });
+    container.addPortMappings({
+      containerPort: 53,
+      protocol: aws_ecs.Protocol.UDP
+    });
+    container.addPortMappings({
+      containerPort: 80,
+      protocol: aws_ecs.Protocol.TCP
+    });
 
     // 📝 Create IAM instance profile fer ECS container instances
     const instanceRole = new aws_iam.Role(this, 'pihole-instance-role', {
       assumedBy: new aws_iam.ServicePrincipal('ec2.amazonaws.com'),
       managedPolicies: [
         aws_iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonEC2ContainerServiceforEC2Role'),
-        aws_iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore'),
-        aws_iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonElasticFileSystemClientReadWriteAccess'),
-        aws_iam.ManagedPolicy.fromAwsManagedPolicyName('CloudWatchAgentServerPolicy')
+        ...PiHoleIamPolicies.getManagedPolicies()
       ]
     });
 
@@ -294,15 +221,15 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
     const capacityProvider = new aws_ecs.ManagedInstancesCapacityProvider(this, 'pihole-capacity-provider', {
       capacityProviderName: 'pihole-managed-instances',
       ec2InstanceProfile: instanceProfile,
-      subnets: vpc.selectSubnets({ subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS }).subnets,
-      securityGroups: [sgEc2],
+      subnets: networking.vpc.selectSubnets({ subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS }).subnets,
+      securityGroups: [networking.securityGroup],
       taskVolumeStorage: Size.gibibytes(30),
       monitoring: aws_ecs.InstanceMonitoring.DETAILED,
       instanceRequirements: {
-        vCpuCountMin: 2,
-        vCpuCountMax: 4,
-        memoryMin: Size.mebibytes(2048),
-        memoryMax: Size.mebibytes(4096),
+        vCpuCountMin: props.appConfig.piHoleConfig.vCpuMin,
+        vCpuCountMax: props.appConfig.piHoleConfig.vCpuMax,
+        memoryMin: Size.mebibytes(props.appConfig.piHoleConfig.memoryMinMiB),
+        memoryMax: Size.mebibytes(props.appConfig.piHoleConfig.memoryMaxMiB),
         cpuManufacturers: bUseIntel ? [CpuManufacturer.INTEL, CpuManufacturer.AMD] : [CpuManufacturer.AWS]
       }
     });
@@ -331,81 +258,42 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
       serviceName: 'pihole-service'
     });
 
-    // 🌐 Create Network Load Balancer fer DNS traffic (same as original stack)
-    let nlb = new aws_elasticloadbalancingv2.NetworkLoadBalancer(this, 'nlb-ecs', {
-      vpc: vpc,
-      internetFacing: false,
-      crossZoneEnabled: true,
-      loadBalancerName: 'pihole-ecs'
+    // 🌐 Create shared load balancer resources
+    const loadBalancer = new PiHoleLoadBalancer(this, 'loadbalancer', {
+      vpc: networking.vpc,
+      config: props.appConfig.piHoleConfig,
+      resourceSuffix: '-ecs'
     });
 
-    // Add listener fer DNS on port 53 (both TCP and UDP)
-    let nlbListener = nlb.addListener('NLBDNS-ecs', { 
-      port: 53, 
-      protocol: aws_elasticloadbalancingv2.Protocol.TCP_UDP 
-    });
+    // Attach service to target groups
+    service.attachToNetworkTargetGroup(loadBalancer.dnsTargetGroup);
 
-    // Create target group and attach service to it
-    const targetGroup = new aws_elasticloadbalancingv2.NetworkTargetGroup(this, 'pihole-tg-ecs', {
-      vpc: vpc,
-      port: 53,
-      protocol: aws_elasticloadbalancingv2.Protocol.TCP_UDP,
-      targetType: aws_elasticloadbalancingv2.TargetType.INSTANCE,
-      deregistrationDelay: cdk.Duration.minutes(2),
-      healthCheck: {
-        enabled: true,
-        protocol: aws_elasticloadbalancingv2.Protocol.TCP,
-        port: '53'
-      }
-    });
 
-    nlbListener.addTargetGroups('pihole-targets-ecs', targetGroup);
-    targetGroup.setAttribute("deregistration_delay.connection_termination.enabled", "true");
-
-    // Attach service to target group
-    service.attachToNetworkTargetGroup(targetGroup);
-
-    // 🔍 Get NLB private IP addresses fer client configuration
-    const getEndpointIps = new AwsCustomResource(this, 'GetEndpointIps-ecs', {
-      onUpdate: {
-        service: 'EC2',
-        action: 'describeNetworkInterfaces',
-        parameters: {
-          Filters: [{ Name: "description", Values: [`ELB ${nlb.loadBalancerFullName}`] }],
-        },
-        physicalResourceId: PhysicalResourceId.of('GetEndpointIps-ecs'),
-        outputPaths: ['NetworkInterfaces.0.PrivateIpAddress', 'NetworkInterfaces.1.PrivateIpAddress', 'NetworkInterfaces.2.PrivateIpAddress']
-      },
-      policy: AwsCustomResourcePolicy.fromSdkCalls({ resources: AwsCustomResourcePolicy.ANY_RESOURCE }),
-      installLatestAwsSdk: false
-    });
-
-    getEndpointIps.node.addDependency(nlb);
 
     // 🌍 Optional: Create Application Load Balancer fer public HTTP access
     if (bPublic_http) {
       let sgAlbIngress = new aws_ec2.SecurityGroup(this, 'sg-albIngress-ecs', { 
         description: 'Security Group for ALB Ingress ECS', 
-        vpc: vpc 
+        vpc: networking.vpc 
       });
       sgAlbIngress.addIngressRule(aws_ec2.Peer.ipv4(local_ip_cidr), aws_ec2.Port.tcp(80), 'Allow access to ALB to local IP');
 
       let sgAlbTarget = new aws_ec2.SecurityGroup(this, 'sg-albTarget-ecs', { 
         description: 'Security Group for ALB Target ECS', 
-        vpc: vpc 
+        vpc: networking.vpc 
       });
       sgAlbTarget.addIngressRule(aws_ec2.Peer.anyIpv4(), aws_ec2.Port.tcp(80), 'Allow access to ALB to any IP');
-      sgEc2.addIngressRule(sgAlbTarget, aws_ec2.Port.tcp(80), 'Allow access to ALB to local IP');
+      networking.securityGroup.addIngressRule(sgAlbTarget, aws_ec2.Port.tcp(80), 'Allow access to ALB to local IP');
 
       let alb = new aws_elasticloadbalancingv2.ApplicationLoadBalancer(this, 'alb-ecs', {
-        vpc: vpc,
+        vpc: networking.vpc,
         internetFacing: true,
         securityGroup: sgAlbTarget
       });
 
       // Create target group fer HTTP traffic
       const albTargetGroup = new aws_elasticloadbalancingv2.ApplicationTargetGroup(this, 'pihole-alb-tg', {
-        vpc: vpc,
+        vpc: networking.vpc,
         port: 80,
         protocol: aws_elasticloadbalancingv2.ApplicationProtocol.HTTP,
         targetType: aws_elasticloadbalancingv2.TargetType.INSTANCE,
@@ -433,11 +321,11 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
 
     // 📤 Stack Outputs
     new CfnOutput(this, 'dns1-ecs', {
-      value: getEndpointIps.getResponseField('NetworkInterfaces.0.PrivateIpAddress'),
+      value: loadBalancer.getEndpointIps.getResponseField('NetworkInterfaces.0.PrivateIpAddress'),
       description: 'Primary DNS server IP address'
     });
     new CfnOutput(this, 'dns2-ecs', {
-      value: getEndpointIps.getResponseField('NetworkInterfaces.1.PrivateIpAddress'),
+      value: loadBalancer.getEndpointIps.getResponseField('NetworkInterfaces.1.PrivateIpAddress'),
       description: 'Secondary DNS server IP address'
     });
     new CfnOutput(this, "admin-url-ecs", { 
@@ -445,11 +333,11 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
       description: 'Admin URL (configure DNS to point to NLB IPs first)'
     });
     new CfnOutput(this, 'SecretArn-ecs', { 
-      value: pwd.secretArn,
+      value: storage.secret.secretArn,
       description: 'Secrets Manager ARN fer Pi-hole password'
     });
     new CfnOutput(this, 'RFC1918PrefixListId-ecs', { 
-      value: prefix_list.attrPrefixListId, 
+      value: networking.prefixList.attrPrefixListId, 
       exportName: 'RFC1918PrefixListId-ECS',
       description: 'Prefix list ID fer RFC1918 private IP ranges'
     });
@@ -458,11 +346,11 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
       description: 'ECS Cluster name fer Pi-hole'
     });
     new CfnOutput(this, 'ServiceName-ecs', {
-      value: service.serviceName,
+      value: service.serviceName || 'pihole-service',
       description: 'ECS Service name fer Pi-hole'
     });
     new CfnOutput(this, 'EfsFileSystemId-ecs', {
-      value: file_system.fileSystemId,
+      value: storage.fileSystem.fileSystemId,
       description: 'EFS File System ID fer Pi-hole persistent storage'
     });
   }
