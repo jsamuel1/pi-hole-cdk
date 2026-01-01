@@ -50,8 +50,9 @@ export class TgwWithSiteToSiteVpnStack extends cdk.Stack {
             ]   
       });
 
-      // No prefixlist support in CloudFormation/CDK for PrefixLists in Route Tables yet!!
-      let prefixList = PrefixList.fromPrefixListId(this, 'rfc1918-prefix-list', cdk.Fn.importValue('RFC1918PrefixListId'));
+      // Use prefix list ID from parameter or context (no longer using cross-stack import)
+      const prefixListId = this.node.tryGetContext('rfc1918PrefixListId') || props.appConfig.rfc1918PrefixListId;
+      let prefixList = PrefixList.fromPrefixListId(this, 'rfc1918-prefix-list', prefixListId);
       
       vpc.privateSubnets.forEach(({routeTable: { routeTableId }}, index) => { 
         this.AddTgwRoute(index, routeTableId, prefixList, tgw);

@@ -23,6 +23,7 @@ export class AppConfig
   readonly bUseIntel : boolean;
   readonly node : Node;
   readonly piHoleConfig : PiHoleConfig;
+  readonly rfc1918PrefixListId ?: string;
 
   constructor(scope: Node, env: cdk.Environment)
   {
@@ -42,6 +43,7 @@ export class AppConfig
     this.bUseIntel = false;//(env.region == 'ap-southeast-4');
     
     this.piHoleConfig = DEFAULT_PIHOLE_CONFIG;
+    this.rfc1918PrefixListId = this.node.tryGetContext('rfc1918PrefixListId');
   }
 }
 

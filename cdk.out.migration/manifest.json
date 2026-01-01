@@ -1,0 +1,3679 @@
+{
+  "version": "48.0.0",
+  "artifacts": {
+    "PiHoleCdkStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "PiHoleCdkStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "PiHoleCdkStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://717494614307/us-west-2",
+      "properties": {
+        "templateFile": "PiHoleCdkStack.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::717494614307:role/cdk-hnb659fds-deploy-role-717494614307-us-west-2",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::717494614307:role/cdk-hnb659fds-cfn-exec-role-717494614307-us-west-2",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-717494614307-us-west-2/3e70e7294f31713b4de7ff055bcff8954df856335df4e922418e51de667f17ee.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "PiHoleCdkStack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::717494614307:role/cdk-hnb659fds-lookup-role-717494614307-us-west-2",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "PiHoleCdkStack.assets"
+      ],
+      "metadata": {
+        "/PiHoleCdkStack/networking/vpc": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleCdkStack/networking/vpc/PublicSubnet1": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleCdkStack/networking/vpc/PublicSubnet2": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleCdkStack/networking/vpc/PublicSubnet3": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleCdkStack/networking/vpc/PrivateSubnet1": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleCdkStack/networking/vpc/PrivateSubnet2": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleCdkStack/networking/vpc/PrivateSubnet3": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleCdkStack/networking/rfc1918prefix": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "networkingrfc1918prefixB68305A2"
+          }
+        ],
+        "/PiHoleCdkStack/networking/allow_dns_http": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "description": "*",
+              "vpc": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addIngressRule": [
+                {
+                  "canInlineRule": false,
+                  "connections": "*",
+                  "uniqueId": "*"
+                },
+                {},
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addIngressRule": [
+                {
+                  "canInlineRule": false,
+                  "connections": "*",
+                  "uniqueId": "*"
+                },
+                {},
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addIngressRule": [
+                {
+                  "canInlineRule": false,
+                  "connections": "*",
+                  "uniqueId": "*"
+                },
+                {},
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addIngressRule": [
+                {
+                  "canInlineRule": false,
+                  "connections": "*",
+                  "uniqueId": "*"
+                },
+                {},
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addIngressRule": [
+                {
+                  "canInlineRule": false,
+                  "connections": "*",
+                  "uniqueId": "*"
+                },
+                {},
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addEgressRule": [
+                "*",
+                {},
+                "*",
+                true
+              ]
+            }
+          }
+        ],
+        "/PiHoleCdkStack/networking/allow_dns_http/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "networkingallowdnshttp984E9584"
+          }
+        ],
+        "/PiHoleCdkStack/networking/allow_dns_http/from {IndirectPeer}:22": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "networkingallowdnshttpfromIndirectPeer22118EB7AE"
+          }
+        ],
+        "/PiHoleCdkStack/networking/allow_dns_http/from '{IndirectPeer2}':80": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "networkingallowdnshttpfromIndirectPeer2804C4460C0"
+          }
+        ],
+        "/PiHoleCdkStack/networking/allow_dns_http/from '{IndirectPeer3}':53": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "networkingallowdnshttpfromIndirectPeer3539A00D0FB"
+          }
+        ],
+        "/PiHoleCdkStack/networking/allow_dns_http/from '{IndirectPeer4}':UDP 53": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "networkingallowdnshttpfromIndirectPeer4UDP53F0C05619"
+          }
+        ],
+        "/PiHoleCdkStack/networking/allow_dns_http/from '{IndirectPeer5}':ICMP Type 8": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "networkingallowdnshttpfromIndirectPeer5ICMPType81897A3BC"
+          }
+        ],
+        "/PiHoleCdkStack/storage/piholepwd": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "secretName": "*",
+              "generateSecretString": {
+                "excludePunctuation": true,
+                "includeSpace": false
+              }
+            }
+          }
+        ],
+        "/PiHoleCdkStack/storage/piholepwd/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "storagepiholepwd56AA2350"
+          }
+        ],
+        "/PiHoleCdkStack/storage/pihole-fs": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "vpc": "*",
+              "encrypted": true,
+              "fileSystemName": "*"
+            }
+          }
+        ],
+        "/PiHoleCdkStack/storage/pihole-fs/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "storagepiholefs1643C501"
+          }
+        ],
+        "/PiHoleCdkStack/storage/pihole-fs/EfsSecurityGroup": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "vpc": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addIngressRule": [
+                "*",
+                {},
+                "*",
+                false
+              ]
+            }
+          }
+        ],
+        "/PiHoleCdkStack/storage/pihole-fs/EfsSecurityGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "storagepiholefsEfsSecurityGroupACBC1060"
+          }
+        ],
+        "/PiHoleCdkStack/storage/pihole-fs/EfsSecurityGroup/from PiHoleCdkStacknetworkingallowdnshttp15F47C12:2049": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "storagepiholefsEfsSecurityGroupfromPiHoleCdkStacknetworkingallowdnshttp15F47C1220495231691F"
+          }
+        ],
+        "/PiHoleCdkStack/storage/pihole-fs/EfsMountTarget-PrivateSubnet1": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "storagepiholefsEfsMountTargetPrivateSubnet13D991399"
+          }
+        ],
+        "/PiHoleCdkStack/storage/pihole-fs/EfsMountTarget-PrivateSubnet2": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "storagepiholefsEfsMountTargetPrivateSubnet252655C50"
+          }
+        ],
+        "/PiHoleCdkStack/storage/pihole-fs/EfsMountTarget-PrivateSubnet3": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "storagepiholefsEfsMountTargetPrivateSubnet31E5741F8"
+          }
+        ],
+        "/PiHoleCdkStack/pihole-role": [
+          {
+            "type": "aws:cdk:warning",
+            "data": "Failed to add construct metadata for node [pihole-role]. Reason: ValidationError: The result of fromAwsManagedPolicyName can not be used in this API [ack: @aws-cdk/core:addConstructMetadataFailed]",
+            "trace": [
+              "Annotations.addMessage (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/annotations.js:1:2066)",
+              "Annotations.addWarningV2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/annotations.js:1:984)",
+              "addConstructMetadata (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/metadata-resource.js:1:1490)",
+              "new Role2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-iam/lib/role.js:1:12084)",
+              "new Role2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
+              "new PiHoleCdkStack (/Users/sauhsoj/src/personal/pi-hole-cdk/lib/pi-hole-cdk-stack.ts:45:16)",
+              "Object.<anonymous> (/Users/sauhsoj/src/personal/pi-hole-cdk/bin/pi-hole-cdk.ts:64:1)",
+              "Module._compile (node:internal/modules/cjs/loader:1761:14)",
+              "Module.m._compile (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/index.ts:1618:23)",
+              "node:internal/modules/cjs/loader:1893:10",
+              "Object.require.extensions.<computed> [as .ts] (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/index.ts:1621:12)",
+              "Module.load (node:internal/modules/cjs/loader:1481:32)",
+              "Module._load (node:internal/modules/cjs/loader:1300:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:328:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:245:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "phase4 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:649:14)",
+              "bootstrap (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:95:10)",
+              "main (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:55:10)",
+              "Object.<anonymous> (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:800:3)",
+              "Module._compile (node:internal/modules/cjs/loader:1761:14)",
+              "Object.<anonymous> (node:internal/modules/cjs/loader:1893:10)",
+              "Module.load (node:internal/modules/cjs/loader:1481:32)",
+              "Module._load (node:internal/modules/cjs/loader:1300:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:328:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:245:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "node:internal/main/run_main_module:33:47"
+            ]
+          }
+        ],
+        "/PiHoleCdkStack/pihole-role/Importpihole-role": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleCdkStack/pihole-role/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "piholerole45D2AA68"
+          }
+        ],
+        "/PiHoleCdkStack/pihole-asg-launchtemplate": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "instanceType": "*",
+              "machineImage": "*",
+              "userData": "*",
+              "role": "*",
+              "securityGroup": "*",
+              "requireImdsv2": true,
+              "keyPair": "*"
+            }
+          }
+        ],
+        "/PiHoleCdkStack/pihole-asg-launchtemplate/Profile": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "piholeasglaunchtemplateProfile79BDF81F"
+          }
+        ],
+        "/PiHoleCdkStack/pihole-asg-launchtemplate/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "piholeasglaunchtemplate35F914B9"
+          }
+        ],
+        "/PiHoleCdkStack/SsmParameterValue:--aws--service--canonical--ubuntu--server--22.04--stable--current--arm64--hvm--ebs-gp2--ami-id:C96584B6-F00A-464E-AD19-53AFF4B05118.Parameter": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SsmParameterValueawsservicecanonicalubuntuserver2204stablecurrentarm64hvmebsgp2amiidC96584B6F00A464EAD1953AFF4B05118Parameter"
+          }
+        ],
+        "/PiHoleCdkStack/pihole-asg": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "launchTemplate": "*",
+              "vpc": "*",
+              "vpcSubnets": {
+                "subnetType": "Private"
+              },
+              "maxInstanceLifetime": "*",
+              "updatePolicy": "*",
+              "healthChecks": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToNetworkTargetGroup": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToNetworkTargetGroup": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/PiHoleCdkStack/pihole-asg/ASG": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "piholeasgASG8930D123"
+          }
+        ],
+        "/PiHoleCdkStack/loadbalancer/nlb": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          }
+        ],
+        "/PiHoleCdkStack/loadbalancer/nlb/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "loadbalancernlbCB05B3A6"
+          }
+        ],
+        "/PiHoleCdkStack/loadbalancer/nlb/NLBDNS": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          }
+        ],
+        "/PiHoleCdkStack/loadbalancer/nlb/NLBDNS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "loadbalancernlbNLBDNSA035D5D5"
+          }
+        ],
+        "/PiHoleCdkStack/loadbalancer/nlb/NLBDNS/piholesTargetsGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "loadbalancernlbNLBDNSpiholesTargetsGroupBADD8C1A"
+          }
+        ],
+        "/PiHoleCdkStack/loadbalancer/nlb/NLBHTTP": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          }
+        ],
+        "/PiHoleCdkStack/loadbalancer/nlb/NLBHTTP/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "loadbalancernlbNLBHTTP2327CFDA"
+          }
+        ],
+        "/PiHoleCdkStack/loadbalancer/nlb/NLBHTTP/piholeHttpTargetsGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "loadbalancernlbNLBHTTPpiholeHttpTargetsGroup59493487"
+          }
+        ],
+        "/PiHoleCdkStack/loadbalancer/GetEndpointIps/Provider": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "uuid": "*",
+              "lambdaPurpose": "*",
+              "memorySize": "*",
+              "timeout": "*",
+              "role": "*",
+              "logGroup": "*",
+              "functionName": "*",
+              "vpc": "*",
+              "vpcSubnets": "*",
+              "code": "*",
+              "handler": "*",
+              "runtime": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addMetadata": [
+                "*",
+                true
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addMetadata": [
+                "*",
+                "*"
+              ]
+            }
+          }
+        ],
+        "/PiHoleCdkStack/loadbalancer/GetEndpointIps/Resource": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          }
+        ],
+        "/PiHoleCdkStack/loadbalancer/GetEndpointIps/Resource/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "loadbalancerGetEndpointIpsC39C9DEF"
+          }
+        ],
+        "/PiHoleCdkStack/loadbalancer/GetEndpointIps/CustomResourcePolicy": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "statements": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/PiHoleCdkStack/loadbalancer/GetEndpointIps/CustomResourcePolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "loadbalancerGetEndpointIpsCustomResourcePolicy4ECFB2FD"
+          }
+        ],
+        "/PiHoleCdkStack/AWS679f53fac002430cb0da5b7982bd2287": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "memorySize": "*",
+              "timeout": "*",
+              "role": "*",
+              "logGroup": "*",
+              "functionName": "*",
+              "vpc": "*",
+              "vpcSubnets": "*",
+              "code": "*",
+              "handler": "*",
+              "runtime": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-singleton",
+            "data": true
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-runtime-family",
+            "data": 0
+          }
+        ],
+        "/PiHoleCdkStack/AWS679f53fac002430cb0da5b7982bd2287/ServiceRole": [
+          {
+            "type": "aws:cdk:warning",
+            "data": "Failed to add construct metadata for node [ServiceRole]. Reason: ValidationError: The result of fromAwsManagedPolicyName can not be used in this API [ack: @aws-cdk/core:addConstructMetadataFailed]",
+            "trace": [
+              "Annotations.addMessage (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/annotations.js:1:2066)",
+              "Annotations.addWarningV2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/annotations.js:1:984)",
+              "addConstructMetadata (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/metadata-resource.js:1:1490)",
+              "new Role2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-iam/lib/role.js:1:12084)",
+              "new Role2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
+              "new Function2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-lambda/lib/function.js:1:14132)",
+              "new Function2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
+              "AwsCustomResourceSingletonFunction.ensureLambda (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-lambda/lib/singleton-lambda.js:1:7815)",
+              "new SingletonFunction2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-lambda/lib/singleton-lambda.js:1:5778)",
+              "new SingletonFunction2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
+              "new AwsCustomResourceSingletonFunction (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/custom-resource-handlers/dist/custom-resources/aws-custom-resource-provider.generated.js:1:286)",
+              "new AwsCustomResource2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/custom-resources/lib/aws-custom-resource/aws-custom-resource.js:1:7488)",
+              "new AwsCustomResource2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
+              "new PiHoleLoadBalancer (/Users/sauhsoj/src/personal/pi-hole-cdk/lib/constructs/pihole-loadbalancer.ts:56:27)",
+              "new PiHoleCdkStack (/Users/sauhsoj/src/personal/pi-hole-cdk/lib/pi-hole-cdk-stack.ts:107:26)",
+              "Object.<anonymous> (/Users/sauhsoj/src/personal/pi-hole-cdk/bin/pi-hole-cdk.ts:64:1)",
+              "Module._compile (node:internal/modules/cjs/loader:1761:14)",
+              "Module.m._compile (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/index.ts:1618:23)",
+              "node:internal/modules/cjs/loader:1893:10",
+              "Object.require.extensions.<computed> [as .ts] (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/index.ts:1621:12)",
+              "Module.load (node:internal/modules/cjs/loader:1481:32)",
+              "Module._load (node:internal/modules/cjs/loader:1300:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:328:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:245:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "phase4 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:649:14)",
+              "bootstrap (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:95:10)",
+              "main (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:55:10)",
+              "Object.<anonymous> (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:800:3)",
+              "Module._compile (node:internal/modules/cjs/loader:1761:14)",
+              "Object.<anonymous> (node:internal/modules/cjs/loader:1893:10)",
+              "Module.load (node:internal/modules/cjs/loader:1481:32)",
+              "Module._load (node:internal/modules/cjs/loader:1300:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:328:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:245:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "node:internal/main/run_main_module:33:47"
+            ]
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/PiHoleCdkStack/AWS679f53fac002430cb0da5b7982bd2287/ServiceRole/ImportServiceRole": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleCdkStack/AWS679f53fac002430cb0da5b7982bd2287/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2"
+          }
+        ],
+        "/PiHoleCdkStack/AWS679f53fac002430cb0da5b7982bd2287/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AWS679f53fac002430cb0da5b7982bd22872D164C4C"
+          }
+        ],
+        "/PiHoleCdkStack/AWS679f53fac002430cb0da5b7982bd2287/LogGroup": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "logGroupName": "*"
+            }
+          }
+        ],
+        "/PiHoleCdkStack/AWS679f53fac002430cb0da5b7982bd2287/LogGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AWS679f53fac002430cb0da5b7982bd2287LogGroup449FB7C2"
+          }
+        ],
+        "/PiHoleCdkStack/dns1": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "dns1"
+          }
+        ],
+        "/PiHoleCdkStack/dns2": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "dns2"
+          }
+        ],
+        "/PiHoleCdkStack/admin-url": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "adminurl"
+          }
+        ],
+        "/PiHoleCdkStack/SecretArn": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretArn"
+          }
+        ],
+        "/PiHoleCdkStack/RFC1918PrefixListId": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RFC1918PrefixListId"
+          }
+        ],
+        "/PiHoleCdkStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/PiHoleCdkStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/PiHoleCdkStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "PiHoleCdkStack"
+    },
+    "PiHoleEcsManagedStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "PiHoleEcsManagedStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "PiHoleEcsManagedStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://717494614307/us-west-2",
+      "properties": {
+        "templateFile": "PiHoleEcsManagedStack.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::717494614307:role/cdk-hnb659fds-deploy-role-717494614307-us-west-2",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::717494614307:role/cdk-hnb659fds-cfn-exec-role-717494614307-us-west-2",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-717494614307-us-west-2/a33ca9287b04405f4f00c8a890ca542af972cfe196f4f031d6f00526adfa2692.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "PiHoleEcsManagedStack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::717494614307:role/cdk-hnb659fds-lookup-role-717494614307-us-west-2",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "PiHoleEcsManagedStack.assets"
+      ],
+      "metadata": {
+        "/PiHoleEcsManagedStack/networking/vpc": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleEcsManagedStack/networking/vpc/PublicSubnet1": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleEcsManagedStack/networking/vpc/PublicSubnet2": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleEcsManagedStack/networking/vpc/PublicSubnet3": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleEcsManagedStack/networking/vpc/PrivateSubnet1": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleEcsManagedStack/networking/vpc/PrivateSubnet2": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleEcsManagedStack/networking/vpc/PrivateSubnet3": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleEcsManagedStack/networking/rfc1918prefix-ecs": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "networkingrfc1918prefixecs1B769745"
+          }
+        ],
+        "/PiHoleEcsManagedStack/networking/allow_dns_http-ecs": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "description": "*",
+              "vpc": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addIngressRule": [
+                {
+                  "canInlineRule": false,
+                  "connections": "*",
+                  "uniqueId": "*"
+                },
+                {},
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addIngressRule": [
+                {
+                  "canInlineRule": false,
+                  "connections": "*",
+                  "uniqueId": "*"
+                },
+                {},
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addIngressRule": [
+                {
+                  "canInlineRule": false,
+                  "connections": "*",
+                  "uniqueId": "*"
+                },
+                {},
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addIngressRule": [
+                {
+                  "canInlineRule": false,
+                  "connections": "*",
+                  "uniqueId": "*"
+                },
+                {},
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addIngressRule": [
+                {
+                  "canInlineRule": false,
+                  "connections": "*",
+                  "uniqueId": "*"
+                },
+                {},
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addEgressRule": [
+                "*",
+                {},
+                "*",
+                true
+              ]
+            }
+          }
+        ],
+        "/PiHoleEcsManagedStack/networking/allow_dns_http-ecs/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "networkingallowdnshttpecs207FEFBB"
+          }
+        ],
+        "/PiHoleEcsManagedStack/networking/allow_dns_http-ecs/from {IndirectPeer}:22": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "networkingallowdnshttpecsfromIndirectPeer222551E3BD"
+          }
+        ],
+        "/PiHoleEcsManagedStack/networking/allow_dns_http-ecs/from '{IndirectPeer2}':80": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "networkingallowdnshttpecsfromIndirectPeer2808174E954"
+          }
+        ],
+        "/PiHoleEcsManagedStack/networking/allow_dns_http-ecs/from '{IndirectPeer3}':53": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "networkingallowdnshttpecsfromIndirectPeer3539088F1C6"
+          }
+        ],
+        "/PiHoleEcsManagedStack/networking/allow_dns_http-ecs/from '{IndirectPeer4}':UDP 53": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "networkingallowdnshttpecsfromIndirectPeer4UDP53D2135A24"
+          }
+        ],
+        "/PiHoleEcsManagedStack/networking/allow_dns_http-ecs/from '{IndirectPeer5}':ICMP Type 8": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "networkingallowdnshttpecsfromIndirectPeer5ICMPType8923B89BA"
+          }
+        ],
+        "/PiHoleEcsManagedStack/storage/piholepwd-ecs": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "secretName": "*",
+              "generateSecretString": {
+                "excludePunctuation": true,
+                "includeSpace": false
+              }
+            }
+          }
+        ],
+        "/PiHoleEcsManagedStack/storage/piholepwd-ecs/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "storagepiholepwdecsCA268013"
+          }
+        ],
+        "/PiHoleEcsManagedStack/storage/pihole-fs-ecs": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "vpc": "*",
+              "encrypted": true,
+              "fileSystemName": "*"
+            }
+          }
+        ],
+        "/PiHoleEcsManagedStack/storage/pihole-fs-ecs/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "storagepiholefsecs89BA1EFE"
+          }
+        ],
+        "/PiHoleEcsManagedStack/storage/pihole-fs-ecs/EfsSecurityGroup": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "vpc": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addIngressRule": [
+                "*",
+                {},
+                "*",
+                false
+              ]
+            }
+          }
+        ],
+        "/PiHoleEcsManagedStack/storage/pihole-fs-ecs/EfsSecurityGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "storagepiholefsecsEfsSecurityGroupDAFFAD23"
+          }
+        ],
+        "/PiHoleEcsManagedStack/storage/pihole-fs-ecs/EfsSecurityGroup/from PiHoleEcsManagedStacknetworkingallowdnshttpecs7854684B:2049": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "storagepiholefsecsEfsSecurityGroupfromPiHoleEcsManagedStacknetworkingallowdnshttpecs7854684B2049A67F0B89"
+          }
+        ],
+        "/PiHoleEcsManagedStack/storage/pihole-fs-ecs/EfsMountTarget-PrivateSubnet1": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "storagepiholefsecsEfsMountTargetPrivateSubnet191AA1156"
+          }
+        ],
+        "/PiHoleEcsManagedStack/storage/pihole-fs-ecs/EfsMountTarget-PrivateSubnet2": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "storagepiholefsecsEfsMountTargetPrivateSubnet23119CD1A"
+          }
+        ],
+        "/PiHoleEcsManagedStack/storage/pihole-fs-ecs/EfsMountTarget-PrivateSubnet3": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "storagepiholefsecsEfsMountTargetPrivateSubnet3EFF7CE2B"
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-ecs-cluster": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "clusterName": "*",
+              "vpc": "*",
+              "enableFargateCapacityProviders": false
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addManagedInstancesCapacityProvider": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-ecs-cluster/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "piholeecscluster1D110B90"
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-task-execution-role": [
+          {
+            "type": "aws:cdk:warning",
+            "data": "Failed to add construct metadata for node [pihole-task-execution-role]. Reason: ValidationError: The result of fromAwsManagedPolicyName can not be used in this API [ack: @aws-cdk/core:addConstructMetadataFailed]",
+            "trace": [
+              "Annotations.addMessage (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/annotations.js:1:2066)",
+              "Annotations.addWarningV2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/annotations.js:1:984)",
+              "addConstructMetadata (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/metadata-resource.js:1:1490)",
+              "new Role2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-iam/lib/role.js:1:12084)",
+              "new Role2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
+              "new PiHoleEcsManagedStack (/Users/sauhsoj/src/personal/pi-hole-cdk/lib/pi-hole-ecs-managed-stack.ts:55:31)",
+              "Object.<anonymous> (/Users/sauhsoj/src/personal/pi-hole-cdk/bin/pi-hole-cdk.ts:69:1)",
+              "Module._compile (node:internal/modules/cjs/loader:1761:14)",
+              "Module.m._compile (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/index.ts:1618:23)",
+              "node:internal/modules/cjs/loader:1893:10",
+              "Object.require.extensions.<computed> [as .ts] (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/index.ts:1621:12)",
+              "Module.load (node:internal/modules/cjs/loader:1481:32)",
+              "Module._load (node:internal/modules/cjs/loader:1300:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:328:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:245:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "phase4 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:649:14)",
+              "bootstrap (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:95:10)",
+              "main (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:55:10)",
+              "Object.<anonymous> (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:800:3)",
+              "Module._compile (node:internal/modules/cjs/loader:1761:14)",
+              "Object.<anonymous> (node:internal/modules/cjs/loader:1893:10)",
+              "Module.load (node:internal/modules/cjs/loader:1481:32)",
+              "Module._load (node:internal/modules/cjs/loader:1300:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:328:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:245:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "node:internal/main/run_main_module:33:47"
+            ]
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addToPrincipalPolicy": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addToPrincipalPolicy": [
+                {}
+              ]
+            }
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-task-execution-role/Importpihole-task-execution-role": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-task-execution-role/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "piholetaskexecutionrole1FC77441"
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-task-execution-role/DefaultPolicy": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-task-execution-role/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "piholetaskexecutionroleDefaultPolicyDA0A6144"
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-task-role": [
+          {
+            "type": "aws:cdk:warning",
+            "data": "Failed to add construct metadata for node [pihole-task-role]. Reason: ValidationError: The result of fromAwsManagedPolicyName can not be used in this API [ack: @aws-cdk/core:addConstructMetadataFailed]",
+            "trace": [
+              "Annotations.addMessage (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/annotations.js:1:2066)",
+              "Annotations.addWarningV2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/annotations.js:1:984)",
+              "addConstructMetadata (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/metadata-resource.js:1:1490)",
+              "new Role2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-iam/lib/role.js:1:12084)",
+              "new Role2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
+              "new PiHoleEcsManagedStack (/Users/sauhsoj/src/personal/pi-hole-cdk/lib/pi-hole-ecs-managed-stack.ts:63:22)",
+              "Object.<anonymous> (/Users/sauhsoj/src/personal/pi-hole-cdk/bin/pi-hole-cdk.ts:69:1)",
+              "Module._compile (node:internal/modules/cjs/loader:1761:14)",
+              "Module.m._compile (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/index.ts:1618:23)",
+              "node:internal/modules/cjs/loader:1893:10",
+              "Object.require.extensions.<computed> [as .ts] (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/index.ts:1621:12)",
+              "Module.load (node:internal/modules/cjs/loader:1481:32)",
+              "Module._load (node:internal/modules/cjs/loader:1300:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:328:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:245:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "phase4 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:649:14)",
+              "bootstrap (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:95:10)",
+              "main (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:55:10)",
+              "Object.<anonymous> (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:800:3)",
+              "Module._compile (node:internal/modules/cjs/loader:1761:14)",
+              "Object.<anonymous> (node:internal/modules/cjs/loader:1893:10)",
+              "Module.load (node:internal/modules/cjs/loader:1481:32)",
+              "Module._load (node:internal/modules/cjs/loader:1300:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:328:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:245:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "node:internal/main/run_main_module:33:47"
+            ]
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addToPrincipalPolicy": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-task-role/Importpihole-task-role": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-task-role/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "piholetaskroleEB827945"
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-task-role/DefaultPolicy": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-task-role/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "piholetaskroleDefaultPolicy3071A014"
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-logs": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "logGroupName": "*",
+              "retention": 7,
+              "removalPolicy": "destroy"
+            }
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-logs/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "piholelogs4B59571B"
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-task-def": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-task-def/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "piholetaskdefF10C26F3"
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-instance-role": [
+          {
+            "type": "aws:cdk:warning",
+            "data": "Failed to add construct metadata for node [pihole-instance-role]. Reason: ValidationError: The result of fromAwsManagedPolicyName can not be used in this API [ack: @aws-cdk/core:addConstructMetadataFailed]",
+            "trace": [
+              "Annotations.addMessage (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/annotations.js:1:2066)",
+              "Annotations.addWarningV2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/annotations.js:1:984)",
+              "addConstructMetadata (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/metadata-resource.js:1:1490)",
+              "new Role2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-iam/lib/role.js:1:12084)",
+              "new Role2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
+              "new PiHoleEcsManagedStack (/Users/sauhsoj/src/personal/pi-hole-cdk/lib/pi-hole-ecs-managed-stack.ts:154:26)",
+              "Object.<anonymous> (/Users/sauhsoj/src/personal/pi-hole-cdk/bin/pi-hole-cdk.ts:69:1)",
+              "Module._compile (node:internal/modules/cjs/loader:1761:14)",
+              "Module.m._compile (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/index.ts:1618:23)",
+              "node:internal/modules/cjs/loader:1893:10",
+              "Object.require.extensions.<computed> [as .ts] (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/index.ts:1621:12)",
+              "Module.load (node:internal/modules/cjs/loader:1481:32)",
+              "Module._load (node:internal/modules/cjs/loader:1300:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:328:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:245:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "phase4 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:649:14)",
+              "bootstrap (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:95:10)",
+              "main (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:55:10)",
+              "Object.<anonymous> (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:800:3)",
+              "Module._compile (node:internal/modules/cjs/loader:1761:14)",
+              "Object.<anonymous> (node:internal/modules/cjs/loader:1893:10)",
+              "Module.load (node:internal/modules/cjs/loader:1481:32)",
+              "Module._load (node:internal/modules/cjs/loader:1300:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:328:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:245:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "node:internal/main/run_main_module:33:47"
+            ]
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-instance-role/Importpihole-instance-role": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-instance-role/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "piholeinstancerole686FA222"
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-instance-profile": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "role": "*",
+              "instanceProfileName": "*"
+            }
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-instance-profile/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "piholeinstanceprofile394DFD0D"
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-capacity-provider": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-capacity-provider/pihole-capacity-providerRole": [
+          {
+            "type": "aws:cdk:warning",
+            "data": "Failed to add construct metadata for node [pihole-capacity-providerRole]. Reason: ValidationError: The result of fromAwsManagedPolicyName can not be used in this API [ack: @aws-cdk/core:addConstructMetadataFailed]",
+            "trace": [
+              "Annotations.addMessage (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/annotations.js:1:2066)",
+              "Annotations.addWarningV2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/annotations.js:1:984)",
+              "addConstructMetadata (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/metadata-resource.js:1:1490)",
+              "new Role2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-iam/lib/role.js:1:12084)",
+              "new Role2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
+              "new ManagedInstancesCapacityProvider2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-ecs/lib/cluster.js:1:32698)",
+              "new ManagedInstancesCapacityProvider2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
+              "new PiHoleEcsManagedStack (/Users/sauhsoj/src/personal/pi-hole-cdk/lib/pi-hole-ecs-managed-stack.ts:168:30)",
+              "Object.<anonymous> (/Users/sauhsoj/src/personal/pi-hole-cdk/bin/pi-hole-cdk.ts:69:1)",
+              "Module._compile (node:internal/modules/cjs/loader:1761:14)",
+              "Module.m._compile (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/index.ts:1618:23)",
+              "node:internal/modules/cjs/loader:1893:10",
+              "Object.require.extensions.<computed> [as .ts] (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/index.ts:1621:12)",
+              "Module.load (node:internal/modules/cjs/loader:1481:32)",
+              "Module._load (node:internal/modules/cjs/loader:1300:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:328:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:245:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "phase4 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:649:14)",
+              "bootstrap (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:95:10)",
+              "main (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:55:10)",
+              "Object.<anonymous> (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:800:3)",
+              "Module._compile (node:internal/modules/cjs/loader:1761:14)",
+              "Object.<anonymous> (node:internal/modules/cjs/loader:1893:10)",
+              "Module.load (node:internal/modules/cjs/loader:1481:32)",
+              "Module._load (node:internal/modules/cjs/loader:1300:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:328:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:245:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "node:internal/main/run_main_module:33:47"
+            ]
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-capacity-provider/pihole-capacity-providerRole/Importpihole-capacity-providerRole": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-capacity-provider/pihole-capacity-providerRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "piholecapacityproviderpiholecapacityproviderRole1D67EF27"
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-capacity-provider/pihole-capacity-provider": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "piholecapacityprovider817635A6"
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-service": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          }
+        ],
+        "/PiHoleEcsManagedStack/pihole-service/Service": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "piholeserviceServiceA1FF5D56"
+          }
+        ],
+        "/PiHoleEcsManagedStack/loadbalancer/nlb": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          }
+        ],
+        "/PiHoleEcsManagedStack/loadbalancer/nlb/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "loadbalancernlbCB05B3A6"
+          }
+        ],
+        "/PiHoleEcsManagedStack/loadbalancer/nlb/NLBDNS": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          }
+        ],
+        "/PiHoleEcsManagedStack/loadbalancer/nlb/NLBDNS/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "loadbalancernlbNLBDNSA035D5D5"
+          }
+        ],
+        "/PiHoleEcsManagedStack/loadbalancer/nlb/NLBDNS/piholesTargetsGroup": [
+          {
+            "type": "aws:cdk:warning",
+            "data": "When creating an empty TargetGroup, you should specify a 'targetType' (this warning may become an error in the future). [ack: @aws-cdk/aws-elbv2:targetGroupSpecifyTargetTypeForEmptyTargetGroup]",
+            "trace": [
+              "Annotations.addMessage (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/annotations.js:1:2066)",
+              "Annotations.addWarningV2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/annotations.js:1:984)",
+              "WrappedClass.validateTargetGroup (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-elasticloadbalancingv2/lib/shared/base-target-group.js:1:7519)",
+              "WrappedClass.validateTargetGroup (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-elasticloadbalancingv2/lib/nlb/network-target-group.js:1:7695)",
+              "Object.validate (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-elasticloadbalancingv2/lib/shared/base-target-group.js:1:5295)",
+              "/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/constructs/src/construct.ts:398:45",
+              "Array.flatMap (<anonymous>)",
+              "Node.validate (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/constructs/src/construct.ts:398:30)",
+              "/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:2:6471",
+              "visit (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:4:255)",
+              "visit (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:4:334)",
+              "visit (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:4:334)",
+              "visit (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:4:334)",
+              "visit (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:4:334)",
+              "visit (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:4:334)",
+              "validateTree (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:2:6406)",
+              "synthesize (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:1:1893)",
+              "App.synth (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/stage.js:1:2912)",
+              "process.<anonymous> (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/app.js:1:2041)",
+              "Object.onceWrapper (node:events:623:26)",
+              "process.emit (node:events:508:28)",
+              "process.emit (node:domain:489:12)",
+              "process.emit.sharedData.processEmitHook.installedValue [as emit] (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/@cspotcode/source-map-support/source-map-support.js:745:40)"
+            ]
+          }
+        ],
+        "/PiHoleEcsManagedStack/loadbalancer/nlb/NLBDNS/piholesTargetsGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "loadbalancernlbNLBDNSpiholesTargetsGroupBADD8C1A"
+          }
+        ],
+        "/PiHoleEcsManagedStack/loadbalancer/nlb/NLBHTTP": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          }
+        ],
+        "/PiHoleEcsManagedStack/loadbalancer/nlb/NLBHTTP/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "loadbalancernlbNLBHTTP2327CFDA"
+          }
+        ],
+        "/PiHoleEcsManagedStack/loadbalancer/nlb/NLBHTTP/piholeHttpTargetsGroup": [
+          {
+            "type": "aws:cdk:warning",
+            "data": "When creating an empty TargetGroup, you should specify a 'targetType' (this warning may become an error in the future). [ack: @aws-cdk/aws-elbv2:targetGroupSpecifyTargetTypeForEmptyTargetGroup]",
+            "trace": [
+              "Annotations.addMessage (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/annotations.js:1:2066)",
+              "Annotations.addWarningV2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/annotations.js:1:984)",
+              "WrappedClass.validateTargetGroup (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-elasticloadbalancingv2/lib/shared/base-target-group.js:1:7519)",
+              "WrappedClass.validateTargetGroup (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-elasticloadbalancingv2/lib/nlb/network-target-group.js:1:7695)",
+              "Object.validate (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-elasticloadbalancingv2/lib/shared/base-target-group.js:1:5295)",
+              "/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/constructs/src/construct.ts:398:45",
+              "Array.flatMap (<anonymous>)",
+              "Node.validate (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/constructs/src/construct.ts:398:30)",
+              "/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:2:6471",
+              "visit (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:4:255)",
+              "visit (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:4:334)",
+              "visit (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:4:334)",
+              "visit (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:4:334)",
+              "visit (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:4:334)",
+              "visit (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:4:334)",
+              "validateTree (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:2:6406)",
+              "synthesize (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/private/synthesis.js:1:1893)",
+              "App.synth (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/stage.js:1:2912)",
+              "process.<anonymous> (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/app.js:1:2041)",
+              "Object.onceWrapper (node:events:623:26)",
+              "process.emit (node:events:508:28)",
+              "process.emit (node:domain:489:12)",
+              "process.emit.sharedData.processEmitHook.installedValue [as emit] (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/@cspotcode/source-map-support/source-map-support.js:745:40)"
+            ]
+          }
+        ],
+        "/PiHoleEcsManagedStack/loadbalancer/nlb/NLBHTTP/piholeHttpTargetsGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "loadbalancernlbNLBHTTPpiholeHttpTargetsGroup59493487"
+          }
+        ],
+        "/PiHoleEcsManagedStack/loadbalancer/GetEndpointIps/Provider": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "uuid": "*",
+              "lambdaPurpose": "*",
+              "memorySize": "*",
+              "timeout": "*",
+              "role": "*",
+              "logGroup": "*",
+              "functionName": "*",
+              "vpc": "*",
+              "vpcSubnets": "*",
+              "code": "*",
+              "handler": "*",
+              "runtime": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addMetadata": [
+                "*",
+                true
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addMetadata": [
+                "*",
+                "*"
+              ]
+            }
+          }
+        ],
+        "/PiHoleEcsManagedStack/loadbalancer/GetEndpointIps/Resource": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          }
+        ],
+        "/PiHoleEcsManagedStack/loadbalancer/GetEndpointIps/Resource/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "loadbalancerGetEndpointIpsC39C9DEF"
+          }
+        ],
+        "/PiHoleEcsManagedStack/loadbalancer/GetEndpointIps/CustomResourcePolicy": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "statements": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/PiHoleEcsManagedStack/loadbalancer/GetEndpointIps/CustomResourcePolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "loadbalancerGetEndpointIpsCustomResourcePolicy4ECFB2FD"
+          }
+        ],
+        "/PiHoleEcsManagedStack/AWS679f53fac002430cb0da5b7982bd2287": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "memorySize": "*",
+              "timeout": "*",
+              "role": "*",
+              "logGroup": "*",
+              "functionName": "*",
+              "vpc": "*",
+              "vpcSubnets": "*",
+              "code": "*",
+              "handler": "*",
+              "runtime": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-singleton",
+            "data": true
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-runtime-family",
+            "data": 0
+          }
+        ],
+        "/PiHoleEcsManagedStack/AWS679f53fac002430cb0da5b7982bd2287/ServiceRole": [
+          {
+            "type": "aws:cdk:warning",
+            "data": "Failed to add construct metadata for node [ServiceRole]. Reason: ValidationError: The result of fromAwsManagedPolicyName can not be used in this API [ack: @aws-cdk/core:addConstructMetadataFailed]",
+            "trace": [
+              "Annotations.addMessage (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/annotations.js:1:2066)",
+              "Annotations.addWarningV2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/annotations.js:1:984)",
+              "addConstructMetadata (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/metadata-resource.js:1:1490)",
+              "new Role2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-iam/lib/role.js:1:12084)",
+              "new Role2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
+              "new Function2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-lambda/lib/function.js:1:14132)",
+              "new Function2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
+              "AwsCustomResourceSingletonFunction.ensureLambda (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-lambda/lib/singleton-lambda.js:1:7815)",
+              "new SingletonFunction2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-lambda/lib/singleton-lambda.js:1:5778)",
+              "new SingletonFunction2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
+              "new AwsCustomResourceSingletonFunction (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/custom-resource-handlers/dist/custom-resources/aws-custom-resource-provider.generated.js:1:286)",
+              "new AwsCustomResource2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/custom-resources/lib/aws-custom-resource/aws-custom-resource.js:1:7488)",
+              "new AwsCustomResource2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
+              "new PiHoleLoadBalancer (/Users/sauhsoj/src/personal/pi-hole-cdk/lib/constructs/pihole-loadbalancer.ts:56:27)",
+              "new PiHoleEcsManagedStack (/Users/sauhsoj/src/personal/pi-hole-cdk/lib/pi-hole-ecs-managed-stack.ts:209:26)",
+              "Object.<anonymous> (/Users/sauhsoj/src/personal/pi-hole-cdk/bin/pi-hole-cdk.ts:69:1)",
+              "Module._compile (node:internal/modules/cjs/loader:1761:14)",
+              "Module.m._compile (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/index.ts:1618:23)",
+              "node:internal/modules/cjs/loader:1893:10",
+              "Object.require.extensions.<computed> [as .ts] (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/index.ts:1621:12)",
+              "Module.load (node:internal/modules/cjs/loader:1481:32)",
+              "Module._load (node:internal/modules/cjs/loader:1300:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:328:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:245:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "phase4 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:649:14)",
+              "bootstrap (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:95:10)",
+              "main (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:55:10)",
+              "Object.<anonymous> (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:800:3)",
+              "Module._compile (node:internal/modules/cjs/loader:1761:14)",
+              "Object.<anonymous> (node:internal/modules/cjs/loader:1893:10)",
+              "Module.load (node:internal/modules/cjs/loader:1481:32)",
+              "Module._load (node:internal/modules/cjs/loader:1300:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:328:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:245:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "node:internal/main/run_main_module:33:47"
+            ]
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/PiHoleEcsManagedStack/AWS679f53fac002430cb0da5b7982bd2287/ServiceRole/ImportServiceRole": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/PiHoleEcsManagedStack/AWS679f53fac002430cb0da5b7982bd2287/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2"
+          }
+        ],
+        "/PiHoleEcsManagedStack/AWS679f53fac002430cb0da5b7982bd2287/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AWS679f53fac002430cb0da5b7982bd22872D164C4C"
+          }
+        ],
+        "/PiHoleEcsManagedStack/AWS679f53fac002430cb0da5b7982bd2287/LogGroup": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "logGroupName": "*"
+            }
+          }
+        ],
+        "/PiHoleEcsManagedStack/AWS679f53fac002430cb0da5b7982bd2287/LogGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AWS679f53fac002430cb0da5b7982bd2287LogGroup449FB7C2"
+          }
+        ],
+        "/PiHoleEcsManagedStack/dns1-ecs": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "dns1ecs"
+          }
+        ],
+        "/PiHoleEcsManagedStack/dns2-ecs": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "dns2ecs"
+          }
+        ],
+        "/PiHoleEcsManagedStack/admin-url-ecs": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "adminurlecs"
+          }
+        ],
+        "/PiHoleEcsManagedStack/SecretArn-ecs": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "SecretArnecs"
+          }
+        ],
+        "/PiHoleEcsManagedStack/RFC1918PrefixListId-ecs": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "RFC1918PrefixListIdecs"
+          }
+        ],
+        "/PiHoleEcsManagedStack/ClusterName-ecs": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ClusterNameecs"
+          }
+        ],
+        "/PiHoleEcsManagedStack/ServiceName-ecs": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ServiceNameecs"
+          }
+        ],
+        "/PiHoleEcsManagedStack/EfsFileSystemId-ecs": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "EfsFileSystemIdecs"
+          }
+        ],
+        "/PiHoleEcsManagedStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/PiHoleEcsManagedStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/PiHoleEcsManagedStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "PiHoleEcsManagedStack"
+    },
+    "SiteToSiteVpnStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "SiteToSiteVpnStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "SiteToSiteVpnStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://717494614307/us-west-2",
+      "properties": {
+        "templateFile": "SiteToSiteVpnStack.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::717494614307:role/cdk-hnb659fds-deploy-role-717494614307-us-west-2",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::717494614307:role/cdk-hnb659fds-cfn-exec-role-717494614307-us-west-2",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-717494614307-us-west-2/4ae1ce3dc94094c685bc2f086a8d7f2777dab4dc68065546ecf8aa0f853027e0.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "SiteToSiteVpnStack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::717494614307:role/cdk-hnb659fds-lookup-role-717494614307-us-west-2",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "SiteToSiteVpnStack.assets"
+      ],
+      "metadata": {
+        "/SiteToSiteVpnStack/vpc": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/SiteToSiteVpnStack/vpc/PublicSubnet1": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/SiteToSiteVpnStack/vpc/PublicSubnet2": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/SiteToSiteVpnStack/vpc/PublicSubnet3": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/SiteToSiteVpnStack/vpc/PrivateSubnet1": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/SiteToSiteVpnStack/vpc/PrivateSubnet2": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/SiteToSiteVpnStack/vpc/PrivateSubnet3": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/SiteToSiteVpnStack/vpc/sitetositevpn": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "vpc": "*",
+              "ip": "*",
+              "staticRoutes": "*"
+            }
+          }
+        ],
+        "/SiteToSiteVpnStack/vpc/sitetositevpn/CustomerGateway": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "vpcsitetositevpnCustomerGatewayD928C567"
+          }
+        ],
+        "/SiteToSiteVpnStack/vpc/sitetositevpn/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "vpcsitetositevpnACFC548E"
+          }
+        ],
+        "/SiteToSiteVpnStack/vpc/sitetositevpn/Route1921680016": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "vpcsitetositevpnRoute19216800165389EB67"
+          }
+        ],
+        "/SiteToSiteVpnStack/vpc/VpnGateway": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "amazonSideAsn": "*",
+              "type": "*"
+            }
+          }
+        ],
+        "/SiteToSiteVpnStack/vpc/VpnGateway/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "vpcVpnGateway3B5265B5"
+          }
+        ],
+        "/SiteToSiteVpnStack/vpc/VPCVPNGW": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "vpcVPCVPNGW0F68A0AA"
+          }
+        ],
+        "/SiteToSiteVpnStack/vpc/RoutePropagation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "vpcRoutePropagationC2468C25"
+          }
+        ],
+        "/SiteToSiteVpnStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/SiteToSiteVpnStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/SiteToSiteVpnStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "SiteToSiteVpnStack"
+    },
+    "TgwWithSiteToSiteVpnStack.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "TgwWithSiteToSiteVpnStack.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "TgwWithSiteToSiteVpnStack": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://717494614307/us-west-2",
+      "properties": {
+        "templateFile": "TgwWithSiteToSiteVpnStack.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::717494614307:role/cdk-hnb659fds-deploy-role-717494614307-us-west-2",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::717494614307:role/cdk-hnb659fds-cfn-exec-role-717494614307-us-west-2",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-717494614307-us-west-2/1003f903c4d875d6b3926b34109263fe13934abc18f06004685145c28ff41c7e.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "TgwWithSiteToSiteVpnStack.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::717494614307:role/cdk-hnb659fds-lookup-role-717494614307-us-west-2",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "TgwWithSiteToSiteVpnStack.assets"
+      ],
+      "metadata": {
+        "/TgwWithSiteToSiteVpnStack/vpc": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/vpc/PublicSubnet1": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/vpc/PublicSubnet2": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/vpc/PublicSubnet3": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/vpc/PrivateSubnet1": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/vpc/PrivateSubnet2": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/vpc/PrivateSubnet3": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "tgw23F41D77"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw/GetDefaultRouteTableId/Provider": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "uuid": "*",
+              "lambdaPurpose": "*",
+              "memorySize": "*",
+              "timeout": "*",
+              "role": "*",
+              "logGroup": "*",
+              "functionName": "*",
+              "vpc": "*",
+              "vpcSubnets": "*",
+              "code": "*",
+              "handler": "*",
+              "runtime": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addMetadata": [
+                "*",
+                true
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addMetadata": [
+                "*",
+                "*"
+              ]
+            }
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw/GetDefaultRouteTableId/Resource": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw/GetDefaultRouteTableId/Resource/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "tgwGetDefaultRouteTableId919819F2"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw/GetDefaultRouteTableId/CustomResourcePolicy": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "statements": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw/GetDefaultRouteTableId/CustomResourcePolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "tgwGetDefaultRouteTableIdCustomResourcePolicy98FAE2A5"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/AWS679f53fac002430cb0da5b7982bd2287": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "memorySize": "*",
+              "timeout": "*",
+              "role": "*",
+              "logGroup": "*",
+              "functionName": "*",
+              "vpc": "*",
+              "vpcSubnets": "*",
+              "code": "*",
+              "handler": "*",
+              "runtime": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-singleton",
+            "data": true
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-runtime-family",
+            "data": 0
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-singleton",
+            "data": true
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-runtime-family",
+            "data": 0
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-singleton",
+            "data": true
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-runtime-family",
+            "data": 0
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-singleton",
+            "data": true
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-runtime-family",
+            "data": 0
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-singleton",
+            "data": true
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-runtime-family",
+            "data": 0
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-singleton",
+            "data": true
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-runtime-family",
+            "data": 0
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-singleton",
+            "data": true
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-runtime-family",
+            "data": 0
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-singleton",
+            "data": true
+          },
+          {
+            "type": "aws:cdk:is-custom-resource-handler-runtime-family",
+            "data": 0
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/AWS679f53fac002430cb0da5b7982bd2287/ServiceRole": [
+          {
+            "type": "aws:cdk:warning",
+            "data": "Failed to add construct metadata for node [ServiceRole]. Reason: ValidationError: The result of fromAwsManagedPolicyName can not be used in this API [ack: @aws-cdk/core:addConstructMetadataFailed]",
+            "trace": [
+              "Annotations.addMessage (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/annotations.js:1:2066)",
+              "Annotations.addWarningV2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/annotations.js:1:984)",
+              "addConstructMetadata (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/metadata-resource.js:1:1490)",
+              "new Role2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-iam/lib/role.js:1:12084)",
+              "new Role2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
+              "new Function2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-lambda/lib/function.js:1:14132)",
+              "new Function2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
+              "AwsCustomResourceSingletonFunction.ensureLambda (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-lambda/lib/singleton-lambda.js:1:7815)",
+              "new SingletonFunction2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/aws-lambda/lib/singleton-lambda.js:1:5778)",
+              "new SingletonFunction2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
+              "new AwsCustomResourceSingletonFunction (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/custom-resource-handlers/dist/custom-resources/aws-custom-resource-provider.generated.js:1:286)",
+              "new AwsCustomResource2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/custom-resources/lib/aws-custom-resource/aws-custom-resource.js:1:7488)",
+              "new AwsCustomResource2 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/aws-cdk-lib/core/lib/prop-injectable.js:1:681)",
+              "new TransitGateway (/Users/sauhsoj/src/personal/pi-hole-cdk/lib/int_constructs/transit-gateway.ts:452:36)",
+              "new TgwWithSiteToSiteVpnStack (/Users/sauhsoj/src/personal/pi-hole-cdk/lib/tgw-with-sitetositevpn-stack.ts:19:17)",
+              "Object.<anonymous> (/Users/sauhsoj/src/personal/pi-hole-cdk/bin/pi-hole-cdk.ts:73:1)",
+              "Module._compile (node:internal/modules/cjs/loader:1761:14)",
+              "Module.m._compile (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/index.ts:1618:23)",
+              "node:internal/modules/cjs/loader:1893:10",
+              "Object.require.extensions.<computed> [as .ts] (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/index.ts:1621:12)",
+              "Module.load (node:internal/modules/cjs/loader:1481:32)",
+              "Module._load (node:internal/modules/cjs/loader:1300:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:328:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:245:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "phase4 (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:649:14)",
+              "bootstrap (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:95:10)",
+              "main (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:55:10)",
+              "Object.<anonymous> (/Users/sauhsoj/src/personal/pi-hole-cdk/node_modules/ts-node/src/bin.ts:800:3)",
+              "Module._compile (node:internal/modules/cjs/loader:1761:14)",
+              "Object.<anonymous> (node:internal/modules/cjs/loader:1893:10)",
+              "Module.load (node:internal/modules/cjs/loader:1481:32)",
+              "Module._load (node:internal/modules/cjs/loader:1300:12)",
+              "TracingChannel.traceSync (node:diagnostics_channel:328:14)",
+              "wrapModuleLoad (node:internal/modules/cjs/loader:245:24)",
+              "Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)",
+              "node:internal/main/run_main_module:33:47"
+            ]
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachInlinePolicy": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/AWS679f53fac002430cb0da5b7982bd2287/ServiceRole/ImportServiceRole": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/AWS679f53fac002430cb0da5b7982bd2287/ServiceRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/AWS679f53fac002430cb0da5b7982bd2287/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AWS679f53fac002430cb0da5b7982bd22872D164C4C"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/AWS679f53fac002430cb0da5b7982bd2287/LogGroup": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "logGroupName": "*"
+            }
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/AWS679f53fac002430cb0da5b7982bd2287/LogGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "AWS679f53fac002430cb0da5b7982bd2287LogGroup449FB7C2"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/vpc-tgw-attachment/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "vpctgwattachment12129747"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/customer-gateway": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "customergateway"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/sitetositevpnConnection/VpnConnection": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "sitetositevpnConnectionVpnConnection0A1C70BF"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-0-rtb-0e1b5c4a33d9d952d-prefixlist-transitgateway/Provider": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "uuid": "*",
+              "lambdaPurpose": "*",
+              "memorySize": "*",
+              "timeout": "*",
+              "role": "*",
+              "logGroup": "*",
+              "functionName": "*",
+              "vpc": "*",
+              "vpcSubnets": "*",
+              "code": "*",
+              "handler": "*",
+              "runtime": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addMetadata": [
+                "*",
+                true
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addMetadata": [
+                "*",
+                "*"
+              ]
+            }
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-0-rtb-0e1b5c4a33d9d952d-prefixlist-transitgateway/Resource": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-0-rtb-0e1b5c4a33d9d952d-prefixlist-transitgateway/Resource/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "tgwvpnplroute0rtb0e1b5c4a33d9d952dprefixlisttransitgateway719DF24B"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-0-rtb-0e1b5c4a33d9d952d-prefixlist-transitgateway/CustomResourcePolicy": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "statements": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-0-rtb-0e1b5c4a33d9d952d-prefixlist-transitgateway/CustomResourcePolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "tgwvpnplroute0rtb0e1b5c4a33d9d952dprefixlisttransitgatewayCustomResourcePolicy4364A343"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-1-rtb-0d3c5812eee1ab0e3-prefixlist-transitgateway/Provider": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "uuid": "*",
+              "lambdaPurpose": "*",
+              "memorySize": "*",
+              "timeout": "*",
+              "role": "*",
+              "logGroup": "*",
+              "functionName": "*",
+              "vpc": "*",
+              "vpcSubnets": "*",
+              "code": "*",
+              "handler": "*",
+              "runtime": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addMetadata": [
+                "*",
+                true
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addMetadata": [
+                "*",
+                "*"
+              ]
+            }
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-1-rtb-0d3c5812eee1ab0e3-prefixlist-transitgateway/Resource": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-1-rtb-0d3c5812eee1ab0e3-prefixlist-transitgateway/Resource/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "tgwvpnplroute1rtb0d3c5812eee1ab0e3prefixlisttransitgatewayE7E4BF0E"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-1-rtb-0d3c5812eee1ab0e3-prefixlist-transitgateway/CustomResourcePolicy": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "statements": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-1-rtb-0d3c5812eee1ab0e3-prefixlist-transitgateway/CustomResourcePolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "tgwvpnplroute1rtb0d3c5812eee1ab0e3prefixlisttransitgatewayCustomResourcePolicy14C050C2"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-2-rtb-03fd923d374e6be92-prefixlist-transitgateway/Provider": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "uuid": "*",
+              "lambdaPurpose": "*",
+              "memorySize": "*",
+              "timeout": "*",
+              "role": "*",
+              "logGroup": "*",
+              "functionName": "*",
+              "vpc": "*",
+              "vpcSubnets": "*",
+              "code": "*",
+              "handler": "*",
+              "runtime": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addMetadata": [
+                "*",
+                true
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addMetadata": [
+                "*",
+                "*"
+              ]
+            }
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-2-rtb-03fd923d374e6be92-prefixlist-transitgateway/Resource": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-2-rtb-03fd923d374e6be92-prefixlist-transitgateway/Resource/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "tgwvpnplroute2rtb03fd923d374e6be92prefixlisttransitgatewayC1DFB03F"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-2-rtb-03fd923d374e6be92-prefixlist-transitgateway/CustomResourcePolicy": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "statements": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-2-rtb-03fd923d374e6be92-prefixlist-transitgateway/CustomResourcePolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "tgwvpnplroute2rtb03fd923d374e6be92prefixlisttransitgatewayCustomResourcePolicy1A3FAE1F"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-0-rtb-035c76a2768e67c02-prefixlist-transitgateway/Provider": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "uuid": "*",
+              "lambdaPurpose": "*",
+              "memorySize": "*",
+              "timeout": "*",
+              "role": "*",
+              "logGroup": "*",
+              "functionName": "*",
+              "vpc": "*",
+              "vpcSubnets": "*",
+              "code": "*",
+              "handler": "*",
+              "runtime": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addMetadata": [
+                "*",
+                true
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addMetadata": [
+                "*",
+                "*"
+              ]
+            }
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-0-rtb-035c76a2768e67c02-prefixlist-transitgateway/Resource": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-0-rtb-035c76a2768e67c02-prefixlist-transitgateway/Resource/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "tgwvpnplroute0rtb035c76a2768e67c02prefixlisttransitgateway19D10BA5"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-0-rtb-035c76a2768e67c02-prefixlist-transitgateway/CustomResourcePolicy": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "statements": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-0-rtb-035c76a2768e67c02-prefixlist-transitgateway/CustomResourcePolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "tgwvpnplroute0rtb035c76a2768e67c02prefixlisttransitgatewayCustomResourcePolicyDF36AFC1"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-1-rtb-035c76a2768e67c02-prefixlist-transitgateway/Provider": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "uuid": "*",
+              "lambdaPurpose": "*",
+              "memorySize": "*",
+              "timeout": "*",
+              "role": "*",
+              "logGroup": "*",
+              "functionName": "*",
+              "vpc": "*",
+              "vpcSubnets": "*",
+              "code": "*",
+              "handler": "*",
+              "runtime": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addMetadata": [
+                "*",
+                true
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addMetadata": [
+                "*",
+                "*"
+              ]
+            }
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-1-rtb-035c76a2768e67c02-prefixlist-transitgateway/Resource": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-1-rtb-035c76a2768e67c02-prefixlist-transitgateway/Resource/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "tgwvpnplroute1rtb035c76a2768e67c02prefixlisttransitgatewayD563C5A1"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-1-rtb-035c76a2768e67c02-prefixlist-transitgateway/CustomResourcePolicy": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "statements": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-1-rtb-035c76a2768e67c02-prefixlist-transitgateway/CustomResourcePolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "tgwvpnplroute1rtb035c76a2768e67c02prefixlisttransitgatewayCustomResourcePolicy607A24F6"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-2-rtb-035c76a2768e67c02-prefixlist-transitgateway/Provider": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "uuid": "*",
+              "lambdaPurpose": "*",
+              "memorySize": "*",
+              "timeout": "*",
+              "role": "*",
+              "logGroup": "*",
+              "functionName": "*",
+              "vpc": "*",
+              "vpcSubnets": "*",
+              "code": "*",
+              "handler": "*",
+              "runtime": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addMetadata": [
+                "*",
+                true
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addMetadata": [
+                "*",
+                "*"
+              ]
+            }
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-2-rtb-035c76a2768e67c02-prefixlist-transitgateway/Resource": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-2-rtb-035c76a2768e67c02-prefixlist-transitgateway/Resource/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "tgwvpnplroute2rtb035c76a2768e67c02prefixlisttransitgatewayA922A439"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-2-rtb-035c76a2768e67c02-prefixlist-transitgateway/CustomResourcePolicy": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "statements": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/tgw-vpn-pl-route-2-rtb-035c76a2768e67c02-prefixlist-transitgateway/CustomResourcePolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "tgwvpnplroute2rtb035c76a2768e67c02prefixlisttransitgatewayCustomResourcePolicy1E9D9FD2"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/custom-resource-get-tgw-att-id/Provider": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "uuid": "*",
+              "lambdaPurpose": "*",
+              "memorySize": "*",
+              "timeout": "*",
+              "role": "*",
+              "logGroup": "*",
+              "functionName": "*",
+              "vpc": "*",
+              "vpcSubnets": "*",
+              "code": "*",
+              "handler": "*",
+              "runtime": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addMetadata": [
+                "*",
+                true
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addMetadata": [
+                "*",
+                "*"
+              ]
+            }
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/custom-resource-get-tgw-att-id/Resource": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": "*"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/custom-resource-get-tgw-att-id/Resource/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "customresourcegettgwattidEDD8E265"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/custom-resource-get-tgw-att-id/CustomResourcePolicy": [
+          {
+            "type": "aws:cdk:analytics:construct",
+            "data": {
+              "statements": "*"
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "addStatements": [
+                {}
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          },
+          {
+            "type": "aws:cdk:analytics:method",
+            "data": {
+              "attachToRole": [
+                "*"
+              ]
+            }
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/custom-resource-get-tgw-att-id/CustomResourcePolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "customresourcegettgwattidCustomResourcePolicy80D0EB21"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/vpn-route-0-pihole-vpn-192.168.0.0--16": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "vpnroute0piholevpn1921680016"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/TgwWithSiteToSiteVpnStack/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "TgwWithSiteToSiteVpnStack"
+    },
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    },
+    "aws-cdk-lib/feature-flag-report": {
+      "type": "cdk:feature-flag-report",
+      "properties": {
+        "module": "aws-cdk-lib",
+        "flags": {
+          "@aws-cdk/aws-signer:signingProfileNamePassedToCfn": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Pass signingProfileName to CfnSigningProfile"
+          },
+          "@aws-cdk/core:newStyleStackSynthesis": {
+            "recommendedValue": true,
+            "explanation": "Switch to new stack synthesis method which enables CI/CD",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/core:stackRelativeExports": {
+            "recommendedValue": true,
+            "explanation": "Name exports based on the construct paths relative to the stack, rather than the global construct path",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/aws-ecs-patterns:secGroupsDisablesImplicitOpenListener": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Disable implicit openListener when custom security groups are provided"
+          },
+          "@aws-cdk/aws-rds:lowercaseDbIdentifier": {
+            "recommendedValue": true,
+            "explanation": "Force lowercasing of RDS Cluster names in CDK",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/aws-apigateway:usagePlanKeyOrderInsensitiveId": {
+            "recommendedValue": true,
+            "explanation": "Allow adding/removing multiple UsagePlanKeys independently",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/aws-lambda:recognizeVersionProps": {
+            "recommendedValue": true,
+            "explanation": "Enable this feature flag to opt in to the updated logical id calculation for Lambda Version created using the  `fn.currentVersion`.",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/aws-lambda:recognizeLayerVersion": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Enable this feature flag to opt in to the updated logical id calculation for Lambda Version created using the `fn.currentVersion`."
+          },
+          "@aws-cdk/aws-cloudfront:defaultSecurityPolicyTLSv1.2_2021": {
+            "recommendedValue": true,
+            "explanation": "Enable this feature flag to have cloudfront distributions use the security policy TLSv1.2_2021 by default.",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/core:checkSecretUsage": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Enable this flag to make it impossible to accidentally use SecretValues in unsafe locations"
+          },
+          "@aws-cdk/core:target-partitions": {
+            "userValue": [
+              "aws",
+              "aws-cn"
+            ],
+            "recommendedValue": [
+              "aws",
+              "aws-cn"
+            ],
+            "explanation": "What regions to include in lookup tables of environment agnostic stacks"
+          },
+          "@aws-cdk-containers/ecs-service-extensions:enableDefaultLogDriver": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "ECS extensions will automatically add an `awslogs` driver if no logging is specified"
+          },
+          "@aws-cdk/aws-ec2:uniqueImdsv2TemplateName": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Enable this feature flag to have Launch Templates generated by the `InstanceRequireImdsv2Aspect` use unique names."
+          },
+          "@aws-cdk/aws-ecs:arnFormatIncludesClusterName": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "ARN format used by ECS. In the new ARN format, the cluster name is part of the resource ID."
+          },
+          "@aws-cdk/aws-iam:minimizePolicies": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Minimize IAM policies by combining Statements"
+          },
+          "@aws-cdk/core:validateSnapshotRemovalPolicy": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Error on snapshot removal policies on resources that do not support it."
+          },
+          "@aws-cdk/aws-codepipeline:crossAccountKeyAliasStackSafeResourceName": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Generate key aliases that include the stack name"
+          },
+          "@aws-cdk/aws-s3:createDefaultLoggingPolicy": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Enable this feature flag to create an S3 bucket policy by default in cases where an AWS service would automatically create the Policy if one does not exist."
+          },
+          "@aws-cdk/aws-sns-subscriptions:restrictSqsDescryption": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Restrict KMS key policy for encrypted Queues a bit more"
+          },
+          "@aws-cdk/aws-apigateway:disableCloudWatchRole": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Make default CloudWatch Role behavior safe for multiple API Gateways in one environment"
+          },
+          "@aws-cdk/core:enablePartitionLiterals": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Make ARNs concrete if AWS partition is known"
+          },
+          "@aws-cdk/aws-events:eventsTargetQueueSameAccount": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Event Rules may only push to encrypted SQS queues in the same account"
+          },
+          "@aws-cdk/aws-ecs:disableExplicitDeploymentControllerForCircuitBreaker": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Avoid setting the \"ECS\" deployment controller when adding a circuit breaker"
+          },
+          "@aws-cdk/aws-iam:importedRoleStackSafeDefaultPolicyName": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Enable this feature to create default policy names for imported roles that depend on the stack the role is in."
+          },
+          "@aws-cdk/aws-s3:serverAccessLogsUseBucketPolicy": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Use S3 Bucket Policy instead of ACLs for Server Access Logging"
+          },
+          "@aws-cdk/aws-route53-patters:useCertificate": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Use the official `Certificate` resource instead of `DnsValidatedCertificate`"
+          },
+          "@aws-cdk/customresources:installLatestAwsSdkDefault": {
+            "userValue": false,
+            "recommendedValue": false,
+            "explanation": "Whether to install the latest SDK by default in AwsCustomResource"
+          },
+          "@aws-cdk/aws-rds:databaseProxyUniqueResourceName": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Use unique resource name for Database Proxy"
+          },
+          "@aws-cdk/aws-codedeploy:removeAlarmsFromDeploymentGroup": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Remove CloudWatch alarms from deployment group"
+          },
+          "@aws-cdk/aws-apigateway:authorizerChangeDeploymentLogicalId": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Include authorizer configuration in the calculation of the API deployment logical ID."
+          },
+          "@aws-cdk/aws-ec2:launchTemplateDefaultUserData": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Define user data for a launch template by default when a machine image is provided."
+          },
+          "@aws-cdk/aws-secretsmanager:useAttachedSecretResourcePolicyForSecretTargetAttachments": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "SecretTargetAttachments uses the ResourcePolicy of the attached Secret."
+          },
+          "@aws-cdk/aws-redshift:columnId": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Whether to use an ID to track Redshift column changes"
+          },
+          "@aws-cdk/aws-stepfunctions-tasks:enableEmrServicePolicyV2": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Enable AmazonEMRServicePolicy_v2 managed policies"
+          },
+          "@aws-cdk/aws-ec2:restrictDefaultSecurityGroup": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Restrict access to the VPC default security group"
+          },
+          "@aws-cdk/aws-apigateway:requestValidatorUniqueId": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Generate a unique id for each RequestValidator added to a method"
+          },
+          "@aws-cdk/aws-kms:aliasNameRef": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "KMS Alias name and keyArn will have implicit reference to KMS Key"
+          },
+          "@aws-cdk/aws-kms:applyImportedAliasPermissionsToPrincipal": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Enable grant methods on Aliases imported by name to use kms:ResourceAliases condition"
+          },
+          "@aws-cdk/aws-autoscaling:generateLaunchTemplateInsteadOfLaunchConfig": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Generate a launch template when creating an AutoScalingGroup"
+          },
+          "@aws-cdk/core:includePrefixInUniqueNameGeneration": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Include the stack prefix in the stack name generation process"
+          },
+          "@aws-cdk/aws-efs:denyAnonymousAccess": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "EFS denies anonymous clients accesses"
+          },
+          "@aws-cdk/aws-opensearchservice:enableOpensearchMultiAzWithStandby": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Enables support for Multi-AZ with Standby deployment for opensearch domains"
+          },
+          "@aws-cdk/aws-lambda-nodejs:useLatestRuntimeVersion": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Enables aws-lambda-nodejs.Function to use the latest available NodeJs runtime as the default"
+          },
+          "@aws-cdk/aws-efs:mountTargetOrderInsensitiveLogicalId": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, mount targets will have a stable logicalId that is linked to the associated subnet."
+          },
+          "@aws-cdk/aws-rds:auroraClusterChangeScopeOfInstanceParameterGroupWithEachParameters": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, a scope of InstanceParameterGroup for AuroraClusterInstance with each parameters will change."
+          },
+          "@aws-cdk/aws-appsync:useArnForSourceApiAssociationIdentifier": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, will always use the arn for identifiers for CfnSourceApiAssociation in the GraphqlApi construct rather than id."
+          },
+          "@aws-cdk/aws-rds:preventRenderingDeprecatedCredentials": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, creating an RDS database cluster from a snapshot will only render credentials for snapshot credentials."
+          },
+          "@aws-cdk/aws-codepipeline-actions:useNewDefaultBranchForCodeCommitSource": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, the CodeCommit source action is using the default branch name 'main'."
+          },
+          "@aws-cdk/aws-cloudwatch-actions:changeLambdaPermissionLogicalIdForLambdaAction": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, the logical ID of a Lambda permission for a Lambda action includes an alarm ID."
+          },
+          "@aws-cdk/aws-codepipeline:crossAccountKeysDefaultValueToFalse": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Enables Pipeline to set the default value for crossAccountKeys to false."
+          },
+          "@aws-cdk/aws-codepipeline:defaultPipelineTypeToV2": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Enables Pipeline to set the default pipeline type to V2."
+          },
+          "@aws-cdk/aws-kms:reduceCrossAccountRegionPolicyScope": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, IAM Policy created from KMS key grant will reduce the resource scope to this key only."
+          },
+          "@aws-cdk/pipelines:reduceAssetRoleTrustScope": {
+            "recommendedValue": true,
+            "explanation": "Remove the root account principal from PipelineAssetsFileRole trust policy",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/aws-eks:nodegroupNameAttribute": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, nodegroupName attribute of the provisioned EKS NodeGroup will not have the cluster name prefix."
+          },
+          "@aws-cdk/aws-ec2:ebsDefaultGp3Volume": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, the default volume type of the EBS volume will be GP3"
+          },
+          "@aws-cdk/aws-ecs:removeDefaultDeploymentAlarm": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, remove default deployment alarm settings"
+          },
+          "@aws-cdk/custom-resources:logApiResponseDataPropertyTrueDefault": {
+            "userValue": false,
+            "recommendedValue": false,
+            "explanation": "When enabled, the custom resource used for `AwsCustomResource` will configure the `logApiResponseData` property as true by default"
+          },
+          "@aws-cdk/aws-s3:keepNotificationInImportedBucket": {
+            "userValue": false,
+            "recommendedValue": false,
+            "explanation": "When enabled, Adding notifications to a bucket in the current stack will not remove notification from imported stack."
+          },
+          "@aws-cdk/aws-stepfunctions-tasks:useNewS3UriParametersForBedrockInvokeModelTask": {
+            "recommendedValue": true,
+            "explanation": "When enabled, use new props for S3 URI field in task definition of state machine for bedrock invoke model.",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/core:explicitStackTags": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, stack tags need to be assigned explicitly on a Stack."
+          },
+          "@aws-cdk/aws-ecs:reduceEc2FargateCloudWatchPermissions": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, we will only grant the necessary permissions when users specify cloudwatch log group through logConfiguration"
+          },
+          "@aws-cdk/aws-dynamodb:resourcePolicyPerReplica": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled will allow you to specify a resource policy per replica, and not copy the source table policy to all replicas"
+          },
+          "@aws-cdk/aws-ec2:ec2SumTImeoutEnabled": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, initOptions.timeout and resourceSignalTimeout values will be summed together."
+          },
+          "@aws-cdk/aws-appsync:appSyncGraphQLAPIScopeLambdaPermission": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, a Lambda authorizer Permission created when using GraphqlApi will be properly scoped with a SourceArn."
+          },
+          "@aws-cdk/aws-rds:setCorrectValueForDatabaseInstanceReadReplicaInstanceResourceId": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, the value of property `instanceResourceId` in construct `DatabaseInstanceReadReplica` will be set to the correct value which is `DbiResourceId` instead of currently `DbInstanceArn`"
+          },
+          "@aws-cdk/core:cfnIncludeRejectComplexResourceUpdateCreatePolicyIntrinsics": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, CFN templates added with `cfn-include` will error if the template contains Resource Update or Create policies with CFN Intrinsics that include non-primitive values."
+          },
+          "@aws-cdk/aws-lambda-nodejs:sdkV3ExcludeSmithyPackages": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, both `@aws-sdk` and `@smithy` packages will be excluded from the Lambda Node.js 18.x runtime to prevent version mismatches in bundled applications."
+          },
+          "@aws-cdk/aws-stepfunctions-tasks:fixRunEcsTaskPolicy": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, the resource of IAM Run Ecs policy generated by SFN EcsRunTask will reference the definition, instead of constructing ARN."
+          },
+          "@aws-cdk/aws-ec2:bastionHostUseAmazonLinux2023ByDefault": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, the BastionHost construct will use the latest Amazon Linux 2023 AMI, instead of Amazon Linux 2."
+          },
+          "@aws-cdk/core:aspectStabilization": {
+            "recommendedValue": true,
+            "explanation": "When enabled, a stabilization loop will be run when invoking Aspects during synthesis.",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/aws-route53-targets:userPoolDomainNameMethodWithoutCustomResource": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, use a new method for DNS Name of user pool domain target without creating a custom resource."
+          },
+          "@aws-cdk/aws-elasticloadbalancingV2:albDualstackWithoutPublicIpv4SecurityGroupRulesDefault": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, the default security group ingress rules will allow IPv6 ingress from anywhere"
+          },
+          "@aws-cdk/aws-iam:oidcRejectUnauthorizedConnections": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, the default behaviour of OIDC provider will reject unauthorized connections"
+          },
+          "@aws-cdk/core:enableAdditionalMetadataCollection": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, CDK will expand the scope of usage data collected to better inform CDK development and improve communication for security concerns and emerging issues."
+          },
+          "@aws-cdk/aws-lambda:createNewPoliciesWithAddToRolePolicy": {
+            "userValue": false,
+            "recommendedValue": false,
+            "explanation": "[Deprecated] When enabled, Lambda will create new inline policies with AddToRolePolicy instead of adding to the Default Policy Statement"
+          },
+          "@aws-cdk/aws-s3:setUniqueReplicationRoleName": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, CDK will automatically generate a unique role name that is used for s3 object replication."
+          },
+          "@aws-cdk/pipelines:reduceStageRoleTrustScope": {
+            "recommendedValue": true,
+            "explanation": "Remove the root account principal from Stage addActions trust policy",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/aws-events:requireEventBusPolicySid": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, grantPutEventsTo() will use resource policies with Statement IDs for service principals."
+          },
+          "@aws-cdk/core:aspectPrioritiesMutating": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When set to true, Aspects added by the construct library on your behalf will be given a priority of MUTATING."
+          },
+          "@aws-cdk/aws-dynamodb:retainTableReplica": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, table replica will be default to the removal policy of source table unless specified otherwise."
+          },
+          "@aws-cdk/cognito:logUserPoolClientSecretValue": {
+            "userValue": false,
+            "recommendedValue": false,
+            "explanation": "When disabled, the value of the user pool client secret will not be logged in the custom resource lambda function logs."
+          },
+          "@aws-cdk/pipelines:reduceCrossAccountActionRoleTrustScope": {
+            "recommendedValue": true,
+            "explanation": "When enabled, scopes down the trust policy for the cross-account action role",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/aws-stepfunctions:useDistributedMapResultWriterV2": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, the resultWriterV2 property of DistributedMap will be used insted of resultWriter"
+          },
+          "@aws-cdk/s3-notifications:addS3TrustKeyPolicyForSnsSubscriptions": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Add an S3 trust policy to a KMS key resource policy for SNS subscriptions."
+          },
+          "@aws-cdk/aws-ec2:requirePrivateSubnetsForEgressOnlyInternetGateway": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, the EgressOnlyGateway resource is only created if private subnets are defined in the dual-stack VPC."
+          },
+          "@aws-cdk/aws-ec2-alpha:useResourceIdForVpcV2Migration": {
+            "userValue": false,
+            "recommendedValue": false,
+            "explanation": "When enabled, use resource IDs for VPC V2 migration"
+          },
+          "@aws-cdk/aws-s3:publicAccessBlockedByDefault": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, setting any combination of options for BlockPublicAccess will automatically set true for any options not defined."
+          },
+          "@aws-cdk/aws-lambda:useCdkManagedLogGroup": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, CDK creates and manages loggroup for the lambda function"
+          },
+          "@aws-cdk/aws-elasticloadbalancingv2:networkLoadBalancerWithSecurityGroupByDefault": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, Network Load Balancer will be created with a security group by default."
+          },
+          "@aws-cdk/aws-stepfunctions-tasks:httpInvokeDynamicJsonPathEndpoint": {
+            "recommendedValue": true,
+            "explanation": "When enabled, allows using a dynamic apiEndpoint with JSONPath format in HttpInvoke tasks.",
+            "unconfiguredBehavesLike": {
+              "v2": true
+            }
+          },
+          "@aws-cdk/aws-ecs-patterns:uniqueTargetGroupId": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "When enabled, ECS patterns will generate unique target group IDs to prevent conflicts during load balancer replacement"
+          },
+          "@aws-cdk/aws-route53-patterns:useDistribution": {
+            "userValue": true,
+            "recommendedValue": true,
+            "explanation": "Use the `Distribution` resource instead of `CloudFrontWebDistribution`"
+          }
+        }
+      }
+    }
+  },
+  "minimumCliVersion": "2.1033.0"
+}

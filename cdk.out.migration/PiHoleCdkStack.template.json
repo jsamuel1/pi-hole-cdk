@@ -1,0 +1,955 @@
+{
+ "Resources": {
+  "networkingrfc1918prefixB68305A2": {
+   "Type": "AWS::EC2::PrefixList",
+   "Properties": {
+    "AddressFamily": "IPv4",
+    "Entries": [
+     {
+      "Cidr": "10.0.0.0/8",
+      "Description": "RFC1918 10/8"
+     },
+     {
+      "Cidr": "172.16.0.0/12",
+      "Description": "RFC1918 172.16/12"
+     },
+     {
+      "Cidr": "192.168.0.0/16",
+      "Description": "RFC1918 192.168/16"
+     }
+    ],
+    "MaxEntries": 3,
+    "PrefixListName": "RFC1918"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/networking/rfc1918prefix"
+   }
+  },
+  "networkingallowdnshttp984E9584": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "AllowDNSandSSH",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": "vpc-069f286e8b8ca3d57"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/networking/allow_dns_http/Resource"
+   }
+  },
+  "networkingallowdnshttpfromIndirectPeer22118EB7AE": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Allow_SSH",
+    "FromPort": 22,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "networkingallowdnshttp984E9584",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourcePrefixListId": {
+     "Fn::GetAtt": [
+      "networkingrfc1918prefixB68305A2",
+      "PrefixListId"
+     ]
+    },
+    "ToPort": 22
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/networking/allow_dns_http/from {IndirectPeer}:22"
+   }
+  },
+  "networkingallowdnshttpfromIndirectPeer2804C4460C0": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Allow_HTTP",
+    "FromPort": 80,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "networkingallowdnshttp984E9584",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourcePrefixListId": {
+     "Fn::GetAtt": [
+      "networkingrfc1918prefixB68305A2",
+      "PrefixListId"
+     ]
+    },
+    "ToPort": 80
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/networking/allow_dns_http/from '{IndirectPeer2}':80"
+   }
+  },
+  "networkingallowdnshttpfromIndirectPeer3539A00D0FB": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Allow_DNS_over_TCP",
+    "FromPort": 53,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "networkingallowdnshttp984E9584",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourcePrefixListId": {
+     "Fn::GetAtt": [
+      "networkingrfc1918prefixB68305A2",
+      "PrefixListId"
+     ]
+    },
+    "ToPort": 53
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/networking/allow_dns_http/from '{IndirectPeer3}':53"
+   }
+  },
+  "networkingallowdnshttpfromIndirectPeer4UDP53F0C05619": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Allow_DNS_over_UDP",
+    "FromPort": 53,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "networkingallowdnshttp984E9584",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "udp",
+    "SourcePrefixListId": {
+     "Fn::GetAtt": [
+      "networkingrfc1918prefixB68305A2",
+      "PrefixListId"
+     ]
+    },
+    "ToPort": 53
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/networking/allow_dns_http/from '{IndirectPeer4}':UDP 53"
+   }
+  },
+  "networkingallowdnshttpfromIndirectPeer5ICMPType81897A3BC": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Allow ICMP Ping",
+    "FromPort": 8,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "networkingallowdnshttp984E9584",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "icmp",
+    "SourcePrefixListId": {
+     "Fn::GetAtt": [
+      "networkingrfc1918prefixB68305A2",
+      "PrefixListId"
+     ]
+    },
+    "ToPort": -1
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/networking/allow_dns_http/from '{IndirectPeer5}':ICMP Type 8"
+   }
+  },
+  "storagepiholepwd56AA2350": {
+   "Type": "AWS::SecretsManager::Secret",
+   "Properties": {
+    "GenerateSecretString": {
+     "ExcludePunctuation": true,
+     "IncludeSpace": false
+    },
+    "Name": "pihole-pwd"
+   },
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/storage/piholepwd/Resource"
+   }
+  },
+  "storagepiholefs1643C501": {
+   "Type": "AWS::EFS::FileSystem",
+   "Properties": {
+    "Encrypted": true,
+    "FileSystemPolicy": {
+     "Statement": [
+      {
+       "Action": [
+        "elasticfilesystem:ClientRootAccess",
+        "elasticfilesystem:ClientWrite"
+       ],
+       "Condition": {
+        "Bool": {
+         "elasticfilesystem:AccessedViaMountTarget": "true"
+        }
+       },
+       "Effect": "Allow",
+       "Principal": {
+        "AWS": "*"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "FileSystemTags": [
+     {
+      "Key": "Name",
+      "Value": "pihole-fs"
+     }
+    ]
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/storage/pihole-fs/Resource"
+   }
+  },
+  "storagepiholefsEfsSecurityGroupACBC1060": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "PiHoleCdkStack/storage/pihole-fs/EfsSecurityGroup",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "Tags": [
+     {
+      "Key": "Name",
+      "Value": "pihole-fs"
+     }
+    ],
+    "VpcId": "vpc-069f286e8b8ca3d57"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/storage/pihole-fs/EfsSecurityGroup/Resource"
+   }
+  },
+  "storagepiholefsEfsSecurityGroupfromPiHoleCdkStacknetworkingallowdnshttp15F47C1220495231691F": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "from PiHoleCdkStacknetworkingallowdnshttp15F47C12:2049",
+    "FromPort": 2049,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "storagepiholefsEfsSecurityGroupACBC1060",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "networkingallowdnshttp984E9584",
+      "GroupId"
+     ]
+    },
+    "ToPort": 2049
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/storage/pihole-fs/EfsSecurityGroup/from PiHoleCdkStacknetworkingallowdnshttp15F47C12:2049"
+   }
+  },
+  "storagepiholefsEfsMountTargetPrivateSubnet13D991399": {
+   "Type": "AWS::EFS::MountTarget",
+   "Properties": {
+    "FileSystemId": {
+     "Ref": "storagepiholefs1643C501"
+    },
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "storagepiholefsEfsSecurityGroupACBC1060",
+       "GroupId"
+      ]
+     }
+    ],
+    "SubnetId": "subnet-095b069ea2f8dae96"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/storage/pihole-fs/EfsMountTarget-PrivateSubnet1"
+   }
+  },
+  "storagepiholefsEfsMountTargetPrivateSubnet252655C50": {
+   "Type": "AWS::EFS::MountTarget",
+   "Properties": {
+    "FileSystemId": {
+     "Ref": "storagepiholefs1643C501"
+    },
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "storagepiholefsEfsSecurityGroupACBC1060",
+       "GroupId"
+      ]
+     }
+    ],
+    "SubnetId": "subnet-0640a0a54147e3239"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/storage/pihole-fs/EfsMountTarget-PrivateSubnet2"
+   }
+  },
+  "storagepiholefsEfsMountTargetPrivateSubnet31E5741F8": {
+   "Type": "AWS::EFS::MountTarget",
+   "Properties": {
+    "FileSystemId": {
+     "Ref": "storagepiholefs1643C501"
+    },
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "storagepiholefsEfsSecurityGroupACBC1060",
+       "GroupId"
+      ]
+     }
+    ],
+    "SubnetId": "subnet-017bb34117eab1589"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/storage/pihole-fs/EfsMountTarget-PrivateSubnet3"
+   }
+  },
+  "piholerole45D2AA68": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ec2.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/AmazonSSMManagedInstanceCore"
+       ]
+      ]
+     },
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/AmazonElasticFileSystemClientReadWriteAccess"
+       ]
+      ]
+     },
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/AmazonSSMPatchAssociation"
+       ]
+      ]
+     },
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/CloudWatchAgentServerPolicy"
+       ]
+      ]
+     }
+    ],
+    "Policies": [
+     {
+      "PolicyDocument": {
+       "Statement": [
+        {
+         "Action": [
+          "secretsmanager:DescribeSecret",
+          "secretsmanager:GetResourcePolicy",
+          "secretsmanager:GetSecretValue",
+          "secretsmanager:ListSecretVersionIds"
+         ],
+         "Effect": "Allow",
+         "Resource": {
+          "Ref": "storagepiholepwd56AA2350"
+         }
+        },
+        {
+         "Action": "secretsmanager:ListSecrets",
+         "Effect": "Allow",
+         "Resource": "*"
+        }
+       ],
+       "Version": "2012-10-17"
+      },
+      "PolicyName": "secretPolicy"
+     },
+     {
+      "PolicyDocument": {
+       "Statement": [
+        {
+         "Action": [
+          "kms:Decrypt",
+          "kms:DescribeKey",
+          "kms:Encrypt",
+          "kms:GenerateDataKey*",
+          "kms:ReEncrypt*"
+         ],
+         "Effect": "Allow",
+         "Resource": "*"
+        }
+       ],
+       "Version": "2012-10-17"
+      },
+      "PolicyName": "kmsPolicy"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/pihole-role/Resource"
+   }
+  },
+  "piholeasglaunchtemplateProfile79BDF81F": {
+   "Type": "AWS::IAM::InstanceProfile",
+   "Properties": {
+    "Roles": [
+     {
+      "Ref": "piholerole45D2AA68"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/pihole-asg-launchtemplate/Profile"
+   }
+  },
+  "piholeasglaunchtemplate35F914B9": {
+   "Type": "AWS::EC2::LaunchTemplate",
+   "Properties": {
+    "LaunchTemplateData": {
+     "IamInstanceProfile": {
+      "Arn": {
+       "Fn::GetAtt": [
+        "piholeasglaunchtemplateProfile79BDF81F",
+        "Arn"
+       ]
+      }
+     },
+     "ImageId": {
+      "Ref": "SsmParameterValueawsservicecanonicalubuntuserver2204stablecurrentarm64hvmebsgp2amiidC96584B6F00A464EAD1953AFF4B05118Parameter"
+     },
+     "InstanceType": "t4g.small",
+     "KeyName": "pihole",
+     "MetadataOptions": {
+      "HttpTokens": "required"
+     },
+     "SecurityGroupIds": [
+      {
+       "Fn::GetAtt": [
+        "networkingallowdnshttp984E9584",
+        "GroupId"
+       ]
+      }
+     ],
+     "TagSpecifications": [
+      {
+       "ResourceType": "instance",
+       "Tags": [
+        {
+         "Key": "Name",
+         "Value": "PiHoleCdkStack/pihole-asg-launchtemplate"
+        }
+       ]
+      },
+      {
+       "ResourceType": "volume",
+       "Tags": [
+        {
+         "Key": "Name",
+         "Value": "PiHoleCdkStack/pihole-asg-launchtemplate"
+        }
+       ]
+      }
+     ],
+     "UserData": {
+      "Fn::Base64": {
+       "Fn::Join": [
+        "",
+        [
+         "#!/bin/bash\nSECRET_ARN=",
+         {
+          "Ref": "storagepiholepwd56AA2350"
+         },
+         "\nEFS_ID=",
+         {
+          "Ref": "storagepiholefs1643C501"
+         },
+         "\nREV_SERVER_CIDR=192.168.0.0/16\nREV_SERVER_TARGET=192.168.1.1\n#!/bin/bash -x\n# Pi-hole v6 installation script\n# This script installs Pi-hole v6 which includes an embedded web server\n# No longer requires lighttpd or PHP as Pi-hole v6 has these built-in\n# \n# log user data output to /var/log/user-data.log\nexec > >(tee /var/log/user-data.log | logger -t user-data -s 2>/dev/console) 2>&1\n\n# Function to log with timestamp\nlog_message() {\n    echo \"[$(date '+%Y-%m-%d %H:%M:%S')] $1\"\n}\n\n# Function to retry commands with exponential backoff\nretry_command() {\n    local max_attempts=5\n    local delay=1\n    local attempt=1\n    \n    while [ $attempt -le $max_attempts ]; do\n        log_message \"Attempt $attempt of $max_attempts: $*\"\n        if \"$@\"; then\n            log_message \"Command succeeded: $*\"\n            return 0\n        else\n            log_message \"Command failed: $*\"\n            if [ $attempt -lt $max_attempts ]; then\n                log_message \"Waiting ${delay}s before retry...\"\n                sleep $delay\n                delay=$((delay * 2))\n            fi\n            attempt=$((attempt + 1))\n        fi\n    done\n    \n    log_message \"Command failed after $max_attempts attempts: $*\"\n    return 1\n}\n\nlog_message \"Starting Pi-hole v6 installation userdata script\"\n\n# upgrade packages\nlog_message \"Updating package lists and upgrading system\"\nretry_command apt update -y\nretry_command apt upgrade -y\n\n# Install essential packages (removed lighttpd, php-* packages, but kept Lua)\nlog_message \"Installing required packages\"\nretry_command apt install -y dialog unzip idn2 dns-root-data jq git binutils make wget python3-pip curl\n\n# Install Lua packages (still needed for web interface extensions and processing)\nlog_message \"Installing Lua packages for web interface processing\"\nretry_command apt install -y lua5.1 liblua5.1-0-dev lua-cjson\n\n# not amazon linux, so need to build the package\nlog_message \"Building and installing EFS utils\"\nretry_command git clone https://github.com/aws/efs-utils /tmp/efs-utils/\ncd /tmp/efs-utils\nretry_command ./build-deb.sh\nretry_command apt -y install ./build/amazon-efs-utils*deb\nretry_command pip3 install botocore --upgrade\n\n# Create pihole directory and setup EFS mount with proper error handling\nlog_message \"Setting up EFS mount for Pi-hole configuration\"\nmkdir -p /etc/pihole/\necho \"$EFS_ID:/ /etc/pihole/ efs _netdev,noresvport,tls,iam,nofail 0 0\" >>/etc/fstab\n\n# Retry EFS mount with better error handling\nlog_message \"Mounting EFS filesystem\"\nif ! retry_command mount -av; then\n    log_message \"EFS mount failed, but continuing with local storage\"\n    # Ensure directory exists even if EFS mount fails\n    mkdir -p /etc/pihole/\nfi\n\n# Verify EFS mount status\nif mountpoint -q /etc/pihole; then\n    log_message \"EFS successfully mounted to /etc/pihole\"\nelse\n    log_message \"WARNING: EFS not mounted, using local storage\"\nfi\n\n# Note: Pi-hole v6 configuration is handled via pihole.toml file created below\n\n# Setup initial blocklists for v6\nlog_message \"Setting up initial Pi-hole blocklists\"\nif [ ! -a /etc/pihole/adlists.list ]; then\n\tcat <<EOF >/etc/pihole/adlists.list\nhttps://raw.githubusercontent.com/StevenBlack/hosts/master/hosts\nhttps://v.firebog.net/hosts/Admiral.txt\nhttps://v.firebog.net/hosts/Easylist.txt\nhttps://v.firebog.net/hosts/Easyprivacy.txt\nhttps://v.firebog.net/hosts/Prigent-Ads.txt\nhttps://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/SmartTV.txt\nEOF\nfi\n\n# Stop any existing lighttpd service (in case it's running from previous installations)\nlog_message \"Stopping any existing lighttpd service\"\nsystemctl stop lighttpd 2>/dev/null || true\nsystemctl disable lighttpd 2>/dev/null || true\n\n# Create Pi-hole v6 TOML configuration for truly unattended installation\n# Pi-hole v6 installer checks for pihole.toml OR setupVars.conf to detect fresh install\nlog_message \"Creating Pi-hole v6 TOML configuration\"\nmkdir -p /etc/pihole\n\n# Detect the primary network interface (exclude loopback)\nPIHOLE_INTERFACE=$(ip -o link show up | awk -F': ' '!/lo/ {print $2; exit}')\nlog_message \"Detected network interface: $PIHOLE_INTERFACE\"\ncat > /etc/pihole/pihole.toml << 'TOML_EOF'\n# Pi-hole v6 configuration file\n# Generated by CDK user-data script\n\n[dns]\n  upstreams = [\"1.1.1.1\", \"1.0.0.1\"]\n  CNAMEdeepInspect = true\n  blockESNI = true\n  EDNS0ECS = true\n  ignoreLocalhost = false\n  showDNSSEC = true\n  analyzeOnlyAandAAAA = false\n  piholePTR = \"PI.HOLE\"\n  replyWhenBusy = \"ALLOW\"\n  blockTTL = 2\n  domainNeeded = false\n  expandHosts = false\n  bogusPriv = false\n  dnssec = false\nTOML_EOF\n\n# Append interface setting (needs variable substitution)\ncat >> /etc/pihole/pihole.toml << EOF\n  interface = \"${PIHOLE_INTERFACE}\"\nEOF\n\ncat >> /etc/pihole/pihole.toml << 'TOML_EOF'\n  listeningMode = \"ALL\"\n  queryLogging = true\n  port = 53\n\n  [dns.domain]\n    name = \"lan\"\n    local = true\n\n  [dns.cache]\n    size = 10000\n    optimizer = 3600\n\n  [dns.blocking]\n    active = true\n    mode = \"NULL\"\n\n  [dns.specialDomains]\n    mozillaCanary = true\n    iCloudPrivateRelay = true\n\n  [dns.rateLimit]\n    count = 1000\n    interval = 60\n\nTOML_EOF\n\n# Append reverse server settings (needs variable substitution)\ncat >> /etc/pihole/pihole.toml << EOF\n  revServers = [\"true,${REV_SERVER_CIDR},${REV_SERVER_TARGET},localdomain\"]\nEOF\n\ncat >> /etc/pihole/pihole.toml << 'TOML_EOF'\n\n[dhcp]\n  active = false\n\n[resolver]\n  resolveIPv4 = true\n  resolveIPv6 = true\n  networkNames = true\n  refreshNames = \"IPV4_ONLY\"\n\n[database]\n  DBimport = true\n  maxDBdays = 365\n  DBinterval = 60\n  useWAL = true\n\n  [database.network]\n    parseARPcache = true\n    expire = 365\n\n[webserver]\n  domain = \"pi.hole\"\n  acl = \"\"\n  port = \"80o,443os,[::]:80o,[::]:443os\"\n\n  [webserver.session]\n    timeout = 1800\n    restore = true\n\n  [webserver.paths]\n    webroot = \"/var/www/html\"\n    webhome = \"/admin/\"\n\n  [webserver.api]\n    prettyJSON = false\n    pwhash = \"\"\n    cli_pw = true\n    maxHistory = 86400\n\n[files]\n  pid = \"/run/pihole-FTL.pid\"\n  database = \"/etc/pihole/pihole-FTL.db\"\n  gravity = \"/etc/pihole/gravity.db\"\n  macvendor = \"/etc/pihole/macvendor.db\"\n\n  [files.log]\n    ftl = \"/var/log/pihole/FTL.log\"\n    dnsmasq = \"/var/log/pihole/pihole.log\"\n    webserver = \"/var/log/pihole/webserver.log\"\n\n[misc]\n  privacylevel = 0\n  delay_startup = 0\n  nice = -10\n  addr2line = true\n\n[debug]\n  database = false\n  networking = false\n  queries = false\nTOML_EOF\n\nlog_message \"Pi-hole TOML configuration created\"\n\n# Install Pi-hole v6 unattended\nlog_message \"Installing Pi-hole v6\"\nretry_command wget -O /tmp/basic-install.sh https://install.pi-hole.net\nretry_command bash /tmp/basic-install.sh --unattended\n\n# Install AWS CLI\nlog_message \"Installing AWS CLI\"\nretry_command snap install aws-cli --channel=v2/candidate --classic\n\n# Wait for AWS CLI to be available\nlog_message \"Waiting for AWS CLI to be available\"\nsleep 10\n\n# Set the Pi-hole web UI password\nlog_message \"Setting Pi-hole web UI password from Secrets Manager\"\nif retry_command aws secretsmanager get-secret-value --secret-id $SECRET_ARN; then\n    PASSWORD=$(aws secretsmanager get-secret-value --secret-id $SECRET_ARN | jq .SecretString -j)\n    /usr/local/bin/pihole -a -p \"$PASSWORD\"\n    log_message \"Pi-hole password set successfully\"\nelse\n    log_message \"WARNING: Failed to retrieve password from Secrets Manager\"\nfi\n\n# Apply whitelist\nlog_message \"Applying common whitelists\"\nif retry_command git clone https://github.com/anudeepND/whitelist.git /tmp/whitelist/; then\n    python3 /tmp/whitelist/scripts/whitelist.py\n    log_message \"Whitelist applied successfully\"\nelse\n    log_message \"WARNING: Failed to apply whitelist\"\nfi\n\n# Pi-hole v6 configuration is already set via pihole.toml\n# No need for post-install CLI configuration commands\n\n# Start and enable Pi-hole FTL service\nlog_message \"Starting Pi-hole FTL service\"\nsystemctl restart pihole-FTL\nsystemctl enable pihole-FTL\n\n# Wait for service to start\nsleep 10\n\n# Verify Pi-hole FTL service is running\nlog_message \"Verifying Pi-hole FTL service status\"\nif systemctl is-active --quiet pihole-FTL; then\n    log_message \"Pi-hole FTL is running successfully\"\nelse\n    log_message \"WARNING: Pi-hole FTL failed to start\"\n    systemctl status pihole-FTL\nfi\n\n# Verify web interface is accessible on port 80\nlog_message \"Verifying Pi-hole v6 web interface accessibility\"\nsleep 5\nif curl -s -f http://localhost/admin/ >/dev/null 2>&1; then\n    log_message \"Pi-hole v6 web interface is accessible on port 80\"\nelif curl -s -f http://localhost:8080/admin/ >/dev/null 2>&1; then\n    log_message \"Pi-hole v6 web interface is accessible on port 8080 (fallback)\"\nelse\n    log_message \"WARNING: Pi-hole v6 web interface is not accessible\"\nfi\n\n# Test DNS functionality\nlog_message \"Testing DNS functionality\"\nif dig @127.0.0.1 google.com +short >/dev/null 2>&1; then\n    log_message \"DNS functionality test passed\"\nelse\n    log_message \"WARNING: DNS functionality test failed\"\nfi\n\n# Display Pi-hole v6 configuration summary\nlog_message \"Pi-hole v6 configuration summary:\"\n/usr/local/bin/pihole-FTL --config --list 2>/dev/null || log_message \"Could not retrieve configuration list\"\n\n# Check which ports Pi-hole is listening on\nlog_message \"Checking Pi-hole listening ports:\"\nnetstat -tlnp | grep pihole-FTL || log_message \"Could not determine listening ports\"\n\nlog_message \"Pi-hole v6 installation userdata script completed successfully\"\n"
+        ]
+       ]
+      }
+     }
+    },
+    "TagSpecifications": [
+     {
+      "ResourceType": "launch-template",
+      "Tags": [
+       {
+        "Key": "Name",
+        "Value": "PiHoleCdkStack/pihole-asg-launchtemplate"
+       }
+      ]
+     }
+    ]
+   },
+   "DependsOn": [
+    "piholerole45D2AA68"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/pihole-asg-launchtemplate/Resource"
+   }
+  },
+  "piholeasgASG8930D123": {
+   "Type": "AWS::AutoScaling::AutoScalingGroup",
+   "Properties": {
+    "HealthCheckType": "EC2",
+    "LaunchTemplate": {
+     "LaunchTemplateId": {
+      "Ref": "piholeasglaunchtemplate35F914B9"
+     },
+     "Version": {
+      "Fn::GetAtt": [
+       "piholeasglaunchtemplate35F914B9",
+       "LatestVersionNumber"
+      ]
+     }
+    },
+    "MaxInstanceLifetime": 604800,
+    "MaxSize": "1",
+    "MinSize": "1",
+    "TargetGroupARNs": [
+     {
+      "Ref": "loadbalancernlbNLBDNSpiholesTargetsGroupBADD8C1A"
+     },
+     {
+      "Ref": "loadbalancernlbNLBHTTPpiholeHttpTargetsGroup59493487"
+     }
+    ],
+    "VPCZoneIdentifier": [
+     "subnet-095b069ea2f8dae96",
+     "subnet-0640a0a54147e3239",
+     "subnet-017bb34117eab1589"
+    ]
+   },
+   "UpdatePolicy": {
+    "AutoScalingRollingUpdate": {
+     "SuspendProcesses": [
+      "HealthCheck",
+      "ReplaceUnhealthy",
+      "AZRebalance",
+      "AlarmNotification",
+      "ScheduledActions",
+      "InstanceRefresh"
+     ]
+    },
+    "AutoScalingScheduledAction": {
+     "IgnoreUnmodifiedGroupSizeProperties": true
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/pihole-asg/ASG"
+   }
+  },
+  "loadbalancernlbCB05B3A6": {
+   "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+   "Properties": {
+    "LoadBalancerAttributes": [
+     {
+      "Key": "deletion_protection.enabled",
+      "Value": "false"
+     },
+     {
+      "Key": "load_balancing.cross_zone.enabled",
+      "Value": "true"
+     }
+    ],
+    "Name": "pihole",
+    "Scheme": "internal",
+    "SecurityGroups": [],
+    "Subnets": [
+     "subnet-095b069ea2f8dae96",
+     "subnet-0640a0a54147e3239",
+     "subnet-017bb34117eab1589"
+    ],
+    "Type": "network"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/loadbalancer/nlb/Resource"
+   }
+  },
+  "loadbalancernlbNLBDNSA035D5D5": {
+   "Type": "AWS::ElasticLoadBalancingV2::Listener",
+   "Properties": {
+    "DefaultActions": [
+     {
+      "TargetGroupArn": {
+       "Ref": "loadbalancernlbNLBDNSpiholesTargetsGroupBADD8C1A"
+      },
+      "Type": "forward"
+     }
+    ],
+    "LoadBalancerArn": {
+     "Ref": "loadbalancernlbCB05B3A6"
+    },
+    "Port": 53,
+    "Protocol": "TCP_UDP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/loadbalancer/nlb/NLBDNS/Resource"
+   }
+  },
+  "loadbalancernlbNLBDNSpiholesTargetsGroupBADD8C1A": {
+   "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+   "Properties": {
+    "Port": 53,
+    "Protocol": "TCP_UDP",
+    "TargetGroupAttributes": [
+     {
+      "Key": "deregistration_delay.timeout_seconds",
+      "Value": "120"
+     },
+     {
+      "Key": "deregistration_delay.connection_termination.enabled",
+      "Value": "true"
+     }
+    ],
+    "TargetType": "instance",
+    "VpcId": "vpc-069f286e8b8ca3d57"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/loadbalancer/nlb/NLBDNS/piholesTargetsGroup/Resource"
+   }
+  },
+  "loadbalancernlbNLBHTTP2327CFDA": {
+   "Type": "AWS::ElasticLoadBalancingV2::Listener",
+   "Properties": {
+    "DefaultActions": [
+     {
+      "TargetGroupArn": {
+       "Ref": "loadbalancernlbNLBHTTPpiholeHttpTargetsGroup59493487"
+      },
+      "Type": "forward"
+     }
+    ],
+    "LoadBalancerArn": {
+     "Ref": "loadbalancernlbCB05B3A6"
+    },
+    "Port": 80,
+    "Protocol": "TCP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/loadbalancer/nlb/NLBHTTP/Resource"
+   }
+  },
+  "loadbalancernlbNLBHTTPpiholeHttpTargetsGroup59493487": {
+   "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+   "Properties": {
+    "HealthCheckPath": "/admin/",
+    "HealthCheckProtocol": "HTTP",
+    "Port": 80,
+    "Protocol": "TCP",
+    "TargetGroupAttributes": [
+     {
+      "Key": "deregistration_delay.timeout_seconds",
+      "Value": "120"
+     }
+    ],
+    "TargetType": "instance",
+    "VpcId": "vpc-069f286e8b8ca3d57"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/loadbalancer/nlb/NLBHTTP/piholeHttpTargetsGroup/Resource"
+   }
+  },
+  "loadbalancerGetEndpointIpsC39C9DEF": {
+   "Type": "Custom::AWS",
+   "Properties": {
+    "ServiceToken": {
+     "Fn::GetAtt": [
+      "AWS679f53fac002430cb0da5b7982bd22872D164C4C",
+      "Arn"
+     ]
+    },
+    "Create": {
+     "Fn::Join": [
+      "",
+      [
+       "{\"service\":\"EC2\",\"action\":\"describeNetworkInterfaces\",\"parameters\":{\"Filters\":[{\"Name\":\"description\",\"Values\":[\"ELB ",
+       {
+        "Fn::GetAtt": [
+         "loadbalancernlbCB05B3A6",
+         "LoadBalancerFullName"
+        ]
+       },
+       "\"]}]},\"physicalResourceId\":{\"id\":\"GetEndpointIps\"},\"outputPaths\":[\"NetworkInterfaces.0.PrivateIpAddress\",\"NetworkInterfaces.1.PrivateIpAddress\",\"NetworkInterfaces.2.PrivateIpAddress\"]}"
+      ]
+     ]
+    },
+    "Update": {
+     "Fn::Join": [
+      "",
+      [
+       "{\"service\":\"EC2\",\"action\":\"describeNetworkInterfaces\",\"parameters\":{\"Filters\":[{\"Name\":\"description\",\"Values\":[\"ELB ",
+       {
+        "Fn::GetAtt": [
+         "loadbalancernlbCB05B3A6",
+         "LoadBalancerFullName"
+        ]
+       },
+       "\"]}]},\"physicalResourceId\":{\"id\":\"GetEndpointIps\"},\"outputPaths\":[\"NetworkInterfaces.0.PrivateIpAddress\",\"NetworkInterfaces.1.PrivateIpAddress\",\"NetworkInterfaces.2.PrivateIpAddress\"]}"
+      ]
+     ]
+    },
+    "InstallLatestAwsSdk": false
+   },
+   "DependsOn": [
+    "loadbalancerGetEndpointIpsCustomResourcePolicy4ECFB2FD",
+    "loadbalancernlbNLBDNSpiholesTargetsGroupBADD8C1A",
+    "loadbalancernlbNLBDNSA035D5D5",
+    "loadbalancernlbNLBHTTPpiholeHttpTargetsGroup59493487",
+    "loadbalancernlbNLBHTTP2327CFDA",
+    "loadbalancernlbCB05B3A6"
+   ],
+   "UpdateReplacePolicy": "Delete",
+   "DeletionPolicy": "Delete",
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/loadbalancer/GetEndpointIps/Resource/Default"
+   }
+  },
+  "loadbalancerGetEndpointIpsCustomResourcePolicy4ECFB2FD": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": "ec2:DescribeNetworkInterfaces",
+       "Effect": "Allow",
+       "Resource": "*"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "loadbalancerGetEndpointIpsCustomResourcePolicy4ECFB2FD",
+    "Roles": [
+     {
+      "Ref": "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2"
+     }
+    ]
+   },
+   "DependsOn": [
+    "loadbalancernlbNLBDNSpiholesTargetsGroupBADD8C1A",
+    "loadbalancernlbNLBDNSA035D5D5",
+    "loadbalancernlbNLBHTTPpiholeHttpTargetsGroup59493487",
+    "loadbalancernlbNLBHTTP2327CFDA",
+    "loadbalancernlbCB05B3A6"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/loadbalancer/GetEndpointIps/CustomResourcePolicy/Resource"
+   }
+  },
+  "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "lambda.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "ManagedPolicyArns": [
+     {
+      "Fn::Join": [
+       "",
+       [
+        "arn:",
+        {
+         "Ref": "AWS::Partition"
+        },
+        ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+       ]
+      ]
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/AWS679f53fac002430cb0da5b7982bd2287/ServiceRole/Resource"
+   }
+  },
+  "AWS679f53fac002430cb0da5b7982bd22872D164C4C": {
+   "Type": "AWS::Lambda::Function",
+   "Properties": {
+    "Code": {
+     "S3Bucket": "cdk-hnb659fds-assets-717494614307-us-west-2",
+     "S3Key": "bc8ef58951f4c88e641dd23090e9d2e2e61c7530a07960e767522941e959b625.zip"
+    },
+    "Handler": "index.handler",
+    "Role": {
+     "Fn::GetAtt": [
+      "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2",
+      "Arn"
+     ]
+    },
+    "Runtime": "nodejs22.x",
+    "Timeout": 120
+   },
+   "DependsOn": [
+    "AWS679f53fac002430cb0da5b7982bd2287ServiceRoleC1EA0FF2"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/AWS679f53fac002430cb0da5b7982bd2287/Resource",
+    "aws:asset:path": "asset.bc8ef58951f4c88e641dd23090e9d2e2e61c7530a07960e767522941e959b625",
+    "aws:asset:is-bundled": false,
+    "aws:asset:property": "Code"
+   }
+  },
+  "AWS679f53fac002430cb0da5b7982bd2287LogGroup449FB7C2": {
+   "Type": "AWS::Logs::LogGroup",
+   "Properties": {
+    "LogGroupName": {
+     "Fn::Join": [
+      "",
+      [
+       "/aws/lambda/",
+       {
+        "Ref": "AWS679f53fac002430cb0da5b7982bd22872D164C4C"
+       }
+      ]
+     ]
+    },
+    "RetentionInDays": 731
+   },
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/AWS679f53fac002430cb0da5b7982bd2287/LogGroup/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/+1WS2/bOBD+LdVxwWg3Tk+5JekDBpzWsHITgmBCjWXGFKmSQydeQv99wYccOW62pwX20INBzoPz/GasWTm7uCj/+gDP9ow32zMpHktfEfAtW6HVznCsiz8K9ovfPYNn++CRz0p/s1ZLg2vxshCWWIXcGUH7r0a7vvZFg5Yb0ZPQqriMr3c9j7eB+QKaZq5ag9aunMTisvYFBzVXUihMnDVIi6zgWinkwYrNZpwSPxzOm9HWEOP6bfQ/M/p5ajOoJzEj4zDq/GtjJw+i+/vhnt2s1RFcThjZBFuAU3xzh10vgbD2hVCWQHG82/eYY++Ab4TCeQftyHIWzScgyKTRcpTYqZdRjD+cMDjvGrubFZchLVZscb8EYVJeMeLjWAZmkRsk24GCFk3pq0jXvkiCb9CNTltUaIAwaVRkhGqLS1/gC5euwaVTnBykSUnehYqSqgc+tm041M0gDQzXtvRfhMRqbwm7+rULrEDFzb4nbEZz64PeIapk7dVAoG61U3QHpg0OBHSlX2kZqg5EwDcJSUstBd+nxuZeBq1wznNzlkYHjyyphooQEHaoyE5xUk24tR8S3KKnO73SI3jeZUfXycXAwJG2HKRQbemvHOkqEeM2kkfNe7OQ4q1yjwpDKL6w8ZohtjRiF54MAWkvY4oLsUYShw67vgE6lCayNgiSNjcb5NtJ1jmPb0jP2mxTrTMWT5J9Xymm/jbLgaEES4JLDc0jSFBcqHY3K302tNDQXEc+mvpopwd0T4RsfCAsBei+98eQHmYldhpuEE/IgUnoHhsofSVUK5G0+hKgL7SqfeGcaHLpktrSmV7bw5Rjp82+En+PjFB97eh0xKVup9O9zi4m8/jzvkcG182otQHVSDSjA6cO/c74vUWCJm6Z+mgdnopy0ybZ/q/SSasgGx6YvXgAa5FseRUOZi/Ka8e3SNdgsb5nUre29Av9Olz5+ma5jBrDECcVDHRIaBh3lnT3YPJnhy2vnu1N5I1fIuyY/Bn+0uIZ9WOgFUErVBsE3x31jgamdIPlk/1zN/tYnp+X5x+erBBnOflylc5/AD0Dh4AbCQAA"
+   },
+   "Metadata": {
+    "aws:cdk:path": "PiHoleCdkStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Parameters": {
+  "SsmParameterValueawsservicecanonicalubuntuserver2204stablecurrentarm64hvmebsgp2amiidC96584B6F00A464EAD1953AFF4B05118Parameter": {
+   "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+   "Default": "/aws/service/canonical/ubuntu/server/22.04/stable/current/arm64/hvm/ebs-gp2/ami-id"
+  },
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Outputs": {
+  "dns1": {
+   "Value": {
+    "Fn::GetAtt": [
+     "loadbalancerGetEndpointIpsC39C9DEF",
+     "NetworkInterfaces.0.PrivateIpAddress"
+    ]
+   }
+  },
+  "dns2": {
+   "Value": {
+    "Fn::GetAtt": [
+     "loadbalancerGetEndpointIpsC39C9DEF",
+     "NetworkInterfaces.1.PrivateIpAddress"
+    ]
+   }
+  },
+  "adminurl": {
+   "Value": "http://pi.hole/admin"
+  },
+  "SecretArn": {
+   "Value": {
+    "Ref": "storagepiholepwd56AA2350"
+   }
+  },
+  "RFC1918PrefixListId": {
+   "Value": {
+    "Fn::GetAtt": [
+     "networkingrfc1918prefixB68305A2",
+     "PrefixListId"
+    ]
+   },
+   "Export": {
+    "Name": "RFC1918PrefixListId"
+   }
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

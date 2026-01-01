@@ -1,0 +1,126 @@
+{
+ "Resources": {
+  "vpcsitetositevpnCustomerGatewayD928C567": {
+   "Type": "AWS::EC2::CustomerGateway",
+   "Properties": {
+    "BgpAsn": 65000,
+    "IpAddress": "127.0.0.1",
+    "Type": "ipsec.1"
+   },
+   "Metadata": {
+    "aws:cdk:path": "SiteToSiteVpnStack/vpc/sitetositevpn/CustomerGateway"
+   }
+  },
+  "vpcsitetositevpnACFC548E": {
+   "Type": "AWS::EC2::VPNConnection",
+   "Properties": {
+    "CustomerGatewayId": {
+     "Ref": "vpcsitetositevpnCustomerGatewayD928C567"
+    },
+    "StaticRoutesOnly": true,
+    "Type": "ipsec.1",
+    "VpnGatewayId": {
+     "Ref": "vpcVpnGateway3B5265B5"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "SiteToSiteVpnStack/vpc/sitetositevpn/Resource"
+   }
+  },
+  "vpcsitetositevpnRoute19216800165389EB67": {
+   "Type": "AWS::EC2::VPNConnectionRoute",
+   "Properties": {
+    "DestinationCidrBlock": "192.168.0.0/16",
+    "VpnConnectionId": {
+     "Ref": "vpcsitetositevpnACFC548E"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "SiteToSiteVpnStack/vpc/sitetositevpn/Route1921680016"
+   }
+  },
+  "vpcVpnGateway3B5265B5": {
+   "Type": "AWS::EC2::VPNGateway",
+   "Properties": {
+    "Type": "ipsec.1"
+   },
+   "Metadata": {
+    "aws:cdk:path": "SiteToSiteVpnStack/vpc/VpnGateway/Default"
+   }
+  },
+  "vpcVPCVPNGW0F68A0AA": {
+   "Type": "AWS::EC2::VPCGatewayAttachment",
+   "Properties": {
+    "VpcId": "vpc-069f286e8b8ca3d57",
+    "VpnGatewayId": {
+     "Ref": "vpcVpnGateway3B5265B5"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "SiteToSiteVpnStack/vpc/VPCVPNGW"
+   }
+  },
+  "vpcRoutePropagationC2468C25": {
+   "Type": "AWS::EC2::VPNGatewayRoutePropagation",
+   "Properties": {
+    "RouteTableIds": [
+     "rtb-0e1b5c4a33d9d952d",
+     "rtb-0d3c5812eee1ab0e3",
+     "rtb-03fd923d374e6be92"
+    ],
+    "VpnGatewayId": {
+     "Ref": "vpcVpnGateway3B5265B5"
+    }
+   },
+   "DependsOn": [
+    "vpcVPCVPNGW0F68A0AA"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "SiteToSiteVpnStack/vpc/RoutePropagation"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/3WNQWvCQBCFf4t7lM3aRE/eJIfeJETIJYiMm2ldbWaXzMRgQ/67GAOtlB6Gmfd4877EJMuleZtBx5GtLtGXO5p+J2AvOkf2bWOxVHOl/5m9ho4PaBPTF4FST4RWnKeyV9dg1XqMuTAdLCDO5r4V5NEa9jr9oLRl8TU27yDYwe1hFdn2p+yPMTboItD0UfYKavj2tHMVbpgmnNwC/sIU2faFkE5qIwL2VCPJa2qkZI0P8AkP6jBo8hWaMy+uycrEsYlnZ3YualoSV6PJn/sOiewMEFMBAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "SiteToSiteVpnStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

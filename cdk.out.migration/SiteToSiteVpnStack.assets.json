@@ -1,0 +1,21 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "4ae1ce3dc94094c685bc2f086a8d7f2777dab4dc68065546ecf8aa0f853027e0": {
+      "displayName": "SiteToSiteVpnStack Template",
+      "source": {
+        "path": "SiteToSiteVpnStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "717494614307-us-west-2-00fadf91": {
+          "bucketName": "cdk-hnb659fds-assets-717494614307-us-west-2",
+          "objectKey": "4ae1ce3dc94094c685bc2f086a8d7f2777dab4dc68065546ecf8aa0f853027e0.json",
+          "region": "us-west-2",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::717494614307:role/cdk-hnb659fds-file-publishing-role-717494614307-us-west-2"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}
