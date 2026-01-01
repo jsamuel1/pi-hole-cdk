@@ -49,16 +49,19 @@ jobs:
         run: |
           npx cdk --no-notices synth PiHoleCdkStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
-            --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}"
+            --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
+            --context vpc_name="${{ secrets.VPC_NAME_SYDNEY }}"
           npx cdk --no-notices synth PiHoleEcsManagedStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
-            --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}"
+            --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
+            --context vpc_name="${{ secrets.VPC_NAME_SYDNEY }}"
 
       - name: Deploy Original EC2 Stack (PiHoleCdkStack) to Sydney 🚢
         run: |
           npx cdk --no-notices deploy PiHoleCdkStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
+            --context vpc_name="${{ secrets.VPC_NAME_SYDNEY }}" \
             --require-approval never
 
       - name: Deploy ECS Stack (PiHoleEcsManagedStack) to Sydney ⚓
@@ -66,6 +69,7 @@ jobs:
           npx cdk --no-notices deploy PiHoleEcsManagedStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
+            --context vpc_name="${{ secrets.VPC_NAME_SYDNEY }}" \
             --require-approval never
 
   # Bootstrap and Deploy to Melbourne (ap-southeast-4) 🗺️
@@ -100,16 +104,19 @@ jobs:
         run: |
           npx cdk --no-notices synth PiHoleCdkStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
-            --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}"
+            --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
+            --context vpc_name="${{ secrets.VPC_NAME_MELBOURNE }}"
           npx cdk --no-notices synth PiHoleEcsManagedStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
-            --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}"
+            --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
+            --context vpc_name="${{ secrets.VPC_NAME_MELBOURNE }}"
 
       - name: Deploy Original EC2 Stack (PiHoleCdkStack) to Melbourne 🚢
         run: |
           npx cdk --no-notices deploy PiHoleCdkStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
+            --context vpc_name="${{ secrets.VPC_NAME_MELBOURNE }}" \
             --require-approval never
 
       - name: Deploy ECS Stack (PiHoleEcsManagedStack) to Melbourne ⚓
@@ -117,6 +124,7 @@ jobs:
           npx cdk --no-notices deploy PiHoleEcsManagedStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
+            --context vpc_name="${{ secrets.VPC_NAME_MELBOURNE }}" \
             --require-approval never
 
   # Bootstrap and Deploy to San Francisco (us-west-1) 🗺️
@@ -152,16 +160,19 @@ jobs:
         run: |
           npx cdk --no-notices synth PiHoleCdkStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
-            --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}"
+            --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
+            --context vpc_name="${{ secrets.VPC_NAME_SAN_FRANCISCO }}"
           npx cdk --no-notices synth PiHoleEcsManagedStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
-            --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}"
+            --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
+            --context vpc_name="${{ secrets.VPC_NAME_SAN_FRANCISCO }}"
 
       - name: Deploy Original EC2 Stack (PiHoleCdkStack) to San Francisco 🚢
         run: |
           npx cdk --no-notices deploy PiHoleCdkStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
+            --context vpc_name="${{ secrets.VPC_NAME_SAN_FRANCISCO }}" \
             --require-approval never
 
       - name: Deploy ECS Stack (PiHoleEcsManagedStack) to San Francisco ⚓
@@ -169,4 +180,5 @@ jobs:
           npx cdk --no-notices deploy PiHoleEcsManagedStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
+            --context vpc_name="${{ secrets.VPC_NAME_SAN_FRANCISCO }}" \
             --require-approval never
