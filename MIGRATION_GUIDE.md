@@ -1,231 +1,154 @@
 # Pi-hole CDK Stack Migration Guide
 
 ## Overview
-This guide documents the migration process for updating CloudFormation logical IDs after refactoring CDK constructs. The migration is required because CloudFormation treats logical ID changes as resource replacements.
+This guide documents the migration process for updating CloudFormation logical IDs after refactoring CDK constructs.
 
-## Prerequisites
-- AWS CLI configured with appropriate profile
-- CDK project built (`npm run build`)
-- Access to the target AWS account
+## Migration Approach
 
-## Migration Steps
+Due to the complexity of CloudFormation resource imports with CDK-generated templates, the recommended approach is:
 
-### Phase 1: Remove Cross-Stack Export Dependency
+1. **Fresh deployment** - Delete the old stack (with retained resources) and deploy fresh with new CDK code
+2. **Manual cleanup** - Delete orphaned resources from the old deployment
 
-The `PiHoleCdkStack` exports `RFC1918PrefixListId` which is imported by `TgwWithSiteToSiteVpnStack`. We must remove this dependency first.
+## Completed Migration (ap-southeast-2)
 
-#### Step 1.1: Update TGW Stack to Use Hardcoded Prefix List ID
+### Status: ✅ COMPLETE
 
-```bash
-# Get current TGW template
-aws cloudformation get-template \
-  --stack-name TgwWithSiteToSiteVpnStack \
-  --region <REGION> \
-  --profile <PROFILE> \
-  --query TemplateBody > tgw-current-template.json
+The PiHoleCdkStack has been successfully deployed with the new refactored constructs.
 
-# Replace ImportValue with hardcoded prefix list ID
-python3 << 'EOF'
-import json
+**New Resource IDs:**
+- Prefix List: `pl-053a0b8e47f5931e0`
+- Secret ARN: `arn:aws:secretsmanager:ap-southeast-2:717494614307:secret:pihole-pwd-xt7aQK`
+- DNS IPs: `172.31.34.219`, `172.31.90.86`
 
-with open("tgw-current-template.json", "r") as f:
-    template = json.load(f)
+### Steps Performed
 
-template_str = json.dumps(template)
-# Replace with actual prefix list ID from the region
-template_str = template_str.replace('{"Fn::ImportValue": "RFC1918PrefixListId"}', '"<PREFIX_LIST_ID>"')
-template = json.loads(template_str)
+1. ✅ Updated TGW stack to remove `Fn::ImportValue` dependency on `RFC1918PrefixListId`
+2. ✅ Set `DeletionPolicy: Retain` on all PiHoleCdkStack resources
+3. ✅ Deleted PiHoleCdkStack (resources retained)
+4. ✅ Attempted CloudFormation IMPORT - failed due to template property mismatches
+5. ✅ Deleted orphaned resources (NLB, EFS, secrets, security groups, prefix list, EC2 instance)
+6. ✅ Deployed fresh PiHoleCdkStack with new CDK code
 
-with open("tgw-updated-template.json", "w") as f:
-    json.dump(template, f, indent=2)
-EOF
+### Orphaned Resources Cleaned Up
 
-# Update TGW stack
-aws cloudformation update-stack \
-  --stack-name TgwWithSiteToSiteVpnStack \
-  --template-body file://tgw-updated-template.json \
-  --capabilities CAPABILITY_IAM \
-  --region <REGION> \
-  --profile <PROFILE>
+- NLB: `arn:aws:elasticloadbalancing:ap-southeast-2:717494614307:loadbalancer/net/pihole/9a6e7a2d39e235f6`
+- Target Group: `arn:aws:elasticloadbalancing:ap-southeast-2:717494614307:targetgroup/PiHole-nlbNL-DITF7F7H6944/88db297e9fd76fd8`
+- Secret: `pihole-pwd`
+- EFS: `fs-06d79a94d5822cc9f` (with mount targets)
+- Security Groups: `sg-02ab0401266f0f3b0`, `sg-08f48e5eca75263eb`
+- Prefix List: `pl-0c883cfc9fd86d087`
+- EC2 Instance: `i-05ec7fdf103f3f887`
 
-# Wait for completion
-aws cloudformation wait stack-update-complete \
-  --stack-name TgwWithSiteToSiteVpnStack \
-  --region <REGION> \
-  --profile <PROFILE>
-```
+## Migration for Other Regions
 
-#### Step 1.2: Verify Export is No Longer Used
+For other regions with existing deployments, follow these steps:
+
+### Step 1: Update TGW Stack (if applicable)
+
+If you have a TgwWithSiteToSiteVpnStack that imports `RFC1918PrefixListId`:
 
 ```bash
-aws cloudformation list-imports \
-  --export-name RFC1918PrefixListId \
-  --region <REGION> \
-  --profile <PROFILE>
-# Should return empty Imports list
+# Get current prefix list ID
+aws ec2 describe-managed-prefix-lists \
+  --filters "Name=prefix-list-name,Values=RFC1918" \
+  --query "PrefixLists[0].PrefixListId" \
+  --region <REGION> --profile <PROFILE>
+
+# Update cdk.json or pass via context
+# Then deploy TGW stack with hardcoded prefix list ID
 ```
 
-### Phase 2: Set Retain Policy on All PiHole Resources
-
-#### Step 2.1: Get Current Template and Add Retain Policies
+### Step 2: Delete Old Stack with Retained Resources
 
 ```bash
 # Get current template
 aws cloudformation get-template \
   --stack-name PiHoleCdkStack \
-  --region <REGION> \
-  --profile <PROFILE> \
-  --query TemplateBody > pihole-current-template.json
+  --region <REGION> --profile <PROFILE> \
+  --query TemplateBody > current-template.json
 
 # Add DeletionPolicy: Retain to all resources
 python3 << 'EOF'
 import json
-
-with open("pihole-current-template.json", "r") as f:
+with open("current-template.json", "r") as f:
     template = json.load(f)
-
-for resource_id in template["Resources"]:
-    template["Resources"][resource_id]["DeletionPolicy"] = "Retain"
-
-with open("pihole-retain-template.json", "w") as f:
+for res in template["Resources"]:
+    template["Resources"][res]["DeletionPolicy"] = "Retain"
+with open("retain-template.json", "w") as f:
     json.dump(template, f, indent=2)
 EOF
 
-# Update stack with Retain policies
+# Update stack with retain policies
 aws cloudformation update-stack \
   --stack-name PiHoleCdkStack \
-  --template-body file://pihole-retain-template.json \
-  --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-  --region <REGION> \
-  --profile <PROFILE>
+  --template-body file://retain-template.json \
+  --capabilities CAPABILITY_IAM \
+  --region <REGION> --profile <PROFILE>
 
-# Wait for completion
-aws cloudformation wait stack-update-complete \
-  --stack-name PiHoleCdkStack \
-  --region <REGION> \
-  --profile <PROFILE>
-```
-
-### Phase 3: Delete Stack (Resources Retained)
-
-```bash
+# Wait then delete
 aws cloudformation delete-stack \
   --stack-name PiHoleCdkStack \
-  --region <REGION> \
-  --profile <PROFILE>
-
-# Wait for deletion
-aws cloudformation wait stack-delete-complete \
-  --stack-name PiHoleCdkStack \
-  --region <REGION> \
-  --profile <PROFILE>
+  --region <REGION> --profile <PROFILE>
 ```
 
-### Phase 4: Import Resources with New Logical IDs
-
-#### Step 4.1: Create resources-to-import.json
-
-Create a JSON file mapping new logical IDs to physical resource identifiers. Example structure:
-
-```json
-[
-  {
-    "ResourceType": "AWS::EC2::PrefixList",
-    "LogicalResourceId": "networkingrfc1918prefixB68305A2",
-    "ResourceIdentifier": { "PrefixListId": "<PREFIX_LIST_ID>" }
-  },
-  {
-    "ResourceType": "AWS::EC2::SecurityGroup",
-    "LogicalResourceId": "networkingallowdnshttp984E9584",
-    "ResourceIdentifier": { "GroupId": "<SECURITY_GROUP_ID>" }
-  }
-  // ... more resources
-]
-```
-
-#### Step 4.2: Synthesize New CDK Template
+### Step 3: Clean Up Orphaned Resources
 
 ```bash
-CDK_DEFAULT_REGION=<REGION> cdk synth PiHoleCdkStack \
-  -c vpc_name=<VPC_NAME> \
-  --profile <PROFILE> \
-  -o cdk.out.migration
+# Delete NLB
+aws elbv2 delete-load-balancer --load-balancer-arn <NLB_ARN> --region <REGION> --profile <PROFILE>
+
+# Delete target groups
+aws elbv2 delete-target-group --target-group-arn <TG_ARN> --region <REGION> --profile <PROFILE>
+
+# Delete secret
+aws secretsmanager delete-secret --secret-id pihole-pwd --force-delete-without-recovery --region <REGION> --profile <PROFILE>
+
+# Delete EFS mount targets first
+aws efs delete-mount-target --mount-target-id <MT_ID> --region <REGION> --profile <PROFILE>
+# Wait ~60 seconds
+
+# Delete EFS
+aws efs delete-file-system --file-system-id <FS_ID> --region <REGION> --profile <PROFILE>
+
+# Terminate any running instances using the security group
+aws ec2 terminate-instances --instance-ids <INSTANCE_ID> --region <REGION> --profile <PROFILE>
+# Wait for termination
+
+# Delete security groups
+aws ec2 delete-security-group --group-id <SG_ID> --region <REGION> --profile <PROFILE>
+
+# Delete prefix list
+aws ec2 delete-managed-prefix-list --prefix-list-id <PL_ID> --region <REGION> --profile <PROFILE>
 ```
 
-#### Step 4.3: Create Import Change Set
+### Step 4: Deploy Fresh Stack
 
 ```bash
-aws cloudformation create-change-set \
-  --stack-name PiHoleCdkStack \
-  --change-set-name ImportResources \
-  --change-set-type IMPORT \
-  --resources-to-import file://resources-to-import.json \
-  --template-body file://cdk.out.migration/PiHoleCdkStack.template.json \
-  --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
-  --region <REGION> \
-  --profile <PROFILE>
-
-# Wait for change set creation
-aws cloudformation wait change-set-create-complete \
-  --stack-name PiHoleCdkStack \
-  --change-set-name ImportResources \
-  --region <REGION> \
-  --profile <PROFILE>
-
-# Execute change set
-aws cloudformation execute-change-set \
-  --stack-name PiHoleCdkStack \
-  --change-set-name ImportResources \
-  --region <REGION> \
-  --profile <PROFILE>
+cd /path/to/pi-hole-cdk
+npm run build
+AWS_REGION=<REGION> npx cdk deploy PiHoleCdkStack --profile <PROFILE> --require-approval never
 ```
 
-### Phase 5: Update TGW Stack via CDK
+## CDK Code Changes
 
-After PiHoleCdkStack is migrated, update TgwWithSiteToSiteVpnStack via CDK to use the new parameter-based approach:
+The following changes were made to support the migration:
 
-```bash
-CDK_DEFAULT_REGION=<REGION> cdk deploy TgwWithSiteToSiteVpnStack \
-  -c vpc_name=<VPC_NAME> \
-  -c rfc1918PrefixListId=<PREFIX_LIST_ID> \
-  --profile <PROFILE> \
-  --require-approval never
-```
+1. **lib/tgw-with-sitetositevpn-stack.ts**: Uses `rfc1918PrefixListId` from props/context instead of `Fn.importValue`
+2. **bin/pi-hole-cdk.ts**: Added `rfc1918PrefixListId` to `AppConfig`
 
-## Region-Specific Values
+## Why CloudFormation IMPORT Failed
 
-### ap-southeast-2
-- **Profile**: `sauhsoj+ct+pihole-Admin`
-- **VPC Name**: `aws-controltower-VPC`
-- **Prefix List ID**: `pl-0c883cfc9fd86d087`
-- **Security Group (allow_dns_http)**: `sg-02ab0401266f0f3b0`
-- **EFS Security Group**: `sg-08f48e5eca75263eb`
-- **EFS File System**: `fs-06d79a94d5822cc9f`
-- **NLB ARN**: `arn:aws:elasticloadbalancing:ap-southeast-2:717494614307:loadbalancer/net/pihole/9a6e7a2d39e235f6`
+CloudFormation IMPORT requires:
+1. ALL resources in the template must be in the import list
+2. Imported resources must have `DeletionPolicy: Retain`
+3. Resource properties must match the actual resource configuration
 
-## Current Progress (ap-southeast-2)
+The CDK-generated template creates new security groups with different IDs than the imported resources reference, causing property mismatches that CloudFormation cannot reconcile.
 
-### Completed
-- [x] Phase 1.1: Updated TGW stack template to replace ImportValue with hardcoded prefix list ID
-- [x] Phase 2.1: Set DeletionPolicy: Retain on all PiHoleCdkStack resources
+## Lessons Learned
 
-### In Progress
-- [ ] Phase 1.2: Verify TGW stack update completed and export is no longer used
-
-### Remaining
-- [ ] Phase 3: Delete PiHoleCdkStack (resources retained)
-- [ ] Phase 4: Import resources with new logical IDs
-- [ ] Phase 5: Update TGW stack via CDK
-
-## CDK Code Changes Made
-
-1. **lib/tgw-with-sitetositevpn-stack.ts**: Changed from `Fn.importValue('RFC1918PrefixListId')` to use context parameter `rfc1918PrefixListId`
-
-2. **bin/pi-hole-cdk.ts**: Added `rfc1918PrefixListId` property to `AppConfig` class
-
-## Rollback Plan
-
-If migration fails:
-1. Resources are retained with `DeletionPolicy: Retain`
-2. Can recreate stack with original logical IDs by deploying old CDK code
-3. Physical resources (NLB IPs, EFS data, secrets) are preserved
+1. CloudFormation does NOT support in-place logical ID renames
+2. CDK construct refactoring that changes logical IDs requires careful migration planning
+3. Cross-stack exports create tight coupling that complicates migrations
+4. Fresh deployment is often simpler than complex import operations

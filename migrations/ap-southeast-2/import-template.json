@@ -1,0 +1,252 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "",
+  "Parameters": {
+    "SsmParameterValueawsservicecanonicalubuntuserver2204stablecurrentarm64hvmebsgp2amiidC96584B6F00A464EAD1953AFF4B05118Parameter": {
+      "Type": "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>",
+      "Default": "/aws/service/canonical/ubuntu/server/22.04/stable/current/arm64/hvm/ebs-gp2/ami-id"
+    },
+    "BootstrapVersion": {
+      "Type": "AWS::SSM::Parameter::Value<String>",
+      "Default": "/cdk-bootstrap/hnb659fds/version",
+      "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+    }
+  },
+  "Resources": {
+    "storagepiholefs1643C501": {
+      "Type": "AWS::EFS::FileSystem",
+      "Properties": {
+        "Encrypted": true,
+        "FileSystemPolicy": {
+          "Statement": [
+            {
+              "Action": [
+                "elasticfilesystem:ClientRootAccess",
+                "elasticfilesystem:ClientWrite"
+              ],
+              "Condition": {
+                "Bool": {
+                  "elasticfilesystem:AccessedViaMountTarget": "true"
+                }
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "AWS": "*"
+              }
+            }
+          ],
+          "Version": "2012-10-17"
+        },
+        "FileSystemTags": [
+          {
+            "Key": "Name",
+            "Value": "pihole-fs"
+          }
+        ]
+      },
+      "UpdateReplacePolicy": "Retain",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "aws:cdk:path": "PiHoleCdkStack/storage/pihole-fs/Resource"
+      }
+    },
+    "storagepiholefsEfsMountTargetPrivateSubnet252655C50": {
+      "Type": "AWS::EFS::MountTarget",
+      "Properties": {
+        "FileSystemId": {
+          "Ref": "storagepiholefs1643C501"
+        },
+        "SecurityGroups": [
+          {
+            "Fn::GetAtt": [
+              "storagepiholefsEfsSecurityGroupACBC1060",
+              "GroupId"
+            ]
+          }
+        ],
+        "SubnetId": "subnet-0640a0a54147e3239"
+      },
+      "Metadata": {
+        "aws:cdk:path": "PiHoleCdkStack/storage/pihole-fs/EfsMountTarget-PrivateSubnet2"
+      },
+      "DeletionPolicy": "Retain"
+    },
+    "loadbalancernlbCB05B3A6": {
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties": {
+        "LoadBalancerAttributes": [
+          {
+            "Key": "deletion_protection.enabled",
+            "Value": "false"
+          },
+          {
+            "Key": "load_balancing.cross_zone.enabled",
+            "Value": "true"
+          }
+        ],
+        "Name": "pihole",
+        "Scheme": "internal",
+        "SecurityGroups": [],
+        "Subnets": [
+          "subnet-095b069ea2f8dae96",
+          "subnet-0640a0a54147e3239",
+          "subnet-017bb34117eab1589"
+        ],
+        "Type": "network"
+      },
+      "Metadata": {
+        "aws:cdk:path": "PiHoleCdkStack/loadbalancer/nlb/Resource"
+      },
+      "DeletionPolicy": "Retain"
+    },
+    "storagepiholefsEfsMountTargetPrivateSubnet31E5741F8": {
+      "Type": "AWS::EFS::MountTarget",
+      "Properties": {
+        "FileSystemId": {
+          "Ref": "storagepiholefs1643C501"
+        },
+        "SecurityGroups": [
+          {
+            "Fn::GetAtt": [
+              "storagepiholefsEfsSecurityGroupACBC1060",
+              "GroupId"
+            ]
+          }
+        ],
+        "SubnetId": "subnet-017bb34117eab1589"
+      },
+      "Metadata": {
+        "aws:cdk:path": "PiHoleCdkStack/storage/pihole-fs/EfsMountTarget-PrivateSubnet3"
+      },
+      "DeletionPolicy": "Retain"
+    },
+    "networkingrfc1918prefixB68305A2": {
+      "Type": "AWS::EC2::PrefixList",
+      "Properties": {
+        "AddressFamily": "IPv4",
+        "Entries": [
+          {
+            "Cidr": "10.0.0.0/8",
+            "Description": "RFC1918 10/8"
+          },
+          {
+            "Cidr": "172.16.0.0/12",
+            "Description": "RFC1918 172.16/12"
+          },
+          {
+            "Cidr": "192.168.0.0/16",
+            "Description": "RFC1918 192.168/16"
+          }
+        ],
+        "MaxEntries": 3,
+        "PrefixListName": "RFC1918"
+      },
+      "Metadata": {
+        "aws:cdk:path": "PiHoleCdkStack/networking/rfc1918prefix"
+      },
+      "DeletionPolicy": "Retain"
+    },
+    "networkingallowdnshttp984E9584": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "AllowDNSandSSH",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "VpcId": "vpc-069f286e8b8ca3d57"
+      },
+      "Metadata": {
+        "aws:cdk:path": "PiHoleCdkStack/networking/allow_dns_http/Resource"
+      },
+      "DeletionPolicy": "Retain"
+    },
+    "storagepiholefsEfsSecurityGroupACBC1060": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": "PiHoleCdkStack/storage/pihole-fs/EfsSecurityGroup",
+        "SecurityGroupEgress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow all outbound traffic by default",
+            "IpProtocol": "-1"
+          }
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "pihole-fs"
+          }
+        ],
+        "VpcId": "vpc-069f286e8b8ca3d57"
+      },
+      "Metadata": {
+        "aws:cdk:path": "PiHoleCdkStack/storage/pihole-fs/EfsSecurityGroup/Resource"
+      },
+      "DeletionPolicy": "Retain"
+    },
+    "loadbalancernlbNLBDNSpiholesTargetsGroupBADD8C1A": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "Port": 53,
+        "Protocol": "TCP_UDP",
+        "TargetGroupAttributes": [
+          {
+            "Key": "deregistration_delay.timeout_seconds",
+            "Value": "120"
+          },
+          {
+            "Key": "deregistration_delay.connection_termination.enabled",
+            "Value": "true"
+          }
+        ],
+        "TargetType": "instance",
+        "VpcId": "vpc-069f286e8b8ca3d57"
+      },
+      "Metadata": {
+        "aws:cdk:path": "PiHoleCdkStack/loadbalancer/nlb/NLBDNS/piholesTargetsGroup/Resource"
+      },
+      "DeletionPolicy": "Retain"
+    },
+    "storagepiholefsEfsMountTargetPrivateSubnet13D991399": {
+      "Type": "AWS::EFS::MountTarget",
+      "Properties": {
+        "FileSystemId": {
+          "Ref": "storagepiholefs1643C501"
+        },
+        "SecurityGroups": [
+          {
+            "Fn::GetAtt": [
+              "storagepiholefsEfsSecurityGroupACBC1060",
+              "GroupId"
+            ]
+          }
+        ],
+        "SubnetId": "subnet-095b069ea2f8dae96"
+      },
+      "Metadata": {
+        "aws:cdk:path": "PiHoleCdkStack/storage/pihole-fs/EfsMountTarget-PrivateSubnet1"
+      },
+      "DeletionPolicy": "Retain"
+    },
+    "storagepiholepwd56AA2350": {
+      "Type": "AWS::SecretsManager::Secret",
+      "Properties": {
+        "GenerateSecretString": {
+          "ExcludePunctuation": true,
+          "IncludeSpace": false
+        },
+        "Name": "pihole-pwd"
+      },
+      "UpdateReplacePolicy": "Delete",
+      "DeletionPolicy": "Retain",
+      "Metadata": {
+        "aws:cdk:path": "PiHoleCdkStack/storage/piholepwd/Resource"
+      }
+    }
+  },
+  "Outputs": {}
+}
