@@ -189,7 +189,6 @@ export class PiHoleCdkStack extends cdk.Stack {
     });
 
     container.addPortMappings(
-      { containerPort: 53, protocol: aws_ecs.Protocol.TCP },
       { containerPort: 53, protocol: aws_ecs.Protocol.UDP },
       { containerPort: 80, protocol: aws_ecs.Protocol.TCP }
     );
