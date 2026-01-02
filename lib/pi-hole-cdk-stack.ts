@@ -1,6 +1,6 @@
 import * as cdk from 'aws-cdk-lib';
-import { aws_ec2, aws_iam, CfnOutput, aws_autoscaling, aws_elasticloadbalancingv2 } from 'aws-cdk-lib';
-import { LaunchTemplate } from 'aws-cdk-lib/aws-ec2';
+import { aws_ec2, aws_iam, CfnOutput, aws_autoscaling, aws_elasticloadbalancingv2, aws_ecs, aws_logs, Size } from 'aws-cdk-lib';
+import { LaunchTemplate, CpuManufacturer } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 import { readFileSync } from 'fs';
 import { PiHoleProps } from '../bin/pi-hole-cdk';
@@ -113,6 +113,136 @@ export class PiHoleCdkStack extends cdk.Stack {
     loadBalancer.dnsTargetGroup.addTarget(asg);
     loadBalancer.httpTargetGroup.addTarget(asg);
 
+    // ========== ECS DEPLOYMENT (shares NLB, EFS, secrets with EC2) ==========
+    
+    const cluster = new aws_ecs.Cluster(this, 'pihole-ecs-cluster', {
+      clusterName: 'pihole-cluster',
+      vpc: networking.vpc,
+    });
+
+    const taskExecutionRole = new aws_iam.Role(this, 'pihole-task-execution-role', {
+      assumedBy: new aws_iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
+      managedPolicies: [
+        aws_iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSTaskExecutionRolePolicy'),
+      ]
+    });
+
+    const taskRole = new aws_iam.Role(this, 'pihole-task-role', {
+      assumedBy: new aws_iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
+      managedPolicies: PiHoleIamPolicies.getManagedPolicies(),
+      inlinePolicies: {
+        'secretPolicy': PiHoleIamPolicies.createSecretsPolicy(storage.secret.secretArn),
+        'kmsPolicy': PiHoleIamPolicies.createKmsPolicy()
+      }
+    });
+
+    const logGroup = new aws_logs.LogGroup(this, 'pihole-ecs-logs', {
+      logGroupName: '/ecs/pihole',
+      retention: props.appConfig.piHoleConfig.logRetentionDays as aws_logs.RetentionDays,
+      removalPolicy: cdk.RemovalPolicy.DESTROY
+    });
+
+    const taskDefinition = new aws_ecs.Ec2TaskDefinition(this, 'pihole-task-def', {
+      networkMode: aws_ecs.NetworkMode.AWS_VPC,
+      taskRole: taskRole,
+      executionRole: taskExecutionRole,
+      volumes: [{
+        name: 'pihole-config',
+        efsVolumeConfiguration: {
+          fileSystemId: storage.fileSystem.fileSystemId,
+          transitEncryption: 'ENABLED',
+          authorizationConfig: { iam: 'ENABLED' }
+        }
+      }]
+    });
+
+    const container = taskDefinition.addContainer('pihole', {
+      image: aws_ecs.ContainerImage.fromRegistry('pihole/pihole:latest'),
+      memoryReservationMiB: props.appConfig.piHoleConfig.containerMemory,
+      cpu: props.appConfig.piHoleConfig.containerCpu,
+      essential: true,
+      environment: {
+        TZ: 'UTC',
+        REV_SERVER: 'true',
+        REV_SERVER_CIDR: local_internal_cidr,
+        REV_SERVER_TARGET: props.appConfig.piHoleConfig.revServerTarget,
+        REV_SERVER_DOMAIN: props.appConfig.piHoleConfig.revServerDomain,
+        DNS1: props.appConfig.piHoleConfig.dns1,
+        DNS2: props.appConfig.piHoleConfig.dns2,
+        DNSMASQ_LISTENING: 'all',
+      },
+      secrets: { WEBPASSWORD: aws_ecs.Secret.fromSecretsManager(storage.secret) },
+      logging: aws_ecs.LogDrivers.awsLogs({ streamPrefix: 'pihole', logGroup: logGroup }),
+      healthCheck: {
+        command: ['CMD-SHELL', 'dig @127.0.0.1 google.com +short || exit 1'],
+        interval: cdk.Duration.seconds(30),
+        timeout: cdk.Duration.seconds(5),
+        retries: 3,
+        startPeriod: cdk.Duration.seconds(60)
+      }
+    });
+
+    container.addMountPoints({
+      sourceVolume: 'pihole-config',
+      containerPath: '/etc/pihole',
+      readOnly: false
+    });
+
+    container.addPortMappings(
+      { containerPort: 53, protocol: aws_ecs.Protocol.TCP },
+      { containerPort: 53, protocol: aws_ecs.Protocol.UDP },
+      { containerPort: 80, protocol: aws_ecs.Protocol.TCP }
+    );
+
+    const ecsInstanceRole = new aws_iam.Role(this, 'pihole-ecs-instance-role', {
+      assumedBy: new aws_iam.ServicePrincipal('ec2.amazonaws.com'),
+      managedPolicies: [
+        aws_iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonEC2ContainerServiceforEC2Role'),
+        ...PiHoleIamPolicies.getManagedPolicies()
+      ]
+    });
+
+    const instanceProfile = new aws_iam.InstanceProfile(this, 'pihole-ecs-instance-profile', {
+      role: ecsInstanceRole,
+    });
+
+    const capacityProvider = new aws_ecs.ManagedInstancesCapacityProvider(this, 'pihole-capacity-provider', {
+      capacityProviderName: 'pihole-managed-instances',
+      ec2InstanceProfile: instanceProfile,
+      subnets: networking.vpc.selectSubnets({ subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS }).subnets,
+      securityGroups: [networking.securityGroup],
+      taskVolumeStorage: Size.gibibytes(30),
+      monitoring: aws_ecs.InstanceMonitoring.DETAILED,
+      instanceRequirements: {
+        vCpuCountMin: props.appConfig.piHoleConfig.vCpuMin,
+        vCpuCountMax: props.appConfig.piHoleConfig.vCpuMax,
+        memoryMin: Size.mebibytes(props.appConfig.piHoleConfig.memoryMinMiB),
+        memoryMax: Size.mebibytes(props.appConfig.piHoleConfig.memoryMaxMiB),
+        cpuManufacturers: bUseIntel ? [CpuManufacturer.INTEL, CpuManufacturer.AMD] : [CpuManufacturer.AWS]
+      }
+    });
+
+    cluster.addManagedInstancesCapacityProvider(capacityProvider);
+    (cluster as any)._hasEc2Capacity = true;
+
+    const ecsService = new aws_ecs.Ec2Service(this, 'pihole-ecs-service', {
+      cluster: cluster,
+      taskDefinition: taskDefinition,
+      desiredCount: 1,
+      minHealthyPercent: 0,
+      maxHealthyPercent: 100,
+      capacityProviderStrategies: [{ capacityProvider: capacityProvider.capacityProviderName, weight: 1, base: 1 }],
+      enableExecuteCommand: true,
+      placementConstraints: [aws_ecs.PlacementConstraint.distinctInstances()],
+      serviceName: 'pihole-service',
+      vpcSubnets: { subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS },
+      securityGroups: [networking.securityGroup]
+    });
+
+    // Attach ECS service to ECS-specific target groups (IP type)
+    ecsService.attachToNetworkTargetGroup(loadBalancer.dnsTargetGroupEcs);
+    ecsService.attachToNetworkTargetGroup(loadBalancer.httpTargetGroupEcs);
+
     new CfnOutput(this, 'dns1', {
       value: loadBalancer.getEndpointIps.getResponseField('NetworkInterfaces.0.PrivateIpAddress')
     });
@@ -123,5 +253,8 @@ export class PiHoleCdkStack extends cdk.Stack {
     new CfnOutput(this, "admin-url", { value: "http://pi.hole/admin" }); // Only after setting up DNS
     new CfnOutput(this, 'SecretArn', { value: storage.secret.secretArn })
     new CfnOutput(this, 'RFC1918PrefixListId', { value: networking.prefixList.attrPrefixListId, exportName: 'RFC1918PrefixListId' })
+    new CfnOutput(this, 'EfsFileSystemId', { value: storage.fileSystem.fileSystemId })
+    new CfnOutput(this, 'ClusterName', { value: cluster.clusterName })
+    new CfnOutput(this, 'EcsServiceName', { value: ecsService.serviceName || 'pihole-service' })
   }
 }
