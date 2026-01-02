@@ -1,78 +1,17 @@
 name: Multiregion_PiHole_Deploy
 
-# 🏴‍☠️ This workflow deploys Pi-hole stacks to multiple AWS regions
-# Arrr! Automatically triggers on push to main branch, matey!
+# This workflow deploys Pi-hole stack to multiple AWS regions
 on:
   push:
     branches:
       - main
-  workflow_dispatch:  # Manual trigger fer on-demand deployments
+  workflow_dispatch:
 
-# Limit to 1 concurrent job to prevent OOM on self-hosted runners
 concurrency:
   group: pi-hole-deploy
   cancel-in-progress: false
 
-# Run exclusively on self-hosted runners with pi-hole-cdk label
-# The runners be configured in the target AWS account with CDK deployment permissions
 jobs:
-  # Bootstrap and Deploy to Sydney (ap-southeast-2) 🗺️
-  deploy-sydney:
-    needs: deploy-melbourne
-    name: Deploy to Sydney (ap-southeast-2)
-    runs-on: [self-hosted, pi-hole-cdk]
-    env:
-      AWS_REGION: ap-southeast-2
-      CDK_DEFAULT_REGION: ap-southeast-2
-      CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
-    steps:
-      - name: Checkout code ⚓
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build CDK project
-        run: npm run build
-
-      - name: CDK Bootstrap Sydney
-        run: |
-          npx cdk --no-notices bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
-
-      - name: CDK Synth - Verify templates
-        run: |
-          npx cdk --no-notices synth PiHoleCdkStack \
-            --context local_ip="${{ secrets.LOCAL_IP }}" \
-            --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
-            --context vpc_name="${{ secrets.VPC_NAME_SYDNEY }}"
-          npx cdk --no-notices synth PiHoleEcsManagedStack \
-            --context local_ip="${{ secrets.LOCAL_IP }}" \
-            --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
-            --context vpc_name="${{ secrets.VPC_NAME_SYDNEY }}"
-
-      - name: Deploy Original EC2 Stack (PiHoleCdkStack) to Sydney 🚢
-        run: |
-          npx cdk --no-notices deploy PiHoleCdkStack \
-            --context local_ip="${{ secrets.LOCAL_IP }}" \
-            --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
-            --context vpc_name="${{ secrets.VPC_NAME_SYDNEY }}" \
-            --require-approval never
-
-      - name: Deploy ECS Stack (PiHoleEcsManagedStack) to Sydney ⚓
-        run: |
-          npx cdk --no-notices deploy PiHoleEcsManagedStack \
-            --context local_ip="${{ secrets.LOCAL_IP }}" \
-            --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
-            --context vpc_name="${{ secrets.VPC_NAME_SYDNEY }}" \
-            --require-approval never
-
-  # Bootstrap and Deploy to Melbourne (ap-southeast-4) 🗺️
   deploy-melbourne:
     name: Deploy to Melbourne (ap-southeast-4)
     runs-on: [self-hosted, pi-hole-cdk]
@@ -81,7 +20,7 @@ jobs:
       CDK_DEFAULT_REGION: ap-southeast-4
       CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
     steps:
-      - name: Checkout code ⚓
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -106,12 +45,8 @@ jobs:
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
             --context vpc_name="${{ secrets.VPC_NAME_MELBOURNE }}"
-          npx cdk --no-notices synth PiHoleEcsManagedStack \
-            --context local_ip="${{ secrets.LOCAL_IP }}" \
-            --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
-            --context vpc_name="${{ secrets.VPC_NAME_MELBOURNE }}"
 
-      - name: Deploy Original EC2 Stack (PiHoleCdkStack) to Melbourne 🚢
+      - name: Deploy PiHoleCdkStack to Melbourne
         run: |
           npx cdk --no-notices deploy PiHoleCdkStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
@@ -119,15 +54,49 @@ jobs:
             --context vpc_name="${{ secrets.VPC_NAME_MELBOURNE }}" \
             --require-approval never
 
-      - name: Deploy ECS Stack (PiHoleEcsManagedStack) to Melbourne ⚓
+  deploy-sydney:
+    needs: deploy-melbourne
+    name: Deploy to Sydney (ap-southeast-2)
+    runs-on: [self-hosted, pi-hole-cdk]
+    env:
+      AWS_REGION: ap-southeast-2
+      CDK_DEFAULT_REGION: ap-southeast-2
+      CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build CDK project
+        run: npm run build
+
+      - name: CDK Bootstrap Sydney
         run: |
-          npx cdk --no-notices deploy PiHoleEcsManagedStack \
+          npx cdk --no-notices bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
+
+      - name: CDK Synth - Verify templates
+        run: |
+          npx cdk --no-notices synth PiHoleCdkStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
-            --context vpc_name="${{ secrets.VPC_NAME_MELBOURNE }}" \
+            --context vpc_name="${{ secrets.VPC_NAME_SYDNEY }}"
+
+      - name: Deploy PiHoleCdkStack to Sydney
+        run: |
+          npx cdk --no-notices deploy PiHoleCdkStack \
+            --context local_ip="${{ secrets.LOCAL_IP }}" \
+            --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
+            --context vpc_name="${{ secrets.VPC_NAME_SYDNEY }}" \
             --require-approval never
 
-  # Bootstrap and Deploy to San Francisco (us-west-1) 🗺️
   deploy-san-francisco:
     needs: deploy-sydney
     name: Deploy to San Francisco (us-west-1)
@@ -137,7 +106,7 @@ jobs:
       CDK_DEFAULT_REGION: us-west-1
       CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
     steps:
-      - name: Checkout code ⚓
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup Node.js
@@ -162,22 +131,10 @@ jobs:
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
             --context vpc_name="${{ secrets.VPC_NAME_SAN_FRANCISCO }}"
-          npx cdk --no-notices synth PiHoleEcsManagedStack \
-            --context local_ip="${{ secrets.LOCAL_IP }}" \
-            --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
-            --context vpc_name="${{ secrets.VPC_NAME_SAN_FRANCISCO }}"
 
-      - name: Deploy Original EC2 Stack (PiHoleCdkStack) to San Francisco 🚢
+      - name: Deploy PiHoleCdkStack to San Francisco
         run: |
           npx cdk --no-notices deploy PiHoleCdkStack \
-            --context local_ip="${{ secrets.LOCAL_IP }}" \
-            --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
-            --context vpc_name="${{ secrets.VPC_NAME_SAN_FRANCISCO }}" \
-            --require-approval never
-
-      - name: Deploy ECS Stack (PiHoleEcsManagedStack) to San Francisco ⚓
-        run: |
-          npx cdk --no-notices deploy PiHoleEcsManagedStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
             --context vpc_name="${{ secrets.VPC_NAME_SAN_FRANCISCO }}" \

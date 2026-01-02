@@ -2,7 +2,6 @@
 import 'source-map-support/register';
 import * as cdk from 'aws-cdk-lib';
 import { PiHoleCdkStack } from '../lib/pi-hole-cdk-stack';
-import { PiHoleEcsManagedStack } from '../lib/pi-hole-ecs-managed-stack';
 import { SiteToSiteVpnStack } from '../lib/sitetositevpn-stack';
 import { StackProps } from 'aws-cdk-lib';
 import { TgwWithSiteToSiteVpnStack } from '../lib/tgw-with-sitetositevpn-stack';
@@ -62,15 +61,9 @@ var piHoleProps : PiHoleProps = {
   env: env
 }
 
-// 🏴‍☠️ Original EC2 Auto Scaling Group stack (preserved fer current deployments)
+// Pi-hole stack with EC2 ASG and ECS deployments behind shared NLB
 new PiHoleCdkStack(app, 'PiHoleCdkStack', piHoleProps);
-
-// ⚓ New ECS Managed Instances stack (fer gradual regional migration)
-// This stack uses containerized Pi-hole with ECS Managed Instances
-// Deploy this to new regions or gradually migrate existing regions
-new PiHoleEcsManagedStack(app, 'PiHoleEcsManagedStack', piHoleProps);
 
 new SiteToSiteVpnStack(app, 'SiteToSiteVpnStack', piHoleProps);
 
 new TgwWithSiteToSiteVpnStack(app, 'TgwWithSiteToSiteVpnStack', piHoleProps);
-
