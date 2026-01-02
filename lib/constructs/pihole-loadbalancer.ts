@@ -7,6 +7,7 @@ export interface PiHoleLoadBalancerProps {
   vpc: aws_ec2.IVpc;
   config: PiHoleConfig;
   resourceSuffix?: string;
+  targetType?: aws_elasticloadbalancingv2.TargetType;
 }
 
 export class PiHoleLoadBalancer extends Construct {
@@ -19,6 +20,7 @@ export class PiHoleLoadBalancer extends Construct {
     super(scope, id);
 
     const suffix = props.resourceSuffix || '';
+    const targetType = props.targetType || aws_elasticloadbalancingv2.TargetType.IP;
     
     this.nlb = new aws_elasticloadbalancingv2.NetworkLoadBalancer(this, 'nlb', {
       vpc: props.vpc,
@@ -33,25 +35,33 @@ export class PiHoleLoadBalancer extends Construct {
       protocol: aws_elasticloadbalancingv2.Protocol.TCP_UDP 
     });
     
-    this.dnsTargetGroup = dnsListener.addTargets("piholesTargets", {
-      port: 53, 
+    this.dnsTargetGroup = new aws_elasticloadbalancingv2.NetworkTargetGroup(this, 'dnsTargetGroup', {
+      vpc: props.vpc,
+      port: 53,
+      protocol: aws_elasticloadbalancingv2.Protocol.TCP_UDP,
+      targetType: targetType,
       deregistrationDelay: Duration.minutes(props.config.deregistrationDelayMinutes),
     });
     this.dnsTargetGroup.setAttribute("deregistration_delay.connection_termination.enabled", "true");
+    dnsListener.addTargetGroups('piholesTargets', this.dnsTargetGroup);
 
     const httpListener = this.nlb.addListener('NLBHTTP', { 
       port: 80, 
       protocol: aws_elasticloadbalancingv2.Protocol.TCP 
     });
     
-    this.httpTargetGroup = httpListener.addTargets("piholeHttpTargets", {
-      port: 80, 
+    this.httpTargetGroup = new aws_elasticloadbalancingv2.NetworkTargetGroup(this, 'httpTargetGroup', {
+      vpc: props.vpc,
+      port: 80,
+      protocol: aws_elasticloadbalancingv2.Protocol.TCP,
+      targetType: targetType,
       deregistrationDelay: Duration.minutes(props.config.deregistrationDelayMinutes),
       healthCheck: { 
         protocol: aws_elasticloadbalancingv2.Protocol.HTTP, 
         path: '/admin/' 
       }
     });
+    httpListener.addTargetGroups('piholeHttpTargets', this.httpTargetGroup);
 
     this.getEndpointIps = new AwsCustomResource(this, 'GetEndpointIps', {
       onUpdate: {

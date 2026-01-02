@@ -17,7 +17,7 @@ import { PiHoleNetworking, PiHoleStorage, PiHoleLoadBalancer, PiHoleIamPolicies 
  * Pi-hole ECS Managed Instances Stack
  * 
  * Deploys Pi-hole as a containerized ECS workload on managed EC2 instances.
- * Uses host network mode for DNS port 53 access.
+ * Uses awsvpc network mode for task-level networking with dedicated ENI.
  */
 export class PiHoleEcsManagedStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props: PiHoleProps) {
@@ -78,7 +78,7 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
 
     // Create ECS Task Definition for Pi-hole
     const taskDefinition = new aws_ecs.Ec2TaskDefinition(this, 'pihole-task-def', {
-      networkMode: aws_ecs.NetworkMode.HOST, // Required fer DNS on port 53
+      networkMode: aws_ecs.NetworkMode.AWS_VPC,
       taskRole: taskRole,
       executionRole: taskExecutionRole,
       volumes: [
@@ -136,8 +136,12 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
       readOnly: false
     });
 
-    // CDK requires at least one port mapping; use port 80 only (DNS ports 53 TCP/UDP conflict)
-    container.addPortMappings({ containerPort: 80, protocol: aws_ecs.Protocol.TCP });
+    // Port mappings for awsvpc mode
+    container.addPortMappings(
+      { containerPort: 53, protocol: aws_ecs.Protocol.TCP },
+      { containerPort: 53, protocol: aws_ecs.Protocol.UDP },
+      { containerPort: 80, protocol: aws_ecs.Protocol.TCP }
+    );
 
     // 📝 Create IAM instance profile fer ECS container instances
     const instanceRole = new aws_iam.Role(this, 'pihole-instance-role', {
@@ -191,7 +195,10 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
       ],
       enableExecuteCommand: true,
       placementConstraints: [aws_ecs.PlacementConstraint.distinctInstances()],
-      serviceName: 'pihole-service'
+      serviceName: 'pihole-service',
+      // awsvpc network configuration
+      vpcSubnets: { subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS },
+      securityGroups: [networking.securityGroup]
     });
 
     // Create shared load balancer resources
