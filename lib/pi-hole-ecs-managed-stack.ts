@@ -136,7 +136,8 @@ export class PiHoleEcsManagedStack extends cdk.Stack {
       readOnly: false
     });
 
-    // Host network mode doesn't require port mappings - container uses host's network directly
+    // CDK requires at least one port mapping; use port 80 only (DNS ports 53 TCP/UDP conflict)
+    container.addPortMappings({ containerPort: 80, protocol: aws_ecs.Protocol.TCP });
 
     // 📝 Create IAM instance profile fer ECS container instances
     const instanceRole = new aws_iam.Role(this, 'pihole-instance-role', {
