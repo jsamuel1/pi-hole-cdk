@@ -13,6 +13,9 @@ export class PiHoleLoadBalancer extends Construct {
   public readonly nlb: aws_elasticloadbalancingv2.NetworkLoadBalancer;
   public readonly dnsTargetGroup: aws_elasticloadbalancingv2.NetworkTargetGroup;
   public readonly httpTargetGroup: aws_elasticloadbalancingv2.NetworkTargetGroup;
+  // ECS awsvpc mode target groups (IP type, UDP-only DNS)
+  public readonly ecsDnsTargetGroup: aws_elasticloadbalancingv2.NetworkTargetGroup;
+  public readonly ecsHttpTargetGroup: aws_elasticloadbalancingv2.NetworkTargetGroup;
   public readonly getEndpointIps: AwsCustomResource;
 
   constructor(scope: Construct, id: string, props: PiHoleLoadBalancerProps) {
@@ -28,7 +31,7 @@ export class PiHoleLoadBalancer extends Construct {
       securityGroups: []
     });
 
-    // Target groups (INSTANCE type - shared by ASG and ECS HOST mode)
+    // ASG target groups (INSTANCE type - TCP_UDP)
     this.dnsTargetGroup = new aws_elasticloadbalancingv2.NetworkTargetGroup(this, 'dnsTargetGroup', {
       vpc: props.vpc,
       port: 53,
@@ -47,16 +50,41 @@ export class PiHoleLoadBalancer extends Construct {
       healthCheck: { protocol: aws_elasticloadbalancingv2.Protocol.HTTP, path: '/admin/' }
     });
 
+    // ECS target groups (IP type for awsvpc mode - UDP only for DNS)
+    this.ecsDnsTargetGroup = new aws_elasticloadbalancingv2.NetworkTargetGroup(this, 'ecsDnsTargetGroup', {
+      vpc: props.vpc,
+      port: 53,
+      protocol: aws_elasticloadbalancingv2.Protocol.UDP,
+      targetType: aws_elasticloadbalancingv2.TargetType.IP,
+      deregistrationDelay: Duration.minutes(props.config.deregistrationDelayMinutes),
+    });
+
+    this.ecsHttpTargetGroup = new aws_elasticloadbalancingv2.NetworkTargetGroup(this, 'ecsHttpTargetGroup', {
+      vpc: props.vpc,
+      port: 80,
+      protocol: aws_elasticloadbalancingv2.Protocol.TCP,
+      targetType: aws_elasticloadbalancingv2.TargetType.IP,
+      deregistrationDelay: Duration.minutes(props.config.deregistrationDelayMinutes),
+      healthCheck: { protocol: aws_elasticloadbalancingv2.Protocol.HTTP, path: '/admin/' }
+    });
+
+    // Listener with multiple target groups (ASG + ECS) - equal weights
     this.nlb.addListener('NLBDNS', { 
       port: 53, 
       protocol: aws_elasticloadbalancingv2.Protocol.TCP_UDP,
-      defaultTargetGroups: [this.dnsTargetGroup]
+      defaultAction: aws_elasticloadbalancingv2.NetworkListenerAction.weightedForward([
+        { targetGroup: this.dnsTargetGroup, weight: 1 },
+        { targetGroup: this.ecsDnsTargetGroup, weight: 1 }
+      ])
     });
 
     this.nlb.addListener('NLBHTTP', { 
       port: 80, 
       protocol: aws_elasticloadbalancingv2.Protocol.TCP,
-      defaultTargetGroups: [this.httpTargetGroup]
+      defaultAction: aws_elasticloadbalancingv2.NetworkListenerAction.weightedForward([
+        { targetGroup: this.httpTargetGroup, weight: 1 },
+        { targetGroup: this.ecsHttpTargetGroup, weight: 1 }
+      ])
     });
 
     this.getEndpointIps = new AwsCustomResource(this, 'GetEndpointIps', {

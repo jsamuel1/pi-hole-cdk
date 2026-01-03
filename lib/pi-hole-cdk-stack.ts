@@ -143,7 +143,7 @@ export class PiHoleCdkStack extends cdk.Stack {
     });
 
     const taskDefinition = new aws_ecs.Ec2TaskDefinition(this, 'pihole-task-def', {
-      networkMode: aws_ecs.NetworkMode.HOST,
+      networkMode: aws_ecs.NetworkMode.AWS_VPC,
       taskRole: taskRole,
       executionRole: taskExecutionRole,
       volumes: [{
@@ -170,15 +170,16 @@ export class PiHoleCdkStack extends cdk.Stack {
         DNS1: props.appConfig.piHoleConfig.dns1,
         DNS2: props.appConfig.piHoleConfig.dns2,
         DNSMASQ_LISTENING: 'all',
+        FTLCONF_dns_port: '8053',  // Use alternate port for TCP DNS to avoid port conflict
       },
       secrets: { WEBPASSWORD: aws_ecs.Secret.fromSecretsManager(storage.secret) },
       logging: aws_ecs.LogDrivers.awsLogs({ streamPrefix: 'pihole', logGroup: logGroup }),
       healthCheck: {
-        command: ['CMD-SHELL', 'dig @127.0.0.1 google.com +short || exit 1'],
+        command: ['CMD-SHELL', 'dig @127.0.0.1 -p 8053 google.com +short || exit 1'],
         interval: cdk.Duration.seconds(30),
         timeout: cdk.Duration.seconds(5),
         retries: 3,
-        startPeriod: cdk.Duration.seconds(300)  // Pi-hole needs time to download blocklists on first run
+        startPeriod: cdk.Duration.seconds(300)
       }
     });
 
@@ -188,8 +189,12 @@ export class PiHoleCdkStack extends cdk.Stack {
       readOnly: false
     });
 
-    // HOST mode: only need one port mapping for CDK validation, all ports exposed via host network
-    container.addPortMappings({ containerPort: 80, protocol: aws_ecs.Protocol.TCP });
+    // awsvpc mode: expose DNS (UDP only on 53, TCP on 8053) and HTTP
+    container.addPortMappings(
+      { containerPort: 53, protocol: aws_ecs.Protocol.UDP },
+      { containerPort: 8053, protocol: aws_ecs.Protocol.TCP },
+      { containerPort: 80, protocol: aws_ecs.Protocol.TCP }
+    );
 
     // Role name must start with 'ecsInstanceRole' to match the PassRole permission
     // in AmazonECSInfrastructureRolePolicyForManagedInstances managed policy
@@ -244,11 +249,21 @@ export class PiHoleCdkStack extends cdk.Stack {
       enableExecuteCommand: true,
       placementConstraints: [aws_ecs.PlacementConstraint.distinctInstances()],
       serviceName: 'pihole-service',
+      securityGroups: [networking.securityGroup],
+      vpcSubnets: { subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS },
     });
 
-    // HOST mode: attach to same INSTANCE target groups as ASG
-    ecsService.attachToNetworkTargetGroup(loadBalancer.dnsTargetGroup);
-    ecsService.attachToNetworkTargetGroup(loadBalancer.httpTargetGroup);
+    // awsvpc mode: register with IP-type target groups
+    loadBalancer.ecsDnsTargetGroup.addTarget(ecsService.loadBalancerTarget({
+      containerName: 'pihole',
+      containerPort: 53,
+      protocol: aws_ecs.Protocol.UDP
+    }));
+    loadBalancer.ecsHttpTargetGroup.addTarget(ecsService.loadBalancerTarget({
+      containerName: 'pihole',
+      containerPort: 80,
+      protocol: aws_ecs.Protocol.TCP
+    }));
 
     new CfnOutput(this, 'dns1', {
       value: loadBalancer.getEndpointIps.getResponseField('NetworkInterfaces.0.PrivateIpAddress')
