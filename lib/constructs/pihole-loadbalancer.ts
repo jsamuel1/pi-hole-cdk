@@ -31,11 +31,11 @@ export class PiHoleLoadBalancer extends Construct {
       securityGroups: []
     });
 
-    // ASG target groups (INSTANCE type - TCP_UDP)
+    // ASG target groups (INSTANCE type - UDP only for DNS)
     this.dnsTargetGroup = new aws_elasticloadbalancingv2.NetworkTargetGroup(this, 'dnsTargetGroup', {
       vpc: props.vpc,
       port: 53,
-      protocol: aws_elasticloadbalancingv2.Protocol.TCP_UDP,
+      protocol: aws_elasticloadbalancingv2.Protocol.UDP,
       targetType: aws_elasticloadbalancingv2.TargetType.INSTANCE,
       deregistrationDelay: Duration.minutes(props.config.deregistrationDelayMinutes),
     });
@@ -68,16 +68,17 @@ export class PiHoleLoadBalancer extends Construct {
       healthCheck: { protocol: aws_elasticloadbalancingv2.Protocol.HTTP, path: '/admin/' }
     });
 
-    // Listener with multiple target groups (ASG + ECS) - equal weights
+    // DNS listener - both ASG and ECS (UDP only)
     this.nlb.addListener('NLBDNS', { 
       port: 53, 
-      protocol: aws_elasticloadbalancingv2.Protocol.TCP_UDP,
+      protocol: aws_elasticloadbalancingv2.Protocol.UDP,
       defaultAction: aws_elasticloadbalancingv2.NetworkListenerAction.weightedForward([
         { targetGroup: this.dnsTargetGroup, weight: 1 },
         { targetGroup: this.ecsDnsTargetGroup, weight: 1 }
       ])
     });
 
+    // HTTP listener - both ASG and ECS
     this.nlb.addListener('NLBHTTP', { 
       port: 80, 
       protocol: aws_elasticloadbalancingv2.Protocol.TCP,

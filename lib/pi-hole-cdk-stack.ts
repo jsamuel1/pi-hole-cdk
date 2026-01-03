@@ -170,12 +170,11 @@ export class PiHoleCdkStack extends cdk.Stack {
         DNS1: props.appConfig.piHoleConfig.dns1,
         DNS2: props.appConfig.piHoleConfig.dns2,
         DNSMASQ_LISTENING: 'all',
-        FTLCONF_dns_port: '8053',  // Use alternate port for TCP DNS to avoid port conflict
       },
       secrets: { WEBPASSWORD: aws_ecs.Secret.fromSecretsManager(storage.secret) },
       logging: aws_ecs.LogDrivers.awsLogs({ streamPrefix: 'pihole', logGroup: logGroup }),
       healthCheck: {
-        command: ['CMD-SHELL', 'dig @127.0.0.1 -p 8053 google.com +short || exit 1'],
+        command: ['CMD-SHELL', 'dig @127.0.0.1 google.com +short || exit 1'],
         interval: cdk.Duration.seconds(30),
         timeout: cdk.Duration.seconds(5),
         retries: 3,
@@ -189,10 +188,9 @@ export class PiHoleCdkStack extends cdk.Stack {
       readOnly: false
     });
 
-    // awsvpc mode: expose DNS (UDP only on 53, TCP on 8053) and HTTP
+    // awsvpc mode: expose DNS (UDP on 53) and HTTP
     container.addPortMappings(
       { containerPort: 53, protocol: aws_ecs.Protocol.UDP },
-      { containerPort: 8053, protocol: aws_ecs.Protocol.TCP },
       { containerPort: 80, protocol: aws_ecs.Protocol.TCP }
     );
 
