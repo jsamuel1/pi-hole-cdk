@@ -191,7 +191,10 @@ export class PiHoleCdkStack extends cdk.Stack {
     // HOST mode: only need one port mapping for CDK validation, all ports exposed via host network
     container.addPortMappings({ containerPort: 80, protocol: aws_ecs.Protocol.TCP });
 
+    // Role name must start with 'ecsInstanceRole' to match the PassRole permission
+    // in AmazonECSInfrastructureRolePolicyForManagedInstances managed policy
     const ecsInstanceRole = new aws_iam.Role(this, 'pihole-ecs-instance-role', {
+      roleName: 'ecsInstanceRole-pihole',
       assumedBy: new aws_iam.ServicePrincipal('ec2.amazonaws.com'),
       managedPolicies: [
         aws_iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonEC2ContainerServiceforEC2Role'),
@@ -203,17 +206,13 @@ export class PiHoleCdkStack extends cdk.Stack {
       role: ecsInstanceRole,
     });
 
-    // Infrastructure role for ECS Managed Instances - needs PassRole to assign instance role
+    // Infrastructure role for ECS Managed Instances
     const infrastructureRole = new aws_iam.Role(this, 'pihole-ecs-infrastructure-role', {
       assumedBy: new aws_iam.ServicePrincipal('ecs.amazonaws.com'),
       managedPolicies: [
-        aws_iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSInfrastructureRolePolicyForManagedInstances'),
+        aws_iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonECSInfrastructureRolePolicyForManagedInstances'),
       ],
     });
-    infrastructureRole.addToPolicy(new aws_iam.PolicyStatement({
-      actions: ['iam:PassRole'],
-      resources: [ecsInstanceRole.roleArn],
-    }));
 
     const capacityProvider = new aws_ecs.ManagedInstancesCapacityProvider(this, 'pihole-capacity-provider', {
       infrastructureRole: infrastructureRole,
