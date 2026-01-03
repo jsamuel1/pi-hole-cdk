@@ -143,7 +143,7 @@ export class PiHoleCdkStack extends cdk.Stack {
     });
 
     const taskDefinition = new aws_ecs.Ec2TaskDefinition(this, 'pihole-task-def', {
-      networkMode: aws_ecs.NetworkMode.AWS_VPC,
+      networkMode: aws_ecs.NetworkMode.HOST,
       taskRole: taskRole,
       executionRole: taskExecutionRole,
       volumes: [{
@@ -188,10 +188,8 @@ export class PiHoleCdkStack extends cdk.Stack {
       readOnly: false
     });
 
-    container.addPortMappings(
-      { containerPort: 53, protocol: aws_ecs.Protocol.UDP },
-      { containerPort: 80, protocol: aws_ecs.Protocol.TCP }
-    );
+    // HOST mode: only need one port mapping for CDK validation, all ports exposed via host network
+    container.addPortMappings({ containerPort: 80, protocol: aws_ecs.Protocol.TCP });
 
     const ecsInstanceRole = new aws_iam.Role(this, 'pihole-ecs-instance-role', {
       assumedBy: new aws_iam.ServicePrincipal('ec2.amazonaws.com'),
@@ -234,13 +232,11 @@ export class PiHoleCdkStack extends cdk.Stack {
       enableExecuteCommand: true,
       placementConstraints: [aws_ecs.PlacementConstraint.distinctInstances()],
       serviceName: 'pihole-service',
-      vpcSubnets: { subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS },
-      securityGroups: [networking.securityGroup]
     });
 
-    // Attach ECS service to ECS-specific target groups (IP type)
-    ecsService.attachToNetworkTargetGroup(loadBalancer.dnsTargetGroupEcs);
-    ecsService.attachToNetworkTargetGroup(loadBalancer.httpTargetGroupEcs);
+    // HOST mode: attach to same INSTANCE target groups as ASG
+    ecsService.attachToNetworkTargetGroup(loadBalancer.dnsTargetGroup);
+    ecsService.attachToNetworkTargetGroup(loadBalancer.httpTargetGroup);
 
     new CfnOutput(this, 'dns1', {
       value: loadBalancer.getEndpointIps.getResponseField('NetworkInterfaces.0.PrivateIpAddress')
