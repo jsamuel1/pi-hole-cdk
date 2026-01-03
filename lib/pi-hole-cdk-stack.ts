@@ -197,7 +197,7 @@ export class PiHoleCdkStack extends cdk.Stack {
     // Role name must start with 'ecsInstanceRole' to match the PassRole permission
     // in AmazonECSInfrastructureRolePolicyForManagedInstances managed policy
     const ecsInstanceRole = new aws_iam.Role(this, 'pihole-ecs-instance-role', {
-      roleName: 'ecsInstanceRole-pihole',
+      roleName: `ecsInstanceRole-pihole-${cdk.Stack.of(this).region}`,
       assumedBy: new aws_iam.ServicePrincipal('ec2.amazonaws.com'),
       managedPolicies: [
         aws_iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonEC2ContainerServiceforEC2Role'),
