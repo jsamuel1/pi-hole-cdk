@@ -203,7 +203,20 @@ export class PiHoleCdkStack extends cdk.Stack {
       role: ecsInstanceRole,
     });
 
+    // Infrastructure role for ECS Managed Instances - needs PassRole to assign instance role
+    const infrastructureRole = new aws_iam.Role(this, 'pihole-ecs-infrastructure-role', {
+      assumedBy: new aws_iam.ServicePrincipal('ecs.amazonaws.com'),
+      managedPolicies: [
+        aws_iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AmazonECSInfrastructureRolePolicyForManagedInstances'),
+      ],
+    });
+    infrastructureRole.addToPolicy(new aws_iam.PolicyStatement({
+      actions: ['iam:PassRole'],
+      resources: [ecsInstanceRole.roleArn],
+    }));
+
     const capacityProvider = new aws_ecs.ManagedInstancesCapacityProvider(this, 'pihole-capacity-provider', {
+      infrastructureRole: infrastructureRole,
       capacityProviderName: 'pihole-managed-instances',
       ec2InstanceProfile: instanceProfile,
       subnets: networking.vpc.selectSubnets({ subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS }).subnets,
