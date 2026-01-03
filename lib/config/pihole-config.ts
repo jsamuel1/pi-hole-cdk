@@ -30,7 +30,7 @@ export const DEFAULT_PIHOLE_CONFIG: PiHoleConfig = {
   dns2: '1.0.0.1',
   
   // Container/Instance Resources
-  containerMemory: 512,
+  containerMemory: 1536,
   containerCpu: 256,
   
   // Load Balancer Configuration

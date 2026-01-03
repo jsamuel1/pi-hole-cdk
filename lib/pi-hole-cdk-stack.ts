@@ -178,7 +178,7 @@ export class PiHoleCdkStack extends cdk.Stack {
         interval: cdk.Duration.seconds(30),
         timeout: cdk.Duration.seconds(5),
         retries: 3,
-        startPeriod: cdk.Duration.seconds(60)
+        startPeriod: cdk.Duration.seconds(300)  // Pi-hole needs time to download blocklists on first run
       }
     });
 
