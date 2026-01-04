@@ -44,6 +44,10 @@ export class AppConfig
     this.piHoleConfig = {
       ...DEFAULT_PIHOLE_CONFIG,
       revServerTarget: this.node.tryGetContext('rev_server_target') || DEFAULT_PIHOLE_CONFIG.revServerTarget,
+      httpsEnabled: this.node.tryGetContext('https_enabled') === 'true' || this.node.tryGetContext('https_enabled') === true,
+      hostedZoneId: this.node.tryGetContext('hosted_zone_id'),
+      hostedZoneName: this.node.tryGetContext('hosted_zone_name'),
+      regionSubdomain: this.node.tryGetContext('region_subdomain'),
     };
     this.rfc1918PrefixListId = this.node.tryGetContext('rfc1918PrefixListId');
   }

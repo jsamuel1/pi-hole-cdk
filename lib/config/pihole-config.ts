@@ -20,6 +20,12 @@ export interface PiHoleConfig {
   vCpuMax: number;
   memoryMinMiB: number;
   memoryMaxMiB: number;
+
+  // HTTPS Configuration (optional)
+  httpsEnabled?: boolean;
+  hostedZoneId?: string;
+  hostedZoneName?: string;
+  regionSubdomain?: string;
 }
 
 export const DEFAULT_PIHOLE_CONFIG: PiHoleConfig = {

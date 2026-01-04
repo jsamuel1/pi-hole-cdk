@@ -1,11 +1,11 @@
 import * as cdk from 'aws-cdk-lib';
-import { aws_ec2, aws_iam, CfnOutput, aws_autoscaling, aws_elasticloadbalancingv2, aws_ecs, aws_logs, Size } from 'aws-cdk-lib';
+import { aws_ec2, aws_iam, CfnOutput, aws_autoscaling, aws_elasticloadbalancingv2, aws_ecs, aws_logs, Size, aws_route53 } from 'aws-cdk-lib';
 import { LaunchTemplate, CpuManufacturer } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 import { readFileSync } from 'fs';
 import { PiHoleProps } from '../bin/pi-hole-cdk';
 import { HealthChecks, UpdatePolicy } from 'aws-cdk-lib/aws-autoscaling';
-import { PiHoleNetworking, PiHoleStorage, PiHoleLoadBalancer, PiHoleIamPolicies } from './constructs';
+import { PiHoleNetworking, PiHoleStorage, PiHoleLoadBalancer, PiHoleIamPolicies, PiHoleHttps } from './constructs';
 
 
 export class PiHoleCdkStack extends cdk.Stack {
@@ -279,6 +279,29 @@ export class PiHoleCdkStack extends cdk.Stack {
       containerPort: 80,
       protocol: aws_ecs.Protocol.TCP
     }));
+
+    // HTTPS ALB with ACM certificate (if configured)
+    if (props.appConfig.piHoleConfig.httpsEnabled && 
+        props.appConfig.piHoleConfig.hostedZoneId && 
+        props.appConfig.piHoleConfig.hostedZoneName &&
+        props.appConfig.piHoleConfig.regionSubdomain) {
+      
+      const https = new PiHoleHttps(this, 'https', {
+        vpc: networking.vpc,
+        hostedZoneId: props.appConfig.piHoleConfig.hostedZoneId,
+        hostedZoneName: props.appConfig.piHoleConfig.hostedZoneName,
+        regionSubdomain: props.appConfig.piHoleConfig.regionSubdomain,
+        targetGroup: loadBalancer.ecsHttpTargetGroup,
+        localIpCidr: local_ip_cidr,
+      });
+
+      // Register ECS service with ALB target group
+      https.albTargetGroup.addTarget(ecsService.loadBalancerTarget({
+        containerName: 'pihole',
+        containerPort: 80,
+        protocol: aws_ecs.Protocol.TCP
+      }));
+    }
 
     new CfnOutput(this, 'dns1', {
       value: loadBalancer.getEndpointIps.getResponseField('NetworkInterfaces.0.PrivateIpAddress')
