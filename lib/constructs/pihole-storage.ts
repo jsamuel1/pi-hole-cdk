@@ -5,6 +5,7 @@ export interface PiHoleStorageProps {
   vpc: aws_ec2.IVpc;
   securityGroup: aws_ec2.SecurityGroup;
   resourceSuffix?: string;
+  replicationRegions?: string[]; // Regions to replicate EFS to (only first region used)
 }
 
 export class PiHoleStorage extends Construct {
@@ -24,10 +25,16 @@ export class PiHoleStorage extends Construct {
       }
     });
 
+    // EFS only supports one replication destination
+    const replicationConfig = props.replicationRegions?.[0] 
+      ? aws_efs.ReplicationConfiguration.regionalFileSystem(props.replicationRegions[0])
+      : undefined;
+
     this.fileSystem = new aws_efs.FileSystem(this, `pihole-fs${suffix}`, {
       vpc: props.vpc,
       encrypted: true,
-      fileSystemName: `pihole-fs${suffix}`
+      fileSystemName: `pihole-fs${suffix}`,
+      replicationConfiguration: replicationConfig,
     });
 
     this.fileSystem.connections.allowDefaultPortFrom(props.securityGroup);

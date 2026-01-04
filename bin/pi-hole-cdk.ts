@@ -5,6 +5,7 @@ import { PiHoleCdkStack } from '../lib/pi-hole-cdk-stack';
 import { SiteToSiteVpnStack } from '../lib/sitetositevpn-stack';
 import { StackProps } from 'aws-cdk-lib';
 import { TgwWithSiteToSiteVpnStack } from '../lib/tgw-with-sitetositevpn-stack';
+import { PiHoleFailoverStack } from '../lib/pihole-failover-stack';
 import { Node } from 'constructs';
 import { PiHoleConfig, DEFAULT_PIHOLE_CONFIG } from '../lib/config/pihole-config';
 
@@ -48,6 +49,7 @@ export class AppConfig
       hostedZoneId: this.node.tryGetContext('hosted_zone_id'),
       hostedZoneName: this.node.tryGetContext('hosted_zone_name'),
       regionSubdomain: this.node.tryGetContext('region_subdomain'),
+      efsReplicationRegions: this.node.tryGetContext('efs_replication_regions')?.split(',').filter((r: string) => r),
     };
     this.rfc1918PrefixListId = this.node.tryGetContext('rfc1918PrefixListId');
   }
@@ -74,3 +76,23 @@ new PiHoleCdkStack(app, 'PiHoleCdkStack', piHoleProps);
 new SiteToSiteVpnStack(app, 'SiteToSiteVpnStack', piHoleProps);
 
 new TgwWithSiteToSiteVpnStack(app, 'TgwWithSiteToSiteVpnStack', piHoleProps);
+
+// Route 53 failover stack (deployed to us-east-1 for global health checks)
+const hostedZoneId = app.node.tryGetContext('hosted_zone_id');
+const hostedZoneName = app.node.tryGetContext('hosted_zone_name');
+const melAlbDns = app.node.tryGetContext('mel_alb_dns');
+const melAlbZone = app.node.tryGetContext('mel_alb_zone');
+const sydAlbDns = app.node.tryGetContext('syd_alb_dns');
+const sydAlbZone = app.node.tryGetContext('syd_alb_zone');
+
+if (hostedZoneId && melAlbDns && sydAlbDns) {
+  new PiHoleFailoverStack(app, 'PiHoleFailoverStack', {
+    env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: 'us-east-1' },
+    hostedZoneId,
+    hostedZoneName,
+    melAlbDnsName: melAlbDns,
+    sydAlbDnsName: sydAlbDns,
+    melAlbHostedZoneId: melAlbZone,
+    sydAlbHostedZoneId: sydAlbZone,
+  });
+}

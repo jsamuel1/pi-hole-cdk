@@ -26,6 +26,9 @@ export interface PiHoleConfig {
   hostedZoneId?: string;
   hostedZoneName?: string;
   regionSubdomain?: string;
+
+  // EFS Replication (optional - only for primary region)
+  efsReplicationRegions?: string[];
 }
 
 export const DEFAULT_PIHOLE_CONFIG: PiHoleConfig = {

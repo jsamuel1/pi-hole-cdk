@@ -27,7 +27,8 @@ export class PiHoleCdkStack extends cdk.Stack {
 
     const storage = new PiHoleStorage(this, 'storage', {
       vpc: networking.vpc,
-      securityGroup: networking.securityGroup
+      securityGroup: networking.securityGroup,
+      replicationRegions: props.appConfig.piHoleConfig.efsReplicationRegions,
     });
 
     // start with default Linux userdata
@@ -301,6 +302,10 @@ export class PiHoleCdkStack extends cdk.Stack {
         containerPort: 80,
         protocol: aws_ecs.Protocol.TCP
       }));
+
+      // Export ALB info for failover stack
+      new CfnOutput(this, 'AlbDnsName', { value: https.alb.loadBalancerDnsName, exportName: `pihole-alb-dns-${props.appConfig.piHoleConfig.regionSubdomain}` });
+      new CfnOutput(this, 'AlbHostedZoneId', { value: https.alb.loadBalancerCanonicalHostedZoneId, exportName: `pihole-alb-zone-${props.appConfig.piHoleConfig.regionSubdomain}` });
     }
 
     new CfnOutput(this, 'dns1', {
