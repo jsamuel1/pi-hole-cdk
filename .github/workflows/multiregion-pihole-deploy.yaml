@@ -44,7 +44,8 @@ jobs:
           npx cdk --no-notices synth PiHoleCdkStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
-            --context vpc_name="${{ secrets.VPC_NAME_MELBOURNE }}"
+            --context vpc_name="${{ secrets.VPC_NAME_MELBOURNE }}" \
+            --context rev_server_target="${{ secrets.REV_SERVER_TARGET }}"
 
       - name: Deploy PiHoleCdkStack to Melbourne
         run: |
@@ -52,6 +53,7 @@ jobs:
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
             --context vpc_name="${{ secrets.VPC_NAME_MELBOURNE }}" \
+            --context rev_server_target="${{ secrets.REV_SERVER_TARGET }}" \
             --require-approval never
 
   deploy-sydney:
@@ -87,7 +89,8 @@ jobs:
           npx cdk --no-notices synth PiHoleCdkStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
-            --context vpc_name="${{ secrets.VPC_NAME_SYDNEY }}"
+            --context vpc_name="${{ secrets.VPC_NAME_SYDNEY }}" \
+            --context rev_server_target="${{ secrets.REV_SERVER_TARGET }}"
 
       - name: Deploy PiHoleCdkStack to Sydney
         run: |
@@ -95,6 +98,7 @@ jobs:
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
             --context vpc_name="${{ secrets.VPC_NAME_SYDNEY }}" \
+            --context rev_server_target="${{ secrets.REV_SERVER_TARGET }}" \
             --require-approval never
 
   deploy-san-francisco:
@@ -130,7 +134,8 @@ jobs:
           npx cdk --no-notices synth PiHoleCdkStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
-            --context vpc_name="${{ secrets.VPC_NAME_SAN_FRANCISCO }}"
+            --context vpc_name="${{ secrets.VPC_NAME_SAN_FRANCISCO }}" \
+            --context rev_server_target="${{ secrets.REV_SERVER_TARGET }}"
 
       - name: Deploy PiHoleCdkStack to San Francisco
         run: |
@@ -138,4 +143,5 @@ jobs:
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
             --context vpc_name="${{ secrets.VPC_NAME_SAN_FRANCISCO }}" \
+            --context rev_server_target="${{ secrets.REV_SERVER_TARGET }}" \
             --require-approval never

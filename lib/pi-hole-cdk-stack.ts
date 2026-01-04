@@ -156,6 +156,13 @@ export class PiHoleCdkStack extends cdk.Stack {
       }]
     });
 
+    // Local domain forwarding config - forwards .local and .localdomain to UniFi gateway
+    const localDnsForwardTarget = props.appConfig.piHoleConfig.revServerTarget;
+    const dnsmasqCustomConfig = [
+      `server=/local/${localDnsForwardTarget}`,
+      `server=/localdomain/${localDnsForwardTarget}`,
+    ].join('\\n');
+
     const container = taskDefinition.addContainer('pihole', {
       image: aws_ecs.ContainerImage.fromRegistry('pihole/pihole:latest'),
       memoryReservationMiB: props.appConfig.piHoleConfig.containerMemory,
@@ -170,6 +177,8 @@ export class PiHoleCdkStack extends cdk.Stack {
         DNS1: props.appConfig.piHoleConfig.dns1,
         DNS2: props.appConfig.piHoleConfig.dns2,
         DNSMASQ_LISTENING: 'all',
+        // Enable custom dnsmasq.d configs and set local domain forwarding
+        DNSMASQ_CUSTOM_CONFIG: dnsmasqCustomConfig,
       },
       secrets: { WEBPASSWORD: aws_ecs.Secret.fromSecretsManager(storage.secret) },
       logging: aws_ecs.LogDrivers.awsLogs({ streamPrefix: 'pihole', logGroup: logGroup }),
@@ -179,7 +188,14 @@ export class PiHoleCdkStack extends cdk.Stack {
         timeout: cdk.Duration.seconds(5),
         retries: 3,
         startPeriod: cdk.Duration.seconds(300)
-      }
+      },
+      // Create dnsmasq.d config and enable it in pihole.toml before starting
+      command: [
+        '/bin/bash', '-c',
+        `mkdir -p /etc/dnsmasq.d && echo -e "${dnsmasqCustomConfig}" > /etc/dnsmasq.d/99-local-forward.conf && ` +
+        `sed -i 's/etc_dnsmasq_d = false/etc_dnsmasq_d = true/' /etc/pihole/pihole.toml 2>/dev/null || true && ` +
+        `/s6-init`
+      ]
     });
 
     container.addMountPoints({

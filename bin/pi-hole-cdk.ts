@@ -41,7 +41,10 @@ export class AppConfig
     this.bUsePrefixLists = (usePrefixLists == undefined || (usePrefixLists == "True" || usePrefixLists == true));
     this.bUseIntel = false;//(env.region == 'ap-southeast-4');
     
-    this.piHoleConfig = DEFAULT_PIHOLE_CONFIG;
+    this.piHoleConfig = {
+      ...DEFAULT_PIHOLE_CONFIG,
+      revServerTarget: this.node.tryGetContext('rev_server_target') || DEFAULT_PIHOLE_CONFIG.revServerTarget,
+    };
     this.rfc1918PrefixListId = this.node.tryGetContext('rfc1918PrefixListId');
   }
 }
