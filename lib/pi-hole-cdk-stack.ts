@@ -188,7 +188,7 @@ export class PiHoleCdkStack extends cdk.Stack {
         interval: cdk.Duration.seconds(30),
         timeout: cdk.Duration.seconds(5),
         retries: 3,
-        startPeriod: cdk.Duration.seconds(300)
+        startPeriod: cdk.Duration.seconds(120)
       },
       // Create dnsmasq.d config, enable it, and set listeningMode to allow all queries (for NLB)
       command: [
@@ -261,6 +261,7 @@ export class PiHoleCdkStack extends cdk.Stack {
       desiredCount: 1,
       minHealthyPercent: 0,
       maxHealthyPercent: 100,
+      healthCheckGracePeriod: cdk.Duration.seconds(120),
       capacityProviderStrategies: [{ capacityProvider: capacityProvider.capacityProviderName, weight: 1, base: 1 }],
       enableExecuteCommand: true,
       placementConstraints: [aws_ecs.PlacementConstraint.distinctInstances()],

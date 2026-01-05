@@ -40,8 +40,8 @@ export class AppConfig
 
     var usePrefixLists = this.node.tryGetContext('usePrefixLists');
     this.bUsePrefixLists = (usePrefixLists == undefined || (usePrefixLists == "True" || usePrefixLists == true));
-    // Melbourne (ap-southeast-4) has limited Graviton availability - use Intel
-    this.bUseIntel = (env.region == 'ap-southeast-4');
+    // Use Graviton for all regions
+    this.bUseIntel = false;
     
     this.piHoleConfig = {
       ...DEFAULT_PIHOLE_CONFIG,
