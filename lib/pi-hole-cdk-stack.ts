@@ -168,7 +168,6 @@ export class PiHoleCdkStack extends cdk.Stack {
       // Reverse lookups (PTR) for 192.168.0.0/22
       `rev-server=192.168.0.0/22,${localDnsForwardTarget}`,
     ].join('\\n');
-    ].join('\\n');
 
     const container = taskDefinition.addContainer('pihole', {
       image: aws_ecs.ContainerImage.fromRegistry('pihole/pihole:latest'),
