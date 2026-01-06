@@ -89,9 +89,10 @@ if [ ! -a /etc/pihole/adlists.list ]; then
 https://raw.githubusercontent.com/StevenBlack/hosts/master/hosts
 https://v.firebog.net/hosts/Admiral.txt
 https://v.firebog.net/hosts/Easylist.txt
-https://v.firebog.net/hosts/Easyprivacy.txt
 https://v.firebog.net/hosts/Prigent-Ads.txt
+https://v.firebog.net/hosts/Prigent-Crypto.txt
 https://raw.githubusercontent.com/Perflyst/PiHoleBlocklist/master/SmartTV.txt
+https://raw.githubusercontent.com/PolishFiltersTeam/KADhosts/master/KADhosts.txt
 EOF
 fi
 
