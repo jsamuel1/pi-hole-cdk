@@ -50,7 +50,8 @@ export class AppConfig
       hostedZoneId: this.node.tryGetContext('hosted_zone_id'),
       hostedZoneName: this.node.tryGetContext('hosted_zone_name'),
       regionSubdomain: this.node.tryGetContext('region_subdomain'),
-      efsReplicationRegions: this.node.tryGetContext('efs_replication_regions')?.split(',').filter((r: string) => r),
+      efsReplicationRegion: this.node.tryGetContext('efs_replication_region'),
+      existingReplicationDestFsId: this.node.tryGetContext('efs_replication_dest_fs_id'),
     };
     this.rfc1918PrefixListId = this.node.tryGetContext('rfc1918PrefixListId');
   }

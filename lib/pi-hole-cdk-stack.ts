@@ -28,7 +28,8 @@ export class PiHoleCdkStack extends cdk.Stack {
     const storage = new PiHoleStorage(this, 'storage', {
       vpc: networking.vpc,
       securityGroup: networking.securityGroup,
-      replicationRegions: props.appConfig.piHoleConfig.efsReplicationRegions,
+      replicationRegion: props.appConfig.piHoleConfig.efsReplicationRegion,
+      existingReplicationDestFsId: props.appConfig.piHoleConfig.existingReplicationDestFsId,
     });
 
     // start with default Linux userdata

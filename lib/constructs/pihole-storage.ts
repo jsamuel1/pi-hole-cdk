@@ -5,7 +5,8 @@ export interface PiHoleStorageProps {
   vpc: aws_ec2.IVpc;
   securityGroup: aws_ec2.SecurityGroup;
   resourceSuffix?: string;
-  replicationRegions?: string[]; // Regions to replicate EFS to (only first region used)
+  replicationRegion?: string; // Region to replicate EFS to
+  existingReplicationDestFsId?: string; // If set, use existing destination instead of creating new
 }
 
 export class PiHoleStorage extends Construct {
@@ -25,10 +26,19 @@ export class PiHoleStorage extends Construct {
       }
     });
 
-    // EFS only supports one replication destination
-    const replicationConfig = props.replicationRegions?.[0] 
-      ? aws_efs.ReplicationConfiguration.regionalFileSystem(props.replicationRegions[0])
-      : undefined;
+    // Determine replication configuration
+    let replicationConfig: aws_efs.ReplicationConfiguration | undefined;
+    if (props.existingReplicationDestFsId) {
+      // Use existing destination filesystem (replication already configured)
+      const destFs = aws_efs.FileSystem.fromFileSystemAttributes(this, 'dest-fs', {
+        fileSystemId: props.existingReplicationDestFsId,
+        securityGroup: aws_ec2.SecurityGroup.fromSecurityGroupId(this, 'dest-sg', 'sg-placeholder'),
+      });
+      replicationConfig = aws_efs.ReplicationConfiguration.existingFileSystem(destFs);
+    } else if (props.replicationRegion) {
+      // Create new replication to region
+      replicationConfig = aws_efs.ReplicationConfiguration.regionalFileSystem(props.replicationRegion);
+    }
 
     this.fileSystem = new aws_efs.FileSystem(this, `pihole-fs${suffix}`, {
       vpc: props.vpc,

@@ -57,6 +57,27 @@ Add the optional context parameter: `public_http=True` if you want to create an 
 
 ## Post-Deployment Configuration
 
+### EFS Replication (Multi-Region)
+
+For multi-region deployments, EFS replication can be configured to replicate Pi-hole configuration data between regions:
+
+```bash
+# First deployment (creates new replication)
+cdk deploy PiHoleCdkStack \
+  --context efs_replication_region="ap-southeast-2"
+
+# Subsequent deployments (uses existing replication destination)
+# The workflow automatically looks up existing replication and passes the destination filesystem ID
+```
+
+**Context Parameters:**
+- `efs_replication_region` - Target region for EFS replication (e.g., "ap-southeast-2")
+- `efs_replication_dest_fs_id` - (Optional) Existing destination filesystem ID. If provided, uses existing replication instead of creating new.
+
+The GitHub Actions workflow automatically detects existing EFS replication and passes the destination filesystem ID to avoid conflicts.
+
+### Conditional Forwarding
+
 Optionally, ye may wish to set up a conditional forwarder back to yer local DHCP server's DNS, if ye are not moving DHCP onto the pihole.
 Do this from the PiHole web UI, or add the following variables into the PiHole setupVars.conf and reload the config:
 ```

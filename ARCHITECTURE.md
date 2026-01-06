@@ -59,6 +59,7 @@
 │  │  - Mounted to /etc/pihole in container                     │    │
 │  │  - IAM authentication + TLS encryption                     │    │
 │  │  - Persistent Pi-hole configuration and blocklists         │    │
+│  │  - Optional cross-region replication                       │    │
 │  └────────────────────────────────────────────────────────────┘    │
 │                                                                      │
 │  ┌────────────────────────────────────────────────────────────┐    │
@@ -213,3 +214,29 @@ Ready to serve DNS queries
 ---
 
 **Arrr! This be a fine architecture fer runnin' Pi-hole in the cloud!** 🏴‍☠️⚓
+
+
+## EFS Replication (Multi-Region)
+
+For multi-region deployments, EFS replication provides data redundancy:
+
+```
+┌─────────────────────────────┐         ┌─────────────────────────────┐
+│  Primary Region (MEL)       │         │  Secondary Region (SYD)     │
+│                             │         │                             │
+│  ┌───────────────────────┐  │         │  ┌───────────────────────┐  │
+│  │  EFS (pihole-fs)      │──┼────────►│  │  EFS (replica)        │  │
+│  │  - Pi-hole config     │  │  async  │  │  - Read-only replica  │  │
+│  │  - Blocklists         │  │  repl   │  │  - Failover ready     │  │
+│  └───────────────────────┘  │         │  └───────────────────────┘  │
+└─────────────────────────────┘         └─────────────────────────────┘
+```
+
+### Configuration
+- `efs_replication_region`: Target region for replication
+- `efs_replication_dest_fs_id`: Existing destination filesystem (auto-detected by workflow)
+
+### Behavior
+- First deployment creates new replication to target region
+- Subsequent deployments detect existing replication and use the same destination
+- GitHub Actions workflow automatically looks up existing replication configuration
