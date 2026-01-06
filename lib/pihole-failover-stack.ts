@@ -40,10 +40,10 @@ export class PiHoleFailoverStack extends cdk.Stack {
       healthCheckTags: [{ key: 'Name', value: 'pihole-syd-health' }],
     });
 
-    // Primary record - Melbourne
+    // Primary record - Melbourne (pihole.home.sauhsoj.wtf)
     new aws_route53.CfnRecordSet(this, 'PrimaryRecord', {
       hostedZoneId: props.hostedZoneId,
-      name: props.hostedZoneName,
+      name: `pihole.${props.hostedZoneName}`,
       type: 'A',
       aliasTarget: {
         dnsName: props.melAlbDnsName,
@@ -55,10 +55,10 @@ export class PiHoleFailoverStack extends cdk.Stack {
       healthCheckId: melHealthCheck.attrHealthCheckId,
     });
 
-    // Secondary record - Sydney
+    // Secondary record - Sydney (pihole.home.sauhsoj.wtf)
     new aws_route53.CfnRecordSet(this, 'SecondarySydRecord', {
       hostedZoneId: props.hostedZoneId,
-      name: props.hostedZoneName,
+      name: `pihole.${props.hostedZoneName}`,
       type: 'A',
       aliasTarget: {
         dnsName: props.sydAlbDnsName,
@@ -70,6 +70,6 @@ export class PiHoleFailoverStack extends cdk.Stack {
       healthCheckId: sydHealthCheck.attrHealthCheckId,
     });
 
-    new cdk.CfnOutput(this, 'FailoverDomain', { value: `https://${props.hostedZoneName}/admin` });
+    new cdk.CfnOutput(this, 'FailoverDomain', { value: `https://pihole.${props.hostedZoneName}/admin` });
   }
 }

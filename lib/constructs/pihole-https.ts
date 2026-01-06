@@ -24,11 +24,12 @@ export class PiHoleHttps extends Construct {
       zoneName: props.hostedZoneName,
     });
 
-    const regionalDomain = `${props.regionSubdomain}.${props.hostedZoneName}`;
+    const regionalDomain = `pihole-${props.regionSubdomain}.${props.hostedZoneName}`;
 
     // ACM Certificate with DNS validation
     this.certificate = new aws_certificatemanager.Certificate(this, 'Cert', {
       domainName: regionalDomain,
+      subjectAlternativeNames: [`pihole.${props.hostedZoneName}`],
       validation: aws_certificatemanager.CertificateValidation.fromDns(hostedZone),
     });
 
@@ -70,10 +71,10 @@ export class PiHoleHttps extends Construct {
       defaultAction: aws_elasticloadbalancingv2.ListenerAction.forward([this.albTargetGroup]),
     });
 
-    // Regional DNS record
+    // Regional DNS record (pihole-mel, pihole-syd)
     this.regionalRecord = new aws_route53.ARecord(this, 'RegionalRecord', {
       zone: hostedZone,
-      recordName: props.regionSubdomain,
+      recordName: `pihole-${props.regionSubdomain}`,
       target: aws_route53.RecordTarget.fromAlias(new aws_route53_targets.LoadBalancerTarget(this.alb)),
     });
 
