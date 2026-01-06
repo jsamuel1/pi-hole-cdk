@@ -52,7 +52,15 @@ export class PiHoleHttps extends Construct {
       port: 80,
       protocol: aws_elasticloadbalancingv2.ApplicationProtocol.HTTP,
       targetType: aws_elasticloadbalancingv2.TargetType.IP,
-      healthCheck: { path: '/admin/', protocol: aws_elasticloadbalancingv2.Protocol.HTTP },
+      healthCheck: {
+        path: '/admin/',
+        protocol: aws_elasticloadbalancingv2.Protocol.HTTP,
+        interval: Duration.seconds(30),
+        timeout: Duration.seconds(10),
+        healthyThresholdCount: 2,
+        unhealthyThresholdCount: 5,
+        healthyHttpCodes: '200-399',
+      },
     });
 
     // HTTPS listener

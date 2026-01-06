@@ -158,11 +158,16 @@ export class PiHoleCdkStack extends cdk.Stack {
       }]
     });
 
-    // Local domain forwarding config - forwards .local and .localdomain to UniFi gateway
+    // Local domain forwarding config - forwards local domains to UniFi gateway
     const localDnsForwardTarget = props.appConfig.piHoleConfig.revServerTarget;
     const dnsmasqCustomConfig = [
+      // Forward lookups for local domains
       `server=/local/${localDnsForwardTarget}`,
       `server=/localdomain/${localDnsForwardTarget}`,
+      `server=/home.sauhsoj.wtf/${localDnsForwardTarget}`,
+      // Reverse lookups (PTR) for 192.168.0.0/22
+      `rev-server=192.168.0.0/22,${localDnsForwardTarget}`,
+    ].join('\\n');
     ].join('\\n');
 
     const container = taskDefinition.addContainer('pihole', {
