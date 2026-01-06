@@ -28,7 +28,12 @@ export class PiHoleLoadBalancer extends Construct {
       internetFacing: false,
       crossZoneEnabled: true,
       loadBalancerName: `pihole${suffix}`,
-      securityGroups: []
+      securityGroups: [],
+      vpcSubnets: { 
+        subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS,
+        onePerAz: true,
+        subnetFilters: [aws_ec2.SubnetFilter.byCidrRanges(['10.0.0.0/8', '172.16.0.0/12', '192.168.0.0/16'])],
+      },
     });
 
     // ASG target groups (INSTANCE type - UDP only for DNS)
