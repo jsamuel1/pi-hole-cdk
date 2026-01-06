@@ -27,14 +27,11 @@ export class PiHoleStorage extends Construct {
     });
 
     // Determine replication configuration
+    // If existingReplicationDestFsId is set, replication already exists - skip config entirely
     let replicationConfig: aws_efs.ReplicationConfiguration | undefined;
     if (props.existingReplicationDestFsId) {
-      // Use existing destination filesystem (replication already configured)
-      const destFs = aws_efs.FileSystem.fromFileSystemAttributes(this, 'dest-fs', {
-        fileSystemId: props.existingReplicationDestFsId,
-        securityGroup: aws_ec2.SecurityGroup.fromSecurityGroupId(this, 'dest-sg', 'sg-placeholder'),
-      });
-      replicationConfig = aws_efs.ReplicationConfiguration.existingFileSystem(destFs);
+      // Replication already exists, don't configure it
+      replicationConfig = undefined;
     } else if (props.replicationRegion) {
       // Create new replication to region
       replicationConfig = aws_efs.ReplicationConfiguration.regionalFileSystem(props.replicationRegion);
