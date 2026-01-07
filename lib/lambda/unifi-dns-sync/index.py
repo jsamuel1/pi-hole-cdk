@@ -8,8 +8,9 @@ import boto3
 def lambda_handler(event, context):
     secrets_client = boto3.client('secretsmanager')
     
-    # Get UniFi credentials
+    # Get UniFi API key
     unifi_secret = json.loads(secrets_client.get_secret_value(SecretId=os.environ['UNIFI_SECRET_NAME'])['SecretString'])
+    api_key = unifi_secret['api_key']
     
     # SSL context that doesn't verify (UniFi uses self-signed certs)
     ctx = ssl.create_default_context()
@@ -19,14 +20,11 @@ def lambda_handler(event, context):
     base_url = os.environ['UNIFI_BASE_URL']
     site_id = os.environ.get('UNIFI_SITE_ID', 'default')
     
-    # Login to UniFi
-    login_data = json.dumps({"username": unifi_secret['username'], "password": unifi_secret['password']}).encode()
-    login_req = urllib.request.Request(f"{base_url}/api/auth/login", data=login_data, headers={'Content-Type': 'application/json'})
-    login_resp = urllib.request.urlopen(login_req, context=ctx)
-    cookies = login_resp.headers.get('Set-Cookie', '')
-    
-    # Get active clients
-    clients_req = urllib.request.Request(f"{base_url}/proxy/network/api/s/{site_id}/stat/sta", headers={'Cookie': cookies})
+    # Get active clients using API key auth
+    clients_req = urllib.request.Request(
+        f"{base_url}/proxy/network/api/s/{site_id}/stat/sta",
+        headers={'X-API-KEY': api_key}
+    )
     clients_resp = urllib.request.urlopen(clients_req, context=ctx)
     clients = json.loads(clients_resp.read())['data']
     
