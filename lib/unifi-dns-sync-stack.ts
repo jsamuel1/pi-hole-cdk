@@ -6,7 +6,6 @@ import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import * as efs from 'aws-cdk-lib/aws-efs';
-import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
 import { Construct } from 'constructs';
 
 export interface UnifiDnsSyncStackProps extends cdk.StackProps {
@@ -40,9 +39,10 @@ export class UnifiDnsSyncStack extends cdk.Stack {
       posixUser: { gid: '0', uid: '0' }
     });
 
-    const lambdaFunction = new PythonFunction(this, 'UnifiDnsSyncFunction', {
-      entry: 'lib/lambda/unifi-dns-sync',
-      runtime: lambda.Runtime.PYTHON_3_13,
+    const lambdaFunction = new lambda.Function(this, 'UnifiDnsSyncFunction', {
+      code: lambda.Code.fromAsset('lib/lambda/unifi-dns-sync'),
+      handler: 'index.lambda_handler',
+      runtime: lambda.Runtime.PYTHON_3_12,
       timeout: cdk.Duration.minutes(5),
       vpc: props.vpc,
       filesystem: lambda.FileSystem.fromEfsAccessPoint(accessPoint, '/mnt/efs'),
@@ -52,8 +52,6 @@ export class UnifiDnsSyncStack extends cdk.Stack {
         PIHOLE_API_URL: props.piholeApiUrl,
         UNIFI_SECRET_NAME: secret.secretName,
         PIHOLE_SECRET_NAME: props.piholeSecret.secretName,
-        ECS_CLUSTER_ARN: props.ecsClusterArn,
-        ECS_SERVICE_NAME: props.ecsServiceName,
         LOCAL_DNS_SUFFIX: props.localDnsSuffix
       }
     });
@@ -61,11 +59,6 @@ export class UnifiDnsSyncStack extends cdk.Stack {
     secret.grantRead(lambdaFunction);
     props.piholeSecret.grantRead(lambdaFunction);
     props.fileSystem.grantRootAccess(lambdaFunction);
-
-    lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
-      actions: ['ecs:ExecuteCommand'],
-      resources: [`${props.ecsClusterArn}/service/${props.ecsServiceName}`]
-    }));
 
     new events.Rule(this, 'ScheduleRule', {
       schedule: events.Schedule.rate(cdk.Duration.minutes(5)),

@@ -1,42 +1,41 @@
 import json
 import os
-import requests
+import ssl
+import urllib.request
 import boto3
-from typing import Dict, List
 
 
 def lambda_handler(event, context):
-    # Get UniFi credentials from Secrets Manager
     secrets_client = boto3.client('secretsmanager')
-    secret = json.loads(secrets_client.get_secret_value(SecretId=os.environ['UNIFI_SECRET_NAME'])['SecretString'])
     
-    # UniFi API session
-    session = requests.Session()
-    session.verify = False  # UniFi uses self-signed certs
+    # Get UniFi credentials
+    unifi_secret = json.loads(secrets_client.get_secret_value(SecretId=os.environ['UNIFI_SECRET_NAME'])['SecretString'])
     
-    # Login to UniFi
+    # SSL context that doesn't verify (UniFi uses self-signed certs)
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    
     base_url = os.environ['UNIFI_BASE_URL']
     site_id = os.environ.get('UNIFI_SITE_ID', 'default')
     
-    login_response = session.post(
-        f"{base_url}/api/auth/login",
-        json={"username": secret['username'], "password": secret['password']}
-    )
-    login_response.raise_for_status()
+    # Login to UniFi
+    login_data = json.dumps({"username": unifi_secret['username'], "password": unifi_secret['password']}).encode()
+    login_req = urllib.request.Request(f"{base_url}/api/auth/login", data=login_data, headers={'Content-Type': 'application/json'})
+    login_resp = urllib.request.urlopen(login_req, context=ctx)
+    cookies = login_resp.headers.get('Set-Cookie', '')
     
     # Get active clients
-    clients_response = session.get(f"{base_url}/proxy/network/api/s/{site_id}/stat/sta")
-    clients_response.raise_for_status()
-    clients = clients_response.json()['data']
+    clients_req = urllib.request.Request(f"{base_url}/proxy/network/api/s/{site_id}/stat/sta", headers={'Cookie': cookies})
+    clients_resp = urllib.request.urlopen(clients_req, context=ctx)
+    clients = json.loads(clients_resp.read())['data']
     
     # Generate custom.list entries
     dns_suffix = os.environ['LOCAL_DNS_SUFFIX']
     entries = []
     for client in clients:
         if client.get('hostname') and client.get('ip'):
-            hostname = client['hostname']
-            ip = client['ip']
-            entries.append(f"{ip} {hostname}.{dns_suffix}")
+            entries.append(f"{client['ip']} {client['hostname']}.{dns_suffix}")
     
     # Write to EFS
     with open('/mnt/efs/custom.list', 'w') as f:
@@ -46,23 +45,14 @@ def lambda_handler(event, context):
     pihole_api_url = os.environ['PIHOLE_API_URL']
     pihole_password = secrets_client.get_secret_value(SecretId=os.environ['PIHOLE_SECRET_NAME'])['SecretString']
     
-    # Authenticate to get session ID
-    auth_response = requests.post(
-        f"{pihole_api_url}/api/auth",
-        json={"password": pihole_password},
-        verify=False
-    )
-    auth_response.raise_for_status()
-    sid = auth_response.json()['session']['sid']
+    # Authenticate
+    auth_data = json.dumps({"password": pihole_password}).encode()
+    auth_req = urllib.request.Request(f"{pihole_api_url}/api/auth", data=auth_data, headers={'Content-Type': 'application/json'})
+    auth_resp = urllib.request.urlopen(auth_req, context=ctx)
+    sid = json.loads(auth_resp.read())['session']['sid']
     
-    # Restart DNS with session ID
-    requests.post(
-        f"{pihole_api_url}/api/action/restartdns",
-        headers={"X-FTL-SID": sid},
-        verify=False
-    )
+    # Restart DNS
+    restart_req = urllib.request.Request(f"{pihole_api_url}/api/action/restartdns", method='POST', headers={'X-FTL-SID': sid})
+    urllib.request.urlopen(restart_req, context=ctx)
     
-    return {
-        'statusCode': 200,
-        'body': json.dumps(f'Updated {len(entries)} DNS entries')
-    }
+    return {'statusCode': 200, 'body': json.dumps(f'Updated {len(entries)} DNS entries')}
