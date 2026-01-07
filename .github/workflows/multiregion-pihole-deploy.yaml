@@ -94,6 +94,11 @@ jobs:
 
       - name: Deploy UnifiDnsSyncStack to Melbourne
         run: |
+          REPL_ARGS=""
+          if [ -n "${{ steps.efs_lookup.outputs.dest_fs_id }}" ]; then
+            REPL_ARGS="--context efs_replication_dest_fs_id=${{ steps.efs_lookup.outputs.dest_fs_id }}"
+          fi
+          
           npx cdk --no-notices deploy UnifiDnsSyncStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
@@ -108,6 +113,7 @@ jobs:
             --context unifi_base_url="${{ secrets.UNIFI_BASE_URL }}" \
             --context unifi_site_id="default" \
             --context pihole_api_url="${{ secrets.PIHOLE_API_URL }}" \
+            $REPL_ARGS \
             --require-approval never
 
   deploy-sydney:
