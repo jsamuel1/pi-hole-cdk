@@ -209,13 +209,13 @@ export class PiHoleCdkStack extends cdk.Stack {
         retries: 3,
         startPeriod: cdk.Duration.seconds(120)
       },
-      // Create dnsmasq.d config, enable it, and set listeningMode to allow all queries (for NLB)
+      // Create dnsmasq.d config, enable it, set listeningMode, and set password from env
       command: [
         '/bin/bash', '-c',
         `mkdir -p /etc/dnsmasq.d && echo -e "${dnsmasqCustomConfig}" > /etc/dnsmasq.d/99-local-forward.conf && ` +
         `sed -i 's/etc_dnsmasq_d = false/etc_dnsmasq_d = true/' /etc/pihole/pihole.toml 2>/dev/null || true && ` +
         `sed -i 's/listeningMode = "LOCAL"/listeningMode = "all"/' /etc/pihole/pihole.toml 2>/dev/null || true && ` +
-        `/s6-init`
+        `/s6-init & sleep 30 && pihole setpassword "$WEBPASSWORD" && wait`
       ]
     });
 

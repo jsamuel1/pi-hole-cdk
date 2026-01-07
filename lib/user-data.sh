@@ -249,7 +249,7 @@ sleep 10
 log_message "Setting Pi-hole web UI password from Secrets Manager"
 if retry_command aws secretsmanager get-secret-value --secret-id $SECRET_ARN; then
     PASSWORD=$(aws secretsmanager get-secret-value --secret-id $SECRET_ARN | jq .SecretString -j)
-    /usr/local/bin/pihole -a -p "$PASSWORD"
+    /usr/local/bin/pihole setpassword "$PASSWORD"
     log_message "Pi-hole password set successfully"
 else
     log_message "WARNING: Failed to retrieve password from Secrets Manager"
