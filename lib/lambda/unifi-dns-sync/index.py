@@ -28,18 +28,14 @@ def lambda_handler(event, context):
     clients_resp = urllib.request.urlopen(clients_req, context=ctx)
     clients = json.loads(clients_resp.read())['data']
     
-    # Generate custom.list entries
+    # Generate DNS host entries for Pi-hole v6 API
     dns_suffix = os.environ['LOCAL_DNS_SUFFIX']
-    entries = []
+    hosts = []
     for client in clients:
         if client.get('hostname') and client.get('ip'):
-            entries.append(f"{client['ip']} {client['hostname']}.{dns_suffix}")
+            hosts.append(f"{client['ip']} {client['hostname']}.{dns_suffix}")
     
-    # Write to EFS
-    with open('/mnt/efs/custom.list', 'w') as f:
-        f.write('\n'.join(entries) + '\n')
-    
-    # Reload Pi-hole DNS via v6 API
+    # Update Pi-hole via v6 API
     pihole_api_url = os.environ['PIHOLE_API_URL']
     pihole_password = secrets_client.get_secret_value(SecretId=os.environ['PIHOLE_SECRET_NAME'])['SecretString']
     
@@ -49,8 +45,14 @@ def lambda_handler(event, context):
     auth_resp = urllib.request.urlopen(auth_req, context=ctx)
     sid = json.loads(auth_resp.read())['session']['sid']
     
-    # Restart DNS
-    restart_req = urllib.request.Request(f"{pihole_api_url}/api/action/restartdns", method='POST', headers={'X-FTL-SID': sid})
-    urllib.request.urlopen(restart_req, context=ctx)
+    # Update dns.hosts via config API
+    config_data = json.dumps({"config": {"dns": {"hosts": hosts}}}).encode()
+    config_req = urllib.request.Request(
+        f"{pihole_api_url}/api/config",
+        data=config_data,
+        method='PATCH',
+        headers={'Content-Type': 'application/json', 'X-FTL-SID': sid}
+    )
+    urllib.request.urlopen(config_req, context=ctx)
     
-    return {'statusCode': 200, 'body': json.dumps(f'Updated {len(entries)} DNS entries')}
+    return {'statusCode': 200, 'body': json.dumps(f'Updated {len(hosts)} DNS entries')}
