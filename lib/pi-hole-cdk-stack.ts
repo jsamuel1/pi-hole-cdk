@@ -1,5 +1,5 @@
 import * as cdk from 'aws-cdk-lib';
-import { aws_ec2, aws_iam, CfnOutput, aws_autoscaling, aws_elasticloadbalancingv2, aws_ecs, aws_logs, Size, aws_route53 } from 'aws-cdk-lib';
+import { aws_ec2, aws_iam, CfnOutput, aws_autoscaling, aws_elasticloadbalancingv2, aws_ecs, aws_logs, Size, aws_route53, aws_efs, aws_secretsmanager } from 'aws-cdk-lib';
 import { LaunchTemplate, CpuManufacturer } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 import { readFileSync } from 'fs';
@@ -9,6 +9,12 @@ import { PiHoleNetworking, PiHoleStorage, PiHoleLoadBalancer, PiHoleIamPolicies,
 
 
 export class PiHoleCdkStack extends cdk.Stack {
+  public readonly vpc: aws_ec2.IVpc;
+  public readonly fileSystem: aws_efs.IFileSystem;
+  public readonly clusterName: string;
+  public readonly ecsServiceName: string;
+  public readonly piholeSecret: aws_secretsmanager.ISecret;
+
   constructor(scope: Construct, id: string, props: PiHoleProps) {
     super(scope, id, props);
 
@@ -31,6 +37,11 @@ export class PiHoleCdkStack extends cdk.Stack {
       replicationRegion: props.appConfig.piHoleConfig.efsReplicationRegion,
       existingReplicationDestFsId: props.appConfig.piHoleConfig.existingReplicationDestFsId,
     });
+
+    // Assign public properties
+    this.vpc = networking.vpc;
+    this.fileSystem = storage.fileSystem;
+    this.piholeSecret = storage.secret;
 
     // start with default Linux userdata
     let user_data = aws_ec2.UserData.forLinux();
@@ -122,6 +133,8 @@ export class PiHoleCdkStack extends cdk.Stack {
       vpc: networking.vpc,
     });
 
+    this.clusterName = cluster.clusterName;
+
     const taskExecutionRole = new aws_iam.Role(this, 'pihole-task-execution-role', {
       assumedBy: new aws_iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
       managedPolicies: [
@@ -160,11 +173,12 @@ export class PiHoleCdkStack extends cdk.Stack {
 
     // Local domain forwarding config - forwards local domains to UniFi gateway
     const localDnsForwardTarget = props.appConfig.piHoleConfig.revServerTarget;
+    const localDnsSuffix = props.appConfig.piHoleConfig.localDnsSuffix;
     const dnsmasqCustomConfig = [
       // Forward lookups for local domains
       `server=/local/${localDnsForwardTarget}`,
       `server=/localdomain/${localDnsForwardTarget}`,
-      `server=/home.sauhsoj.wtf/${localDnsForwardTarget}`,
+      ...(localDnsSuffix ? [`server=/${localDnsSuffix}/${localDnsForwardTarget}`] : []),
       // Reverse lookups (PTR) for 192.168.0.0/22
       `rev-server=192.168.0.0/22,${localDnsForwardTarget}`,
     ].join('\\n');
@@ -274,6 +288,8 @@ export class PiHoleCdkStack extends cdk.Stack {
       securityGroups: [networking.securityGroup],
       vpcSubnets: { subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS },
     });
+
+    this.ecsServiceName = ecsService.serviceName || 'pihole-service';
 
     // awsvpc mode: register with IP-type target groups
     loadBalancer.ecsDnsTargetGroup.addTarget(ecsService.loadBalancerTarget({

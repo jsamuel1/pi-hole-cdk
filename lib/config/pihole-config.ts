@@ -27,9 +27,17 @@ export interface PiHoleConfig {
   hostedZoneName?: string;
   regionSubdomain?: string;
 
+  // Local DNS Configuration
+  localDnsSuffix?: string;
+
   // EFS Replication (optional - only for primary region)
   efsReplicationRegion?: string;
   existingReplicationDestFsId?: string;
+
+  // UniFi DNS Sync Configuration (optional)
+  unifiBaseUrl?: string;
+  unifiSiteId?: string;
+  piholeApiUrl?: string;
 }
 
 export const DEFAULT_PIHOLE_CONFIG: PiHoleConfig = {
@@ -54,4 +62,7 @@ export const DEFAULT_PIHOLE_CONFIG: PiHoleConfig = {
   vCpuMax: 4,
   memoryMinMiB: 2048,
   memoryMaxMiB: 4096,
+
+  // UniFi DNS Sync defaults
+  unifiSiteId: 'default',
 };

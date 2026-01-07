@@ -6,6 +6,7 @@ import { SiteToSiteVpnStack } from '../lib/sitetositevpn-stack';
 import { StackProps } from 'aws-cdk-lib';
 import { TgwWithSiteToSiteVpnStack } from '../lib/tgw-with-sitetositevpn-stack';
 import { PiHoleFailoverStack } from '../lib/pihole-failover-stack';
+import { UnifiDnsSyncStack } from '../lib/unifi-dns-sync-stack';
 import { Node } from 'constructs';
 import { PiHoleConfig, DEFAULT_PIHOLE_CONFIG } from '../lib/config/pihole-config';
 
@@ -52,6 +53,10 @@ export class AppConfig
       regionSubdomain: this.node.tryGetContext('region_subdomain'),
       efsReplicationRegion: this.node.tryGetContext('efs_replication_region'),
       existingReplicationDestFsId: this.node.tryGetContext('efs_replication_dest_fs_id'),
+      unifiBaseUrl: this.node.tryGetContext('unifi_base_url'),
+      unifiSiteId: this.node.tryGetContext('unifi_site_id') || DEFAULT_PIHOLE_CONFIG.unifiSiteId,
+      piholeApiUrl: this.node.tryGetContext('pihole_api_url'),
+      localDnsSuffix: this.node.tryGetContext('local_dns_suffix'),
     };
     this.rfc1918PrefixListId = this.node.tryGetContext('rfc1918PrefixListId');
   }
@@ -73,7 +78,26 @@ var piHoleProps : PiHoleProps = {
 }
 
 // Pi-hole stack with EC2 ASG and ECS deployments behind shared NLB
-new PiHoleCdkStack(app, 'PiHoleCdkStack', piHoleProps);
+const piHoleStack = new PiHoleCdkStack(app, 'PiHoleCdkStack', piHoleProps);
+
+// UniFi DNS sync stack (only deploy to Melbourne where VPN terminates)
+if (env.region === 'ap-southeast-4' && 
+    appConfig.piHoleConfig.unifiBaseUrl && 
+    appConfig.piHoleConfig.piholeApiUrl &&
+    appConfig.piHoleConfig.localDnsSuffix) {
+  new UnifiDnsSyncStack(app, 'UnifiDnsSyncStack', {
+    ...piHoleProps,
+    vpc: piHoleStack.vpc,
+    fileSystem: piHoleStack.fileSystem,
+    piholeSecret: piHoleStack.piholeSecret,
+    ecsClusterArn: `arn:aws:ecs:${env.region}:${env.account}:cluster/${piHoleStack.clusterName}`,
+    ecsServiceName: piHoleStack.ecsServiceName,
+    unifiBaseUrl: appConfig.piHoleConfig.unifiBaseUrl,
+    unifiSiteId: appConfig.piHoleConfig.unifiSiteId || 'default',
+    piholeApiUrl: appConfig.piHoleConfig.piholeApiUrl,
+    localDnsSuffix: appConfig.piHoleConfig.localDnsSuffix,
+  });
+}
 
 new SiteToSiteVpnStack(app, 'SiteToSiteVpnStack', piHoleProps);
 
