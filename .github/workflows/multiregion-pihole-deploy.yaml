@@ -81,6 +81,7 @@ jobs:
             --context hosted_zone_id="${{ secrets.HOSTED_ZONE_ID }}" \
             --context hosted_zone_name="${{ secrets.HOSTED_ZONE_NAME }}" \
             --context region_subdomain=mel \
+            --context cognito_domain_prefix="${{ secrets.COGNITO_DOMAIN_PREFIX }}-mel" \
             --context efs_replication_region="ap-southeast-2" \
             --context local_dns_suffix="${{ secrets.LOCAL_DNS_SUFFIX }}" \
             --context unifi_base_url="${{ secrets.UNIFI_BASE_URL }}" \
@@ -159,6 +160,7 @@ jobs:
             --context hosted_zone_id="${{ secrets.HOSTED_ZONE_ID }}" \
             --context hosted_zone_name="${{ secrets.HOSTED_ZONE_NAME }}" \
             --context region_subdomain=syd \
+            --context cognito_domain_prefix="${{ secrets.COGNITO_DOMAIN_PREFIX }}-syd" \
             --context local_dns_suffix="${{ secrets.LOCAL_DNS_SUFFIX }}" \
             --outputs-file outputs.json \
             --require-approval never

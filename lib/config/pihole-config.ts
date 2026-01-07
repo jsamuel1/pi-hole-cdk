@@ -26,6 +26,7 @@ export interface PiHoleConfig {
   hostedZoneId?: string;
   hostedZoneName?: string;
   regionSubdomain?: string;
+  cognitoDomainPrefix?: string;
 
   // Local DNS Configuration
   localDnsSuffix?: string;

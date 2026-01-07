@@ -316,6 +316,7 @@ export class PiHoleCdkStack extends cdk.Stack {
         regionSubdomain: props.appConfig.piHoleConfig.regionSubdomain,
         targetGroup: loadBalancer.ecsHttpTargetGroup,
         localIpCidr: local_ip_cidr,
+        cognitoDomainPrefix: props.appConfig.piHoleConfig.cognitoDomainPrefix,
       });
 
       // Register ECS service with ALB target group

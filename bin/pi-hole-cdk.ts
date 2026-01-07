@@ -51,6 +51,7 @@ export class AppConfig
       hostedZoneId: this.node.tryGetContext('hosted_zone_id'),
       hostedZoneName: this.node.tryGetContext('hosted_zone_name'),
       regionSubdomain: this.node.tryGetContext('region_subdomain'),
+      cognitoDomainPrefix: this.node.tryGetContext('cognito_domain_prefix'),
       efsReplicationRegion: this.node.tryGetContext('efs_replication_region'),
       existingReplicationDestFsId: this.node.tryGetContext('efs_replication_dest_fs_id'),
       unifiBaseUrl: this.node.tryGetContext('unifi_base_url'),
