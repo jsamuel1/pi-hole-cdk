@@ -342,7 +342,7 @@ export class PiHoleCdkStack extends cdk.Stack {
       if (props.appConfig.piHoleConfig.externalCognitoUserPoolArn && props.appConfig.piHoleConfig.apiCognitoClientId) {
         new PiHoleApi(this, 'Api', {
           vpc: networking.vpc,
-          nlb: loadBalancer.nlb,
+          piholeUrl: `http://${loadBalancer.nlb.loadBalancerDnsName}`,
           cognitoUserPoolArn: props.appConfig.piHoleConfig.externalCognitoUserPoolArn,
           cognitoClientId: props.appConfig.piHoleConfig.apiCognitoClientId,
         });

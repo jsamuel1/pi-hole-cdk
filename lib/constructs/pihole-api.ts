@@ -1,9 +1,9 @@
-import { aws_apigateway, aws_cognito, aws_ec2, aws_elasticloadbalancingv2, CfnOutput } from 'aws-cdk-lib';
+import { aws_apigateway, aws_cognito, aws_lambda, aws_ec2, aws_iam, Duration, CfnOutput } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
 export interface PiHoleApiProps {
   vpc: aws_ec2.IVpc;
-  nlb: aws_elasticloadbalancingv2.INetworkLoadBalancer;
+  piholeUrl: string;  // Internal Pi-hole URL
   cognitoUserPoolArn: string;
   cognitoClientId: string;
 }
@@ -21,9 +21,52 @@ export class PiHoleApi extends Construct {
       cognitoUserPools: [userPool],
     });
 
-    // VPC Link for private NLB access
-    const vpcLink = new aws_apigateway.VpcLink(this, 'VpcLink', {
-      targets: [props.nlb],
+    // Lambda proxy function in VPC
+    const proxyFn = new aws_lambda.Function(this, 'ProxyFn', {
+      runtime: aws_lambda.Runtime.PYTHON_3_12,
+      handler: 'index.handler',
+      code: aws_lambda.Code.fromInline(`
+import json
+import urllib.request
+import urllib.error
+import os
+
+PIHOLE_URL = os.environ['PIHOLE_URL']
+
+def handler(event, context):
+    path = event.get('pathParameters', {}).get('proxy', '')
+    method = event.get('httpMethod', 'GET')
+    body = event.get('body')
+    headers = {k: v for k, v in (event.get('headers') or {}).items() 
+               if k.lower() not in ['host', 'authorization', 'x-forwarded-for']}
+    
+    url = f"{PIHOLE_URL}/api/{path}"
+    if event.get('queryStringParameters'):
+        qs = '&'.join(f"{k}={v}" for k, v in event['queryStringParameters'].items())
+        url = f"{url}?{qs}"
+    
+    req = urllib.request.Request(url, method=method, headers=headers)
+    if body:
+        req.data = body.encode() if isinstance(body, str) else body
+    
+    try:
+        with urllib.request.urlopen(req, timeout=25) as resp:
+            return {
+                'statusCode': resp.status,
+                'headers': {'Content-Type': 'application/json'},
+                'body': resp.read().decode()
+            }
+    except urllib.error.HTTPError as e:
+        return {
+            'statusCode': e.code,
+            'headers': {'Content-Type': 'application/json'},
+            'body': e.read().decode()
+        }
+`),
+      vpc: props.vpc,
+      vpcSubnets: { subnetType: aws_ec2.SubnetType.PRIVATE_WITH_EGRESS },
+      environment: { PIHOLE_URL: props.piholeUrl },
+      timeout: Duration.seconds(29),
     });
 
     this.api = new aws_apigateway.RestApi(this, 'Api', {
@@ -35,42 +78,24 @@ export class PiHoleApi extends Construct {
       },
     });
 
-    const integration = new aws_apigateway.Integration({
-      type: aws_apigateway.IntegrationType.HTTP_PROXY,
-      integrationHttpMethod: 'ANY',
-      uri: `http://${props.nlb.loadBalancerDnsName}/api/{proxy}`,
-      options: {
-        connectionType: aws_apigateway.ConnectionType.VPC_LINK,
-        vpcLink,
-        requestParameters: {
-          'integration.request.path.proxy': 'method.request.path.proxy',
-        },
-      },
-    });
-
     const methodOptions: aws_apigateway.MethodOptions = {
       authorizer,
       authorizationType: aws_apigateway.AuthorizationType.COGNITO,
       authorizationScopes: ['pihole-api/read', 'pihole-api/write'],
-      requestParameters: {
-        'method.request.path.proxy': true,
-      },
+      requestParameters: { 'method.request.path.proxy': true },
     };
 
-    // Proxy all /api/* requests to Pi-hole
+    const lambdaIntegration = new aws_apigateway.LambdaIntegration(proxyFn);
     const apiResource = this.api.root.addResource('api');
     const proxyResource = apiResource.addProxy({ anyMethod: false });
 
-    proxyResource.addMethod('GET', integration, methodOptions);
-    proxyResource.addMethod('POST', integration, methodOptions);
-    proxyResource.addMethod('PUT', integration, methodOptions);
-    proxyResource.addMethod('DELETE', integration, methodOptions);
+    proxyResource.addMethod('GET', lambdaIntegration, methodOptions);
+    proxyResource.addMethod('POST', lambdaIntegration, methodOptions);
+    proxyResource.addMethod('PUT', lambdaIntegration, methodOptions);
+    proxyResource.addMethod('DELETE', lambdaIntegration, methodOptions);
 
     this.apiEndpoint = this.api.url;
 
-    new CfnOutput(this, 'Endpoint', {
-      value: this.api.url,
-      description: 'Pi-hole API Gateway endpoint',
-    });
+    new CfnOutput(this, 'Endpoint', { value: this.api.url });
   }
 }
