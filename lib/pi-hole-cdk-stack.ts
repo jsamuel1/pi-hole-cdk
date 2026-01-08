@@ -341,7 +341,8 @@ export class PiHoleCdkStack extends cdk.Stack {
       // API Gateway for programmatic access (with Cognito M2M auth)
       if (props.appConfig.piHoleConfig.externalCognitoUserPoolArn && props.appConfig.piHoleConfig.apiCognitoClientId) {
         new PiHoleApi(this, 'Api', {
-          piholeUrl: `http://${loadBalancer.nlb.loadBalancerDnsName}`,
+          vpc: networking.vpc,
+          nlb: loadBalancer.nlb,
           cognitoUserPoolArn: props.appConfig.piHoleConfig.externalCognitoUserPoolArn,
           cognitoClientId: props.appConfig.piHoleConfig.apiCognitoClientId,
         });

@@ -1,8 +1,9 @@
-import { aws_apigateway, aws_cognito, aws_iam, CfnOutput } from 'aws-cdk-lib';
+import { aws_apigateway, aws_cognito, aws_ec2, aws_elasticloadbalancingv2, CfnOutput } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
 export interface PiHoleApiProps {
-  piholeUrl: string;  // Internal Pi-hole URL (NLB or direct)
+  vpc: aws_ec2.IVpc;
+  nlb: aws_elasticloadbalancingv2.INetworkLoadBalancer;
   cognitoUserPoolArn: string;
   cognitoClientId: string;
 }
@@ -20,6 +21,11 @@ export class PiHoleApi extends Construct {
       cognitoUserPools: [userPool],
     });
 
+    // VPC Link for private NLB access
+    const vpcLink = new aws_apigateway.VpcLink(this, 'VpcLink', {
+      targets: [props.nlb],
+    });
+
     this.api = new aws_apigateway.RestApi(this, 'Api', {
       restApiName: 'pihole-api',
       description: 'Pi-hole API Gateway with Cognito auth',
@@ -29,21 +35,19 @@ export class PiHoleApi extends Construct {
       },
     });
 
-    // Proxy all /api/* requests to Pi-hole
-    const apiResource = this.api.root.addResource('api');
-    const proxyResource = apiResource.addProxy({
-      anyMethod: false,
-      defaultIntegration: new aws_apigateway.HttpIntegration(`${props.piholeUrl}/api/{proxy}`, {
-        httpMethod: 'ANY',
-        options: {
-          requestParameters: {
-            'integration.request.path.proxy': 'method.request.path.proxy',
-          },
+    const integration = new aws_apigateway.Integration({
+      type: aws_apigateway.IntegrationType.HTTP_PROXY,
+      integrationHttpMethod: 'ANY',
+      uri: `http://${props.nlb.loadBalancerDnsName}/api/{proxy}`,
+      options: {
+        connectionType: aws_apigateway.ConnectionType.VPC_LINK,
+        vpcLink,
+        requestParameters: {
+          'integration.request.path.proxy': 'method.request.path.proxy',
         },
-      }),
+      },
     });
 
-    // Add methods with Cognito auth
     const methodOptions: aws_apigateway.MethodOptions = {
       authorizer,
       authorizationType: aws_apigateway.AuthorizationType.COGNITO,
@@ -53,17 +57,20 @@ export class PiHoleApi extends Construct {
       },
     };
 
-    proxyResource.addMethod('GET', undefined, methodOptions);
-    proxyResource.addMethod('POST', undefined, methodOptions);
-    proxyResource.addMethod('PUT', undefined, methodOptions);
-    proxyResource.addMethod('DELETE', undefined, methodOptions);
+    // Proxy all /api/* requests to Pi-hole
+    const apiResource = this.api.root.addResource('api');
+    const proxyResource = apiResource.addProxy({ anyMethod: false });
+
+    proxyResource.addMethod('GET', integration, methodOptions);
+    proxyResource.addMethod('POST', integration, methodOptions);
+    proxyResource.addMethod('PUT', integration, methodOptions);
+    proxyResource.addMethod('DELETE', integration, methodOptions);
 
     this.apiEndpoint = this.api.url;
 
-    new CfnOutput(this, 'ApiEndpoint', {
+    new CfnOutput(this, 'Endpoint', {
       value: this.api.url,
       description: 'Pi-hole API Gateway endpoint',
-      exportName: 'pihole-api-endpoint',
     });
   }
 }
