@@ -305,9 +305,9 @@ export class PiHoleCdkStack extends cdk.Stack {
 
     // HTTPS ALB with ACM certificate (if configured)
     if (props.appConfig.piHoleConfig.httpsEnabled && 
-        props.appConfig.piHoleConfig.hostedZoneId && 
         props.appConfig.piHoleConfig.hostedZoneName &&
-        props.appConfig.piHoleConfig.regionSubdomain) {
+        props.appConfig.piHoleConfig.regionSubdomain &&
+        (props.appConfig.piHoleConfig.hostedZoneId || props.appConfig.piHoleConfig.certificateArn)) {
       
       const https = new PiHoleHttps(this, 'https', {
         vpc: networking.vpc,
@@ -323,6 +323,7 @@ export class PiHoleCdkStack extends cdk.Stack {
         externalCognitoClientId: props.appConfig.piHoleConfig.externalCognitoClientId,
         externalCognitoClientSecret: props.appConfig.piHoleConfig.externalCognitoClientSecret,
         externalCognitoDomain: props.appConfig.piHoleConfig.externalCognitoDomain,
+        certificateArn: props.appConfig.piHoleConfig.certificateArn,
       });
 
       // Register ECS service with ALB target group

@@ -52,6 +52,7 @@ export class AppConfig
       hostedZoneName: this.node.tryGetContext('hosted_zone_name'),
       regionSubdomain: this.node.tryGetContext('region_subdomain'),
       cognitoDomainPrefix: this.node.tryGetContext('cognito_domain_prefix'),
+      certificateArn: this.node.tryGetContext('certificate_arn'),
       externalCognitoUserPoolArn: this.node.tryGetContext('external_cognito_user_pool_arn'),
       externalCognitoClientId: this.node.tryGetContext('external_cognito_client_id'),
       externalCognitoClientSecret: this.node.tryGetContext('external_cognito_client_secret'),

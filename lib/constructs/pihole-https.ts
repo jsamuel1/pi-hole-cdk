@@ -5,7 +5,7 @@ import { PiHoleCognito } from './pihole-cognito';
 
 export interface PiHoleHttpsProps {
   vpc: aws_ec2.IVpc;
-  hostedZoneId: string;
+  hostedZoneId?: string;  // Optional - only needed for DNS validation
   hostedZoneName: string;
   regionSubdomain: string;
   targetGroup: aws_elasticloadbalancingv2.INetworkTargetGroup;
@@ -18,22 +18,24 @@ export interface PiHoleHttpsProps {
   externalCognitoClientId?: string;
   externalCognitoClientSecret?: string;
   externalCognitoDomain?: string;
+  // Use existing certificate instead of creating new one
+  certificateArn?: string;
 }
 
 export class PiHoleHttps extends Construct {
   public readonly alb: aws_elasticloadbalancingv2.ApplicationLoadBalancer;
-  public readonly certificate: aws_certificatemanager.Certificate;
-  public readonly regionalRecord: aws_route53.ARecord;
+  public readonly certificate: aws_certificatemanager.ICertificate;
+  public readonly regionalRecord?: aws_route53.ARecord;
   public readonly albTargetGroup: aws_elasticloadbalancingv2.ApplicationTargetGroup;
   public readonly cognito?: PiHoleCognito;
 
   constructor(scope: Construct, id: string, props: PiHoleHttpsProps) {
     super(scope, id);
 
-    const hostedZone = aws_route53.HostedZone.fromHostedZoneAttributes(this, 'Zone', {
+    const hostedZone = props.hostedZoneId ? aws_route53.HostedZone.fromHostedZoneAttributes(this, 'Zone', {
       hostedZoneId: props.hostedZoneId,
       zoneName: props.hostedZoneName,
-    });
+    }) : undefined;
 
     const regionalDomain = `pihole-${props.regionSubdomain}.${props.hostedZoneName}`;
     const haDomains = [`ha.${props.hostedZoneName}`, `homeassistant.${props.hostedZoneName}`];
@@ -43,11 +45,18 @@ export class PiHoleHttps extends Construct {
       certDomains.push(...haDomains);
     }
 
-    this.certificate = new aws_certificatemanager.Certificate(this, 'Cert', {
-      domainName: regionalDomain,
-      subjectAlternativeNames: certDomains,
-      validation: aws_certificatemanager.CertificateValidation.fromDns(hostedZone),
-    });
+    // Use existing certificate or create new one with DNS validation
+    if (props.certificateArn) {
+      this.certificate = aws_certificatemanager.Certificate.fromCertificateArn(this, 'Cert', props.certificateArn);
+    } else if (hostedZone) {
+      this.certificate = new aws_certificatemanager.Certificate(this, 'Cert', {
+        domainName: regionalDomain,
+        subjectAlternativeNames: certDomains,
+        validation: aws_certificatemanager.CertificateValidation.fromDns(hostedZone),
+      });
+    } else {
+      throw new Error('Either certificateArn or hostedZoneId must be provided');
+    }
 
     const albSg = new aws_ec2.SecurityGroup(this, 'AlbSg', {
       vpc: props.vpc,
@@ -142,18 +151,7 @@ export class PiHoleHttps extends Construct {
             next: aws_elasticloadbalancingv2.ListenerAction.forward([haTargetGroup]),
           }),
         });
-
-        // DNS records for Home Assistant
-        new aws_route53.ARecord(this, 'HaRecord', {
-          zone: hostedZone,
-          recordName: 'ha',
-          target: aws_route53.RecordTarget.fromAlias(new aws_route53_targets.LoadBalancerTarget(this.alb)),
-        });
-        new aws_route53.ARecord(this, 'HomeAssistantRecord', {
-          zone: hostedZone,
-          recordName: 'homeassistant',
-          target: aws_route53.RecordTarget.fromAlias(new aws_route53_targets.LoadBalancerTarget(this.alb)),
-        });
+        // DNS records managed in home-portal account (cross-account)
       }
     } else if (props.cognitoDomainPrefix) {
       this.cognito = new PiHoleCognito(this, 'Cognito', {
@@ -188,18 +186,7 @@ export class PiHoleHttps extends Construct {
             next: aws_elasticloadbalancingv2.ListenerAction.forward([haTargetGroup]),
           }),
         });
-
-        // DNS records for Home Assistant
-        new aws_route53.ARecord(this, 'HaRecord', {
-          zone: hostedZone,
-          recordName: 'ha',
-          target: aws_route53.RecordTarget.fromAlias(new aws_route53_targets.LoadBalancerTarget(this.alb)),
-        });
-        new aws_route53.ARecord(this, 'HomeAssistantRecord', {
-          zone: hostedZone,
-          recordName: 'homeassistant',
-          target: aws_route53.RecordTarget.fromAlias(new aws_route53_targets.LoadBalancerTarget(this.alb)),
-        });
+        // DNS records managed in home-portal account (cross-account)
       }
     } else {
       this.alb.addListener('Https', {
@@ -209,11 +196,14 @@ export class PiHoleHttps extends Construct {
       });
     }
 
-    this.regionalRecord = new aws_route53.ARecord(this, 'RegionalRecord', {
-      zone: hostedZone,
-      recordName: `pihole-${props.regionSubdomain}`,
-      target: aws_route53.RecordTarget.fromAlias(new aws_route53_targets.LoadBalancerTarget(this.alb)),
-    });
+    // Only create DNS record if hosted zone is provided (same account)
+    if (hostedZone) {
+      this.regionalRecord = new aws_route53.ARecord(this, 'RegionalRecord', {
+        zone: hostedZone,
+        recordName: `pihole-${props.regionSubdomain}`,
+        target: aws_route53.RecordTarget.fromAlias(new aws_route53_targets.LoadBalancerTarget(this.alb)),
+      });
+    }
 
     new CfnOutput(this, 'HttpsUrl', { value: `https://${regionalDomain}/admin` });
   }

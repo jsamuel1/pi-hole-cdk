@@ -27,6 +27,7 @@ export interface PiHoleConfig {
   hostedZoneName?: string;
   regionSubdomain?: string;
   cognitoDomainPrefix?: string;
+  certificateArn?: string;  // Use existing certificate instead of creating new
 
   // External Cognito Configuration (cross-account)
   externalCognitoUserPoolArn?: string;
