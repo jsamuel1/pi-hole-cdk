@@ -1,4 +1,4 @@
-import { aws_elasticloadbalancingv2, aws_elasticloadbalancingv2_targets, aws_ec2, aws_certificatemanager, aws_route53, aws_route53_targets, Duration, CfnOutput } from 'aws-cdk-lib';
+import { aws_elasticloadbalancingv2, aws_elasticloadbalancingv2_targets, aws_ec2, aws_certificatemanager, aws_route53, aws_route53_targets, Duration, CfnOutput, SecretValue } from 'aws-cdk-lib';
 import { aws_elasticloadbalancingv2_actions } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { PiHoleCognito } from './pihole-cognito';
@@ -13,6 +13,11 @@ export interface PiHoleHttpsProps {
   cognitoDomainPrefix?: string;
   homeAssistantIp?: string;
   homeAssistantPort?: number;
+  // External Cognito config
+  externalCognitoUserPoolArn?: string;
+  externalCognitoClientId?: string;
+  externalCognitoClientSecret?: string;
+  externalCognitoDomain?: string;
 }
 
 export class PiHoleHttps extends Construct {
@@ -94,8 +99,63 @@ export class PiHoleHttps extends Construct {
       haTargetGroup.addTarget(new aws_elasticloadbalancingv2_targets.IpTarget(props.homeAssistantIp, props.homeAssistantPort || 8123));
     }
 
-    // Set up Cognito if domain prefix provided
-    if (props.cognitoDomainPrefix) {
+    // Set up Cognito if domain prefix provided or external config
+    if (props.externalCognitoUserPoolArn && props.externalCognitoClientId && props.externalCognitoClientSecret && props.externalCognitoDomain) {
+      // Use external Cognito pool via OIDC
+      const userPoolId = props.externalCognitoUserPoolArn.split('/')[1];
+      const issuer = `https://cognito-idp.ap-southeast-4.amazonaws.com/${userPoolId}`;
+
+      this.cognito = new PiHoleCognito(this, 'Cognito', {
+        callbackUrls: [],
+        externalUserPoolArn: props.externalCognitoUserPoolArn,
+        externalClientId: props.externalCognitoClientId,
+        externalClientSecret: props.externalCognitoClientSecret,
+        externalDomain: props.externalCognitoDomain,
+      });
+
+      const listener = this.alb.addListener('Https', {
+        port: 443,
+        certificates: [this.certificate],
+        defaultAction: aws_elasticloadbalancingv2.ListenerAction.authenticateOidc({
+          authorizationEndpoint: `https://${props.externalCognitoDomain}/oauth2/authorize`,
+          tokenEndpoint: `https://${props.externalCognitoDomain}/oauth2/token`,
+          userInfoEndpoint: `https://${props.externalCognitoDomain}/oauth2/userInfo`,
+          clientId: props.externalCognitoClientId,
+          clientSecret: SecretValue.unsafePlainText(props.externalCognitoClientSecret),
+          issuer,
+          next: aws_elasticloadbalancingv2.ListenerAction.forward([this.albTargetGroup]),
+        }),
+      });
+
+      // Add Home Assistant listener rules
+      if (haTargetGroup) {
+        listener.addAction('HaRule', {
+          priority: 10,
+          conditions: [aws_elasticloadbalancingv2.ListenerCondition.hostHeaders(haDomains)],
+          action: aws_elasticloadbalancingv2.ListenerAction.authenticateOidc({
+            authorizationEndpoint: `https://${props.externalCognitoDomain}/oauth2/authorize`,
+            tokenEndpoint: `https://${props.externalCognitoDomain}/oauth2/token`,
+            userInfoEndpoint: `https://${props.externalCognitoDomain}/oauth2/userInfo`,
+            clientId: props.externalCognitoClientId,
+            clientSecret: SecretValue.unsafePlainText(props.externalCognitoClientSecret),
+            issuer,
+            next: aws_elasticloadbalancingv2.ListenerAction.forward([haTargetGroup]),
+          }),
+        });
+
+        // DNS records for Home Assistant
+        new aws_route53.ARecord(this, 'HaRecord', {
+          zone: hostedZone,
+          recordName: 'ha',
+          target: aws_route53.RecordTarget.fromAlias(new aws_route53_targets.LoadBalancerTarget(this.alb)),
+        });
+        new aws_route53.ARecord(this, 'HomeAssistantRecord', {
+          zone: hostedZone,
+          recordName: 'homeassistant',
+          target: aws_route53.RecordTarget.fromAlias(new aws_route53_targets.LoadBalancerTarget(this.alb)),
+        });
+      }
+    } else if (props.cognitoDomainPrefix) {
       this.cognito = new PiHoleCognito(this, 'Cognito', {
         domainPrefix: props.cognitoDomainPrefix,
         callbackUrls: [

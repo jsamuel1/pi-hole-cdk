@@ -28,6 +28,12 @@ export interface PiHoleConfig {
   regionSubdomain?: string;
   cognitoDomainPrefix?: string;
 
+  // External Cognito Configuration (cross-account)
+  externalCognitoUserPoolArn?: string;
+  externalCognitoClientId?: string;
+  externalCognitoClientSecret?: string;
+  externalCognitoDomain?: string;
+
   // Local DNS Configuration
   localDnsSuffix?: string;
 

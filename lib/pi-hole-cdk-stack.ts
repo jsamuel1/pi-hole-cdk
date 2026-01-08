@@ -319,6 +319,10 @@ export class PiHoleCdkStack extends cdk.Stack {
         cognitoDomainPrefix: props.appConfig.piHoleConfig.cognitoDomainPrefix,
         homeAssistantIp: props.appConfig.piHoleConfig.homeAssistantIp,
         homeAssistantPort: props.appConfig.piHoleConfig.homeAssistantPort,
+        externalCognitoUserPoolArn: props.appConfig.piHoleConfig.externalCognitoUserPoolArn,
+        externalCognitoClientId: props.appConfig.piHoleConfig.externalCognitoClientId,
+        externalCognitoClientSecret: props.appConfig.piHoleConfig.externalCognitoClientSecret,
+        externalCognitoDomain: props.appConfig.piHoleConfig.externalCognitoDomain,
       });
 
       // Register ECS service with ALB target group
