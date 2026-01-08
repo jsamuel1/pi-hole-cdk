@@ -96,7 +96,7 @@ export class PiHoleHttps extends Construct {
           healthyHttpCodes: '200-399',
         },
       });
-      haTargetGroup.addTarget(new aws_elasticloadbalancingv2_targets.IpTarget(props.homeAssistantIp, props.homeAssistantPort || 8123));
+      haTargetGroup.addTarget(new aws_elasticloadbalancingv2_targets.IpTarget(props.homeAssistantIp, props.homeAssistantPort || 8123, 'all'));
     }
 
     // Set up Cognito if domain prefix provided or external config
