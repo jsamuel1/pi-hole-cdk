@@ -39,6 +39,10 @@ export interface PiHoleConfig {
   unifiBaseUrl?: string;
   unifiSiteId?: string;
   piholeApiUrl?: string;
+
+  // Home Assistant Configuration (optional)
+  homeAssistantIp?: string;
+  homeAssistantPort?: number;
 }
 
 export const DEFAULT_PIHOLE_CONFIG: PiHoleConfig = {
@@ -66,4 +70,7 @@ export const DEFAULT_PIHOLE_CONFIG: PiHoleConfig = {
 
   // UniFi DNS Sync defaults
   unifiSiteId: 'default',
+
+  // Home Assistant defaults
+  homeAssistantPort: 8123,
 };

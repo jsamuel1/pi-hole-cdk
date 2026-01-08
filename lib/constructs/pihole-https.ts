@@ -1,4 +1,4 @@
-import { aws_elasticloadbalancingv2, aws_ec2, aws_certificatemanager, aws_route53, aws_route53_targets, Duration, CfnOutput } from 'aws-cdk-lib';
+import { aws_elasticloadbalancingv2, aws_elasticloadbalancingv2_targets, aws_ec2, aws_certificatemanager, aws_route53, aws_route53_targets, Duration, CfnOutput } from 'aws-cdk-lib';
 import { aws_elasticloadbalancingv2_actions } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { PiHoleCognito } from './pihole-cognito';
@@ -11,6 +11,8 @@ export interface PiHoleHttpsProps {
   targetGroup: aws_elasticloadbalancingv2.INetworkTargetGroup;
   localIpCidr: string;
   cognitoDomainPrefix?: string;
+  homeAssistantIp?: string;
+  homeAssistantPort?: number;
 }
 
 export class PiHoleHttps extends Construct {
@@ -29,10 +31,16 @@ export class PiHoleHttps extends Construct {
     });
 
     const regionalDomain = `pihole-${props.regionSubdomain}.${props.hostedZoneName}`;
+    const haDomains = [`ha.${props.hostedZoneName}`, `homeassistant.${props.hostedZoneName}`];
+
+    const certDomains = [`pihole.${props.hostedZoneName}`];
+    if (props.homeAssistantIp) {
+      certDomains.push(...haDomains);
+    }
 
     this.certificate = new aws_certificatemanager.Certificate(this, 'Cert', {
       domainName: regionalDomain,
-      subjectAlternativeNames: [`pihole.${props.hostedZoneName}`],
+      subjectAlternativeNames: certDomains,
       validation: aws_certificatemanager.CertificateValidation.fromDns(hostedZone),
     });
 
@@ -65,6 +73,27 @@ export class PiHoleHttps extends Construct {
       },
     });
 
+    // Home Assistant target group (if configured)
+    let haTargetGroup: aws_elasticloadbalancingv2.ApplicationTargetGroup | undefined;
+    if (props.homeAssistantIp) {
+      haTargetGroup = new aws_elasticloadbalancingv2.ApplicationTargetGroup(this, 'HaTarget', {
+        vpc: props.vpc,
+        port: props.homeAssistantPort || 8123,
+        protocol: aws_elasticloadbalancingv2.ApplicationProtocol.HTTP,
+        targetType: aws_elasticloadbalancingv2.TargetType.IP,
+        healthCheck: {
+          path: '/',
+          protocol: aws_elasticloadbalancingv2.Protocol.HTTP,
+          interval: Duration.seconds(30),
+          timeout: Duration.seconds(10),
+          healthyThresholdCount: 2,
+          unhealthyThresholdCount: 5,
+          healthyHttpCodes: '200-399',
+        },
+      });
+      haTargetGroup.addTarget(new aws_elasticloadbalancingv2_targets.IpTarget(props.homeAssistantIp, props.homeAssistantPort || 8123));
+    }
+
     // Set up Cognito if domain prefix provided
     if (props.cognitoDomainPrefix) {
       this.cognito = new PiHoleCognito(this, 'Cognito', {
@@ -72,6 +101,7 @@ export class PiHoleHttps extends Construct {
         callbackUrls: [
           `https://${regionalDomain}/oauth2/idpresponse`,
           `https://pihole.${props.hostedZoneName}/oauth2/idpresponse`,
+          ...(props.homeAssistantIp ? haDomains.map(d => `https://${d}/oauth2/idpresponse`) : []),
         ],
       });
 
@@ -85,6 +115,32 @@ export class PiHoleHttps extends Construct {
           next: aws_elasticloadbalancingv2.ListenerAction.forward([this.albTargetGroup]),
         }),
       });
+
+      // Add Home Assistant listener rules
+      if (haTargetGroup) {
+        listener.addAction('HaRule', {
+          priority: 10,
+          conditions: [aws_elasticloadbalancingv2.ListenerCondition.hostHeaders(haDomains)],
+          action: new aws_elasticloadbalancingv2_actions.AuthenticateCognitoAction({
+            userPool: this.cognito.userPool,
+            userPoolClient: this.cognito.userPoolClient,
+            userPoolDomain: this.cognito.userPoolDomain,
+            next: aws_elasticloadbalancingv2.ListenerAction.forward([haTargetGroup]),
+          }),
+        });
+
+        // DNS records for Home Assistant
+        new aws_route53.ARecord(this, 'HaRecord', {
+          zone: hostedZone,
+          recordName: 'ha',
+          target: aws_route53.RecordTarget.fromAlias(new aws_route53_targets.LoadBalancerTarget(this.alb)),
+        });
+        new aws_route53.ARecord(this, 'HomeAssistantRecord', {
+          zone: hostedZone,
+          recordName: 'homeassistant',
+          target: aws_route53.RecordTarget.fromAlias(new aws_route53_targets.LoadBalancerTarget(this.alb)),
+        });
+      }
     } else {
       this.alb.addListener('Https', {
         port: 443,

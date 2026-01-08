@@ -87,6 +87,7 @@ jobs:
             --context unifi_base_url="${{ secrets.UNIFI_BASE_URL }}" \
             --context unifi_site_id="default" \
             --context pihole_api_url="${{ secrets.PIHOLE_API_URL }}" \
+            --context home_assistant_ip="${{ secrets.HOME_ASSISTANT_IP }}" \
             $REPL_ARGS \
             --outputs-file outputs.json \
             --require-approval never
@@ -115,6 +116,7 @@ jobs:
             --context unifi_base_url="${{ secrets.UNIFI_BASE_URL }}" \
             --context unifi_site_id="default" \
             --context pihole_api_url="${{ secrets.PIHOLE_API_URL }}" \
+            --context home_assistant_ip="${{ secrets.HOME_ASSISTANT_IP }}" \
             $REPL_ARGS \
             --require-approval never
 

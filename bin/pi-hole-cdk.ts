@@ -58,6 +58,8 @@ export class AppConfig
       unifiSiteId: this.node.tryGetContext('unifi_site_id') || DEFAULT_PIHOLE_CONFIG.unifiSiteId,
       piholeApiUrl: this.node.tryGetContext('pihole_api_url'),
       localDnsSuffix: this.node.tryGetContext('local_dns_suffix'),
+      homeAssistantIp: this.node.tryGetContext('home_assistant_ip'),
+      homeAssistantPort: this.node.tryGetContext('home_assistant_port') || DEFAULT_PIHOLE_CONFIG.homeAssistantPort,
     };
     this.rfc1918PrefixListId = this.node.tryGetContext('rfc1918PrefixListId');
   }
