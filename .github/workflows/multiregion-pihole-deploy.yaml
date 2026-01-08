@@ -179,41 +179,5 @@ jobs:
           echo "alb_dns=$(jq -r '.PiHoleCdkStack.AlbDnsName // empty' outputs.json)" >> $GITHUB_OUTPUT
           echo "alb_zone=$(jq -r '.PiHoleCdkStack.AlbHostedZoneId // empty' outputs.json)" >> $GITHUB_OUTPUT
 
-  deploy-failover:
-    needs: [deploy-melbourne, deploy-sydney]
-    name: Deploy Route 53 Failover
-    runs-on: [self-hosted, pi-hole-cdk]
-    env:
-      AWS_REGION: us-east-1
-      CDK_DEFAULT_REGION: us-east-1
-      CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build CDK project
-        run: npm run build
-
-      - name: CDK Bootstrap us-east-1
-        run: |
-          npx cdk --no-notices bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
-
-      - name: Deploy PiHoleFailoverStack
-        run: |
-          npx cdk --no-notices deploy PiHoleFailoverStack \
-            --context hosted_zone_id="${{ secrets.HOSTED_ZONE_ID }}" \
-            --context hosted_zone_name="${{ secrets.HOSTED_ZONE_NAME }}" \
-            --context mel_alb_dns="${{ needs.deploy-melbourne.outputs.alb_dns }}" \
-            --context mel_alb_zone="${{ needs.deploy-melbourne.outputs.alb_zone }}" \
-            --context syd_alb_dns="${{ needs.deploy-sydney.outputs.alb_dns }}" \
-            --context syd_alb_zone="${{ needs.deploy-sydney.outputs.alb_zone }}" \
-            --require-approval never
+  # Failover DNS records are managed in cognito-account-portal stack (sauhsoj-dev-ct account)
+  # where the home.sauhsoj.wtf hosted zone lives
