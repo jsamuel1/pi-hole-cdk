@@ -91,6 +91,7 @@ jobs:
             --context unifi_site_id="default" \
             --context pihole_api_url="${{ secrets.PIHOLE_API_URL }}" \
             --context home_assistant_ip="${{ secrets.HOME_ASSISTANT_IP }}" \
+            --context api_allowed_cidrs="0.0.0.0/0" \
             $REPL_ARGS \
             --outputs-file outputs.json \
             --require-approval never
@@ -123,6 +124,7 @@ jobs:
             --context unifi_site_id="default" \
             --context pihole_api_url="${{ secrets.PIHOLE_API_URL }}" \
             --context home_assistant_ip="${{ secrets.HOME_ASSISTANT_IP }}" \
+            --context api_cognito_client_id="${{ secrets.API_COGNITO_CLIENT_ID }}" \
             $REPL_ARGS \
             --require-approval never
 

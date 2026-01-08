@@ -20,6 +20,8 @@ export interface PiHoleHttpsProps {
   externalCognitoDomain?: string;
   // Use existing certificate instead of creating new one
   certificateArn?: string;
+  // Allow unauthenticated API access from specific source IPs
+  apiAllowedCidrs?: string[];
 }
 
 export class PiHoleHttps extends Construct {
@@ -153,6 +155,18 @@ export class PiHoleHttps extends Construct {
         });
         // DNS records managed in home-portal account (cross-account)
       }
+
+      // Allow unauthenticated API access from specific CIDRs
+      if (props.apiAllowedCidrs && props.apiAllowedCidrs.length > 0) {
+        listener.addAction('ApiBypass', {
+          priority: 5,
+          conditions: [
+            aws_elasticloadbalancingv2.ListenerCondition.pathPatterns(['/api/*']),
+            aws_elasticloadbalancingv2.ListenerCondition.sourceIps(props.apiAllowedCidrs),
+          ],
+          action: aws_elasticloadbalancingv2.ListenerAction.forward([this.albTargetGroup]),
+        });
+      }
     } else if (props.cognitoDomainPrefix) {
       this.cognito = new PiHoleCognito(this, 'Cognito', {
         domainPrefix: props.cognitoDomainPrefix,
@@ -187,6 +201,18 @@ export class PiHoleHttps extends Construct {
           }),
         });
         // DNS records managed in home-portal account (cross-account)
+      }
+
+      // Allow unauthenticated API access from specific CIDRs
+      if (props.apiAllowedCidrs && props.apiAllowedCidrs.length > 0) {
+        listener.addAction('ApiBypass', {
+          priority: 5,
+          conditions: [
+            aws_elasticloadbalancingv2.ListenerCondition.pathPatterns(['/api/*']),
+            aws_elasticloadbalancingv2.ListenerCondition.sourceIps(props.apiAllowedCidrs),
+          ],
+          action: aws_elasticloadbalancingv2.ListenerAction.forward([this.albTargetGroup]),
+        });
       }
     } else {
       this.alb.addListener('Https', {

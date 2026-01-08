@@ -50,6 +50,12 @@ export interface PiHoleConfig {
   // Home Assistant Configuration (optional)
   homeAssistantIp?: string;
   homeAssistantPort?: number;
+
+  // API access without Cognito auth (for agents/automation)
+  apiAllowedCidrs?: string[];
+
+  // API Gateway Cognito client (M2M auth for programmatic access)
+  apiCognitoClientId?: string;
 }
 
 export const DEFAULT_PIHOLE_CONFIG: PiHoleConfig = {

@@ -5,7 +5,7 @@ import { Construct } from 'constructs';
 import { readFileSync } from 'fs';
 import { PiHoleProps } from '../bin/pi-hole-cdk';
 import { HealthChecks, UpdatePolicy } from 'aws-cdk-lib/aws-autoscaling';
-import { PiHoleNetworking, PiHoleStorage, PiHoleLoadBalancer, PiHoleIamPolicies, PiHoleHttps } from './constructs';
+import { PiHoleNetworking, PiHoleStorage, PiHoleLoadBalancer, PiHoleIamPolicies, PiHoleHttps, PiHoleApi } from './constructs';
 
 
 export class PiHoleCdkStack extends cdk.Stack {
@@ -324,6 +324,7 @@ export class PiHoleCdkStack extends cdk.Stack {
         externalCognitoClientSecret: props.appConfig.piHoleConfig.externalCognitoClientSecret,
         externalCognitoDomain: props.appConfig.piHoleConfig.externalCognitoDomain,
         certificateArn: props.appConfig.piHoleConfig.certificateArn,
+        apiAllowedCidrs: props.appConfig.piHoleConfig.apiAllowedCidrs,
       });
 
       // Register ECS service with ALB target group
@@ -336,6 +337,15 @@ export class PiHoleCdkStack extends cdk.Stack {
       // Export ALB info for failover stack
       new CfnOutput(this, 'AlbDnsName', { value: https.alb.loadBalancerDnsName, exportName: `pihole-alb-dns-${props.appConfig.piHoleConfig.regionSubdomain}` });
       new CfnOutput(this, 'AlbHostedZoneId', { value: https.alb.loadBalancerCanonicalHostedZoneId, exportName: `pihole-alb-zone-${props.appConfig.piHoleConfig.regionSubdomain}` });
+
+      // API Gateway for programmatic access (with Cognito M2M auth)
+      if (props.appConfig.piHoleConfig.externalCognitoUserPoolArn && props.appConfig.piHoleConfig.apiCognitoClientId) {
+        new PiHoleApi(this, 'Api', {
+          piholeUrl: `http://${loadBalancer.nlb.loadBalancerDnsName}`,
+          cognitoUserPoolArn: props.appConfig.piHoleConfig.externalCognitoUserPoolArn,
+          cognitoClientId: props.appConfig.piHoleConfig.apiCognitoClientId,
+        });
+      }
     }
 
     new CfnOutput(this, 'dns1', {

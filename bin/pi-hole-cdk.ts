@@ -65,6 +65,8 @@ export class AppConfig
       localDnsSuffix: this.node.tryGetContext('local_dns_suffix'),
       homeAssistantIp: this.node.tryGetContext('home_assistant_ip'),
       homeAssistantPort: this.node.tryGetContext('home_assistant_port') || DEFAULT_PIHOLE_CONFIG.homeAssistantPort,
+      apiAllowedCidrs: this.node.tryGetContext('api_allowed_cidrs')?.split(',').filter((c: string) => c),
+      apiCognitoClientId: this.node.tryGetContext('api_cognito_client_id'),
     };
     this.rfc1918PrefixListId = this.node.tryGetContext('rfc1918PrefixListId');
   }
