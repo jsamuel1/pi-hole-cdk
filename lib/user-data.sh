@@ -206,6 +206,7 @@ cat >> /etc/pihole/pihole.toml << 'TOML_EOF'
     pwhash = ""
     cli_pw = true
     maxHistory = 86400
+    max_sessions = 64
 
 [files]
   pid = "/run/pihole-FTL.pid"
