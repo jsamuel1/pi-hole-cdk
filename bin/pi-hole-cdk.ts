@@ -5,6 +5,7 @@ import { PiHoleCdkStack } from '../lib/pi-hole-cdk-stack';
 import { SiteToSiteVpnStack } from '../lib/sitetositevpn-stack';
 import { StackProps } from 'aws-cdk-lib';
 import { TgwWithSiteToSiteVpnStack } from '../lib/tgw-with-sitetositevpn-stack';
+import { TgwPeeringStack, TgwPeeringAcceptStack } from '../lib/tgw-peering-stack';
 import { PiHoleFailoverStack } from '../lib/pihole-failover-stack';
 import { UnifiDnsSyncStack } from '../lib/unifi-dns-sync-stack';
 import { Node } from 'constructs';
@@ -112,6 +113,30 @@ if (env.region === 'ap-southeast-4' &&
 new SiteToSiteVpnStack(app, 'SiteToSiteVpnStack', piHoleProps);
 
 new TgwWithSiteToSiteVpnStack(app, 'TgwWithSiteToSiteVpnStack', piHoleProps);
+
+// TGW Peering between regions
+// Context: tgw_id, peer_tgw_id, peer_region for requester
+// Context: tgw_peering_attachment_id, tgw_route_table_id, requester_vpc_cidr, peer_vpc_cidr, requester_tgw_route_table_id for accepter
+const peerRegion = app.node.tryGetContext('peer_region');
+const requesterVpcCidr = app.node.tryGetContext('requester_vpc_cidr');
+const peerVpcCidr = app.node.tryGetContext('peer_vpc_cidr');
+const requesterTgwRouteTableId = app.node.tryGetContext('requester_tgw_route_table_id');
+
+if (peerRegion && app.node.tryGetContext('tgw_id') && app.node.tryGetContext('peer_tgw_id')) {
+  new TgwPeeringStack(app, 'TgwPeeringStack', {
+    env,
+    peerRegion,
+  });
+}
+
+if (requesterVpcCidr && app.node.tryGetContext('tgw_peering_attachment_id')) {
+  new TgwPeeringAcceptStack(app, 'TgwPeeringAcceptStack', {
+    env,
+    requesterCidrs: [requesterVpcCidr],
+    peerCidrs: peerVpcCidr ? [peerVpcCidr] : undefined,
+    requesterTgwRouteTableId,
+  });
+}
 
 // Route 53 failover stack (deployed to us-east-1 for global health checks)
 const hostedZoneId = app.node.tryGetContext('hosted_zone_id');
