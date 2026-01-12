@@ -1,4 +1,4 @@
-import { aws_elasticloadbalancingv2, aws_elasticloadbalancingv2_targets, aws_ec2, aws_certificatemanager, aws_route53, aws_route53_targets, Duration, CfnOutput, SecretValue } from 'aws-cdk-lib';
+import { aws_elasticloadbalancingv2, aws_elasticloadbalancingv2_targets, aws_ec2, aws_certificatemanager, aws_route53, aws_route53_targets, aws_wafv2, Duration, CfnOutput, SecretValue } from 'aws-cdk-lib';
 import { aws_elasticloadbalancingv2_actions } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { PiHoleCognito } from './pihole-cognito';
@@ -73,6 +73,72 @@ export class PiHoleHttps extends Construct {
       securityGroup: albSg,
     });
 
+    // WAF WebACL with AWS managed rules
+    const webAcl = new aws_wafv2.CfnWebACL(this, 'WebAcl', {
+      defaultAction: { allow: {} },
+      scope: 'REGIONAL',
+      visibilityConfig: {
+        cloudWatchMetricsEnabled: true,
+        metricName: 'PiHoleWebAcl',
+        sampledRequestsEnabled: true,
+      },
+      rules: [
+        {
+          name: 'AWSManagedRulesCommonRuleSet',
+          priority: 1,
+          overrideAction: { none: {} },
+          statement: {
+            managedRuleGroupStatement: {
+              vendorName: 'AWS',
+              name: 'AWSManagedRulesCommonRuleSet',
+            },
+          },
+          visibilityConfig: {
+            cloudWatchMetricsEnabled: true,
+            metricName: 'CommonRuleSet',
+            sampledRequestsEnabled: true,
+          },
+        },
+        {
+          name: 'AWSManagedRulesKnownBadInputsRuleSet',
+          priority: 2,
+          overrideAction: { none: {} },
+          statement: {
+            managedRuleGroupStatement: {
+              vendorName: 'AWS',
+              name: 'AWSManagedRulesKnownBadInputsRuleSet',
+            },
+          },
+          visibilityConfig: {
+            cloudWatchMetricsEnabled: true,
+            metricName: 'KnownBadInputs',
+            sampledRequestsEnabled: true,
+          },
+        },
+        {
+          name: 'AWSManagedRulesAmazonIpReputationList',
+          priority: 3,
+          overrideAction: { none: {} },
+          statement: {
+            managedRuleGroupStatement: {
+              vendorName: 'AWS',
+              name: 'AWSManagedRulesAmazonIpReputationList',
+            },
+          },
+          visibilityConfig: {
+            cloudWatchMetricsEnabled: true,
+            metricName: 'IpReputation',
+            sampledRequestsEnabled: true,
+          },
+        },
+      ],
+    });
+
+    new aws_wafv2.CfnWebACLAssociation(this, 'WebAclAssociation', {
+      resourceArn: this.alb.loadBalancerArn,
+      webAclArn: webAcl.attrArn,
+    });
+
     this.albTargetGroup = new aws_elasticloadbalancingv2.ApplicationTargetGroup(this, 'HttpTarget', {
       vpc: props.vpc,
       port: 80,
@@ -140,22 +206,13 @@ export class PiHoleHttps extends Construct {
         }),
       });
 
-      // Add Home Assistant listener rules
+      // Home Assistant - bypass Cognito, use HA's own auth (protected by WAF)
       if (haTargetGroup) {
         listener.addAction('HaRule', {
           priority: 10,
           conditions: [aws_elasticloadbalancingv2.ListenerCondition.hostHeaders(haDomains)],
-          action: aws_elasticloadbalancingv2.ListenerAction.authenticateOidc({
-            authorizationEndpoint: `https://${props.externalCognitoDomain}/oauth2/authorize`,
-            tokenEndpoint: `https://${props.externalCognitoDomain}/oauth2/token`,
-            userInfoEndpoint: `https://${props.externalCognitoDomain}/oauth2/userInfo`,
-            clientId: props.externalCognitoClientId,
-            clientSecret: SecretValue.unsafePlainText(props.externalCognitoClientSecret),
-            issuer,
-            next: aws_elasticloadbalancingv2.ListenerAction.forward([haTargetGroup]),
-          }),
+          action: aws_elasticloadbalancingv2.ListenerAction.forward([haTargetGroup]),
         });
-        // DNS records managed in home-portal account (cross-account)
       }
 
       // Allow unauthenticated API access from specific CIDRs
@@ -190,19 +247,13 @@ export class PiHoleHttps extends Construct {
         }),
       });
 
-      // Add Home Assistant listener rules
+      // Home Assistant - bypass Cognito, use HA's own auth (protected by WAF)
       if (haTargetGroup) {
         listener.addAction('HaRule', {
           priority: 10,
           conditions: [aws_elasticloadbalancingv2.ListenerCondition.hostHeaders(haDomains)],
-          action: new aws_elasticloadbalancingv2_actions.AuthenticateCognitoAction({
-            userPool: this.cognito.userPool,
-            userPoolClient: this.cognito.userPoolClient,
-            userPoolDomain: this.cognito.userPoolDomain,
-            next: aws_elasticloadbalancingv2.ListenerAction.forward([haTargetGroup]),
-          }),
+          action: aws_elasticloadbalancingv2.ListenerAction.forward([haTargetGroup]),
         });
-        // DNS records managed in home-portal account (cross-account)
       }
 
       // Allow unauthenticated API access from specific CIDRs
