@@ -90,6 +90,7 @@ export class PiHoleHttps extends Construct {
     });
 
     // Home Assistant target group (if configured) - HTTPS on port 443
+    // Health check uses HTTP:80 since nginx requires SNI for HTTPS
     let haTargetGroup: aws_elasticloadbalancingv2.ApplicationTargetGroup | undefined;
     if (props.homeAssistantIp) {
       haTargetGroup = new aws_elasticloadbalancingv2.ApplicationTargetGroup(this, 'HaTarget', {
@@ -99,7 +100,8 @@ export class PiHoleHttps extends Construct {
         targetType: aws_elasticloadbalancingv2.TargetType.IP,
         healthCheck: {
           path: '/',
-          protocol: aws_elasticloadbalancingv2.Protocol.HTTPS,
+          port: '80',
+          protocol: aws_elasticloadbalancingv2.Protocol.HTTP,
           interval: Duration.seconds(30),
           timeout: Duration.seconds(10),
           healthyThresholdCount: 2,
