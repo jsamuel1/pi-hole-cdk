@@ -208,12 +208,20 @@ export class PiHoleHttps extends Construct {
         }),
       });
 
-      // Home Assistant - bypass Cognito, use HA's own auth (protected by WAF)
+      // Home Assistant with Cognito OIDC auth
       if (haTargetGroup) {
         listener.addAction('HaRule', {
           priority: 10,
           conditions: [aws_elasticloadbalancingv2.ListenerCondition.hostHeaders(haDomains)],
-          action: aws_elasticloadbalancingv2.ListenerAction.forward([haTargetGroup]),
+          action: aws_elasticloadbalancingv2.ListenerAction.authenticateOidc({
+            authorizationEndpoint: `https://${props.externalCognitoDomain}/oauth2/authorize`,
+            tokenEndpoint: `https://${props.externalCognitoDomain}/oauth2/token`,
+            userInfoEndpoint: `https://${props.externalCognitoDomain}/oauth2/userInfo`,
+            clientId: props.externalCognitoClientId,
+            clientSecret: SecretValue.unsafePlainText(props.externalCognitoClientSecret),
+            issuer,
+            next: aws_elasticloadbalancingv2.ListenerAction.forward([haTargetGroup]),
+          }),
         });
       }
 
@@ -249,12 +257,17 @@ export class PiHoleHttps extends Construct {
         }),
       });
 
-      // Home Assistant - bypass Cognito, use HA's own auth (protected by WAF)
+      // Home Assistant with Cognito auth
       if (haTargetGroup) {
         listener.addAction('HaRule', {
           priority: 10,
           conditions: [aws_elasticloadbalancingv2.ListenerCondition.hostHeaders(haDomains)],
-          action: aws_elasticloadbalancingv2.ListenerAction.forward([haTargetGroup]),
+          action: new aws_elasticloadbalancingv2_actions.AuthenticateCognitoAction({
+            userPool: this.cognito.userPool,
+            userPoolClient: this.cognito.userPoolClient,
+            userPoolDomain: this.cognito.userPoolDomain,
+            next: aws_elasticloadbalancingv2.ListenerAction.forward([haTargetGroup]),
+          }),
         });
       }
 
