@@ -13,6 +13,55 @@ Modern containerized approach using AWS ECS Managed Instances. See [ECS-MIGRATIO
 ### 3. **SiteToSiteVpnStack** & **TgwWithSiteToSiteVpnStack**
 VPN configurations fer secure connectivity.
 
+## 🌐 Traffic Flows
+
+### Pi-hole Admin UI (HTTPS)
+
+```
+Internet/Home → ALB (HTTPS:443) → Cognito Auth → Pi-hole (HTTP:80)
+                     ↓
+              ACM Certificate
+```
+
+- External access requires Cognito authentication
+- ALB terminates SSL using ACM certificate
+- WAF protects against common attacks
+
+### Home Assistant (HTTPS)
+
+```
+Internet → ALB (HTTPS:443) → Home Assistant (HTTP:8123)
+              ↓                      ↑
+       ACM Certificate         Site-to-Site VPN
+
+Home Network → Split-DNS → Home Assistant (HTTPS:443)
+                               ↓
+                        Let's Encrypt Certificate
+```
+
+**External Access (via ALB):**
+- ALB terminates SSL (ACM certificate)
+- Forwards HTTP to HA port 8123 via Site-to-Site VPN
+- No Cognito auth (HA has its own authentication)
+- HA requires `trusted_proxies` configured for VPC CIDR
+
+**Local Access (Split-DNS):**
+- Pi-hole returns local IP for HA hostname
+- Direct HTTPS connection to HA's nginx proxy
+- Uses Let's Encrypt certificate
+
+### DNS Resolution
+
+```
+Pi-hole (AWS) ← Site-to-Site VPN → Home Router
+     ↓                                  ↓
+  Upstream DNS                    Local DNS
+  (1.1.1.1)                    (DHCP clients)
+     ↓
+  Conditional Forwarding
+  (*.localdomain → Home Router)
+```
+
 ## Prerequisites:
 * An existing VPC with internet access
 * A named SSH keypair
@@ -88,6 +137,42 @@ REV_SERVER_DOMAIN=<your_domain>
 ```
 
 For Unifi devices, the Unifi dnsmasq is not configured to listen to the tunnel interface. See the notes in the unifi-vpndns folder fer instructions to fix this, before setting up the conditional forwarding.
+
+## 🏠 Home Assistant Integration
+
+To expose Home Assistant through the ALB:
+
+### CDK Context Parameters
+
+```bash
+-c home_assistant_ip=<HA_IP> \
+-c home_assistant_port=8123
+```
+
+### Home Assistant Configuration
+
+Add the VPC CIDR to `configuration.yaml`:
+
+```yaml
+http:
+  use_x_forwarded_for: true
+  trusted_proxies:
+    - 172.30.33.0/24  # HA internal Docker network
+    - <VPC_CIDR>      # AWS VPC CIDR (via Site-to-Site VPN)
+```
+
+### Certificate Domains
+
+The ACM certificate automatically includes (when `home_assistant_ip` is set):
+
+- `pihole-{region}.{hosted_zone}` (regional Pi-hole)
+- `pihole.{hosted_zone}` (failover)
+- `homeassistant.{hosted_zone}`
+- `ha.{hosted_zone}`
+
+### Split-DNS (Optional)
+
+For local access without going through the ALB, configure Pi-hole Local DNS to return the local HA IP for the HA hostnames.
 
 ## 🗺️ Migration to ECS Managed Instances
 

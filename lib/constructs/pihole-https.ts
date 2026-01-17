@@ -155,18 +155,20 @@ export class PiHoleHttps extends Construct {
       },
     });
 
-    // Home Assistant target group (if configured) - HTTPS on port 443
-    // Health check uses HTTP:80 since nginx requires SNI for HTTPS
+    // Home Assistant target group (if configured) - HTTP on port 8123
+    // ALB terminates SSL, forwards to HA's native HTTP port
+    // HA must have trusted_proxies configured to include VPC CIDR (10.0.0.0/16)
+    const haPort = props.homeAssistantPort || 8123;
     let haTargetGroup: aws_elasticloadbalancingv2.ApplicationTargetGroup | undefined;
     if (props.homeAssistantIp) {
       haTargetGroup = new aws_elasticloadbalancingv2.ApplicationTargetGroup(this, 'HaTarget', {
         vpc: props.vpc,
-        port: 443,
-        protocol: aws_elasticloadbalancingv2.ApplicationProtocol.HTTPS,
+        port: haPort,
+        protocol: aws_elasticloadbalancingv2.ApplicationProtocol.HTTP,
         targetType: aws_elasticloadbalancingv2.TargetType.IP,
         healthCheck: {
           path: '/',
-          port: '80',
+          port: String(haPort),
           protocol: aws_elasticloadbalancingv2.Protocol.HTTP,
           interval: Duration.seconds(30),
           timeout: Duration.seconds(10),
@@ -175,7 +177,7 @@ export class PiHoleHttps extends Construct {
           healthyHttpCodes: '200-399',
         },
       });
-      haTargetGroup.addTarget(new aws_elasticloadbalancingv2_targets.IpTarget(props.homeAssistantIp, 443, 'all'));
+      haTargetGroup.addTarget(new aws_elasticloadbalancingv2_targets.IpTarget(props.homeAssistantIp, haPort, 'all'));
     }
 
     // Set up Cognito if domain prefix provided or external config
