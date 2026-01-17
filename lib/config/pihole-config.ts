@@ -67,7 +67,7 @@ export const DEFAULT_PIHOLE_CONFIG: PiHoleConfig = {
   
   // Container/Instance Resources
   containerMemory: 1536,
-  containerCpu: 256,
+  containerCpu: 2048,
   
   // Load Balancer Configuration
   deregistrationDelayMinutes: 2,
