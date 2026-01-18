@@ -86,7 +86,7 @@
     "@aws-cdk/aws-stepfunctions:useDistributedMapResultWriterV2": true,
     "@aws-cdk/core:aspectPrioritiesMutating": true,
     "@aws-cdk/core:cfnIncludeRejectComplexResourceUpdateCreatePolicyIntrinsics": true,
-    "@aws-cdk/core:enableAdditionalMetadataCollection": true,
+    "@aws-cdk/core:enableAdditionalMetadataCollection": false,
     "@aws-cdk/core:explicitStackTags": true,
     "@aws-cdk/core:includePrefixInUniqueNameGeneration": true,
     "@aws-cdk/s3-notifications:addS3TrustKeyPolicyForSnsSubscriptions": true,
