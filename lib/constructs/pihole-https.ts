@@ -180,6 +180,14 @@ export class PiHoleHttps extends Construct {
       haTargetGroup.addTarget(new aws_elasticloadbalancingv2_targets.IpTarget(props.homeAssistantIp, haPort, 'all'));
     }
 
+    // Helper to add CSP header for iframe embedding
+    const addCspHeader = (listener: aws_elasticloadbalancingv2.ApplicationListener) => {
+      const cfnListener = listener.node.defaultChild as aws_elasticloadbalancingv2.CfnListener;
+      cfnListener.listenerAttributes = [
+        { key: 'routing.http.response.content_security_policy.header_value', value: "frame-ancestors 'self' https://pihole-agent.home.sauhsoj.wtf" },
+      ];
+    };
+
     // Set up Cognito if domain prefix provided or external config
     if (props.externalCognitoUserPoolArn && props.externalCognitoClientId && props.externalCognitoClientSecret && props.externalCognitoDomain) {
       // Use external Cognito pool via OIDC
@@ -207,6 +215,7 @@ export class PiHoleHttps extends Construct {
           next: aws_elasticloadbalancingv2.ListenerAction.forward([this.albTargetGroup]),
         }),
       });
+      addCspHeader(listener);
 
       // Home Assistant with Cognito OIDC auth
       if (haTargetGroup) {
@@ -256,6 +265,7 @@ export class PiHoleHttps extends Construct {
           next: aws_elasticloadbalancingv2.ListenerAction.forward([this.albTargetGroup]),
         }),
       });
+      addCspHeader(listener);
 
       // Home Assistant with Cognito auth
       if (haTargetGroup) {
@@ -283,11 +293,12 @@ export class PiHoleHttps extends Construct {
         });
       }
     } else {
-      this.alb.addListener('Https', {
+      const listener = this.alb.addListener('Https', {
         port: 443,
         certificates: [this.certificate],
         defaultAction: aws_elasticloadbalancingv2.ListenerAction.forward([this.albTargetGroup]),
       });
+      addCspHeader(listener);
     }
 
     // Only create DNS record if hosted zone is provided (same account)
