@@ -26,13 +26,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Assume deploy role
-        if: vars.DEPLOY_ROLE_ARN != ''
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ vars.DEPLOY_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-          role-skip-session-tagging: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -151,13 +144,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Assume deploy role
-        if: vars.DEPLOY_ROLE_ARN != ''
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ vars.DEPLOY_ROLE_ARN }}
-          aws-region: ${{ env.AWS_REGION }}
-          role-skip-session-tagging: true
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
