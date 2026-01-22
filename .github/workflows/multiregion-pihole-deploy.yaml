@@ -20,6 +20,7 @@ jobs:
       alb_zone: ${{ steps.deploy.outputs.alb_zone }}
     env:
       AWS_REGION: ap-southeast-4
+      AWS_DEFAULT_REGION: ap-southeast-4
       CDK_DEFAULT_REGION: ap-southeast-4
       CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
     steps:
@@ -47,19 +48,23 @@ jobs:
         id: efs_lookup
         run: |
           # Get the EFS filesystem ID from CloudFormation
+          echo "Looking up EFS filesystem from CloudFormation stack..."
           FS_ID=$(aws cloudformation describe-stack-resources \
             --stack-name PiHoleCdkStack \
             --query "StackResources[?ResourceType=='AWS::EFS::FileSystem'].PhysicalResourceId" \
-            --output text 2>/dev/null || echo "")
+            --output text 2>&1) || true
+          echo "FS_ID result: '$FS_ID'"
           
-          if [ -n "$FS_ID" ]; then
+          if [ -n "$FS_ID" ] && [[ ! "$FS_ID" =~ "error" ]]; then
             # Check if replication exists
+            echo "Checking replication configuration for $FS_ID..."
             DEST_FS_ID=$(aws efs describe-replication-configurations \
               --file-system-id "$FS_ID" \
               --query 'Replications[0].Destinations[0].FileSystemId' \
-              --output text 2>/dev/null || echo "")
+              --output text 2>&1) || true
+            echo "DEST_FS_ID result: '$DEST_FS_ID'"
             
-            if [ -n "$DEST_FS_ID" ] && [ "$DEST_FS_ID" != "None" ]; then
+            if [ -n "$DEST_FS_ID" ] && [ "$DEST_FS_ID" != "None" ] && [[ ! "$DEST_FS_ID" =~ "error" ]]; then
               echo "dest_fs_id=$DEST_FS_ID" >> $GITHUB_OUTPUT
               echo "Found existing replication destination: $DEST_FS_ID"
             fi
@@ -138,6 +143,7 @@ jobs:
       alb_zone: ${{ steps.deploy.outputs.alb_zone }}
     env:
       AWS_REGION: ap-southeast-2
+      AWS_DEFAULT_REGION: ap-southeast-2
       CDK_DEFAULT_REGION: ap-southeast-2
       CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
     steps:
