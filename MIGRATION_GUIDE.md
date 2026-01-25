@@ -126,8 +126,8 @@ aws ec2 delete-managed-prefix-list --prefix-list-id <PL_ID> --region <REGION> --
 
 ```bash
 cd /path/to/pi-hole-cdk
-npm run build
-AWS_REGION=<REGION> npx cdk deploy PiHoleCdkStack --profile <PROFILE> --require-approval never
+bun run build
+AWS_REGION=<REGION> bunx cdk deploy PiHoleCdkStack --profile <PROFILE> --require-approval never
 ```
 
 ## CDK Code Changes

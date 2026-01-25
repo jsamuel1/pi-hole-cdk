@@ -177,7 +177,7 @@ new PiHoleEcsManagedStack(app, 'PiHoleEcsManagedStack', piHoleProps);
 
 ```bash
 cd /projects/sandbox/pi-hole-cdk
-npm run build
+bun run build
 ```
 
 ### Step 3: Synthesize CloudFormation Template

@@ -19,12 +19,12 @@ Refactor two CDK stacks (`pi-hole-cdk-stack.ts` and `pi-hole-ecs-managed-stack.t
 - `instanceVCpuMin/Max` (default: 2/4)
 - `instanceMemoryMin/Max` (default: 2048/4096)
 
-**Acceptance:** `npm run build` passes
+**Acceptance:** `bun run build` passes
 
 ### Task 2: Update AppConfig and Props
 **Scope:** Extend existing `PiHoleProps` to include optional `PiHoleConfig`
 **File:** `bin/pi-hole-cdk.ts`
-**Acceptance:** `npm run build` && `cdk synth` passes
+**Acceptance:** `bun run build` && `cdk synth` passes
 
 ## Phase 2: Shared Constructs
 
@@ -32,40 +32,40 @@ Refactor two CDK stacks (`pi-hole-cdk-stack.ts` and `pi-hole-ecs-managed-stack.t
 **Scope:** Extract VPC lookup, security group, and RFC1918 prefix list
 **File:** `lib/constructs/pihole-networking.ts`
 **Exposes:** `vpc`, `securityGroup`, `prefixList`
-**Acceptance:** `npm run build` passes
+**Acceptance:** `bun run build` passes
 
 ### Task 4: Create PiHoleStorage Construct
 **Scope:** Extract EFS file system and Secrets Manager secret creation
 **File:** `lib/constructs/pihole-storage.ts`
 **Exposes:** `fileSystem`, `passwordSecret`
-**Acceptance:** `npm run build` passes
+**Acceptance:** `bun run build` passes
 
 ### Task 5: Create PiHoleLoadBalancer Construct
 **Scope:** Extract NLB setup and IP retrieval custom resource
 **File:** `lib/constructs/pihole-loadbalancer.ts`
 **Exposes:** `nlb`, `dnsIp1`, `dnsIp2`, `targetGroup`
-**Acceptance:** `npm run build` passes
+**Acceptance:** `bun run build` passes
 
 ### Task 5b: Create PiHoleIamPolicies Construct
 **Scope:** Extract IAM policies for Secrets Manager and KMS access
 **File:** `lib/constructs/pihole-iam-policies.ts`
 **Exposes:** `createSecretsPolicy(secretArn)`, `createKmsPolicy()`, `getManagedPolicies()`
-**Acceptance:** `npm run build` passes
+**Acceptance:** `bun run build` passes
 
 ### Task 6: Create Constructs Index
 **Scope:** Create barrel export for all constructs
 **File:** `lib/constructs/index.ts`
-**Acceptance:** `npm run build` passes
+**Acceptance:** `bun run build` passes
 
 ## Phase 3: Stack Refactoring
 
 ### Task 7: Refactor ECS Stack to Use Constructs
 **Scope:** Update `pi-hole-ecs-managed-stack.ts` to use shared constructs and config
-**Acceptance:** `npm run build` && `cdk synth` passes
+**Acceptance:** `bun run build` && `cdk synth` passes
 
 ### Task 8: Refactor EC2 ASG Stack to Use Constructs
 **Scope:** Update `pi-hole-cdk-stack.ts` to use shared constructs and config
-**Acceptance:** `npm run build` && `cdk synth` passes
+**Acceptance:** `bun run build` && `cdk synth` passes
 
 ## Phase 4: Cleanup
 
@@ -74,13 +74,13 @@ Refactor two CDK stacks (`pi-hole-cdk-stack.ts` and `pi-hole-ecs-managed-stack.t
 - Remove unused `keypair` variable
 - Remove pirate-speak from comments
 - Trim excessive docstrings
-**Acceptance:** `npm run build` && `cdk synth` passes
+**Acceptance:** `bun run build` && `cdk synth` passes
 
 ---
 
 ## Validation Commands
 Each task must pass before commit:
 ```bash
-npm run build
+bun run build
 cdk synth --quiet
 ```
