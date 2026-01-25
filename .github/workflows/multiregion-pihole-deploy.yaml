@@ -29,17 +29,17 @@ jobs:
 
       - uses: ./.github/actions/setup-tools
         with:
-          install-node: '22'
+          install-bun: latest
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Build CDK project
-        run: npm run build
+        run: bun run build
 
       - name: CDK Bootstrap Melbourne
         run: |
-          npx cdk --no-notices bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
+          bunx cdk --no-notices bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
 
       - name: Lookup existing EFS replication
         id: efs_lookup
@@ -75,7 +75,7 @@ jobs:
             REPL_ARGS="--context efs_replication_dest_fs_id=${{ steps.efs_lookup.outputs.dest_fs_id }}"
           fi
           
-          npx cdk --no-notices deploy PiHoleCdkStack \
+          bunx cdk --no-notices deploy PiHoleCdkStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
             --context vpc_name="${{ secrets.VPC_NAME_MELBOURNE }}" \
@@ -108,7 +108,7 @@ jobs:
             REPL_ARGS="--context efs_replication_dest_fs_id=${{ steps.efs_lookup.outputs.dest_fs_id }}"
           fi
           
-          npx cdk --no-notices deploy UnifiDnsSyncStack \
+          bunx cdk --no-notices deploy UnifiDnsSyncStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
             --context vpc_name="${{ secrets.VPC_NAME_MELBOURNE }}" \
@@ -149,22 +149,22 @@ jobs:
 
       - uses: ./.github/actions/setup-tools
         with:
-          install-node: '22'
+          install-bun: latest
 
       - name: Install dependencies
-        run: npm ci
+        run: bun install --frozen-lockfile
 
       - name: Build CDK project
-        run: npm run build
+        run: bun run build
 
       - name: CDK Bootstrap Sydney
         run: |
-          npx cdk --no-notices bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
+          bunx cdk --no-notices bootstrap aws://${{ secrets.AWS_ACCOUNT_ID }}/${{ env.AWS_REGION }}
 
       - name: Deploy PiHoleCdkStack to Sydney
         id: deploy
         run: |
-          npx cdk --no-notices deploy PiHoleCdkStack \
+          bunx cdk --no-notices deploy PiHoleCdkStack \
             --context local_ip="${{ secrets.LOCAL_IP }}" \
             --context local_internal_cidr="${{ secrets.LOCAL_INTERNAL_CIDR }}" \
             --context vpc_name="${{ secrets.VPC_NAME_SYDNEY }}" \

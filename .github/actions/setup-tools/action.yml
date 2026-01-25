@@ -1,5 +1,5 @@
 name: 'Setup Tools'
-description: 'Setup AWS CLI, uv, and agentcore with caching'
+description: 'Setup AWS CLI, uv, Node/Bun, and agentcore with caching'
 inputs:
   install-zip:
     description: 'Install zip package'
@@ -9,6 +9,9 @@ inputs:
     default: 'false'
   install-node:
     description: 'Node.js version to install (empty to skip)'
+    default: ''
+  install-bun:
+    description: 'Bun version to install (empty to skip, use "latest" for latest)'
     default: ''
 runs:
   using: 'composite'
@@ -21,6 +24,10 @@ runs:
       if: inputs.install-node != ''
       with:
         node-version: ${{ inputs.install-node }}
+    - uses: oven-sh/setup-bun@v2
+      if: inputs.install-bun != ''
+      with:
+        bun-version: ${{ inputs.install-bun }}
     - uses: unfor19/install-aws-cli-action@v1
     - uses: astral-sh/setup-uv@v7
       with:
