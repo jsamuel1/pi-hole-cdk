@@ -1,0 +1,37 @@
+name: 'Setup Tools'
+description: 'Setup AWS CLI, uv, and agentcore with caching'
+inputs:
+  install-zip:
+    description: 'Install zip package'
+    default: 'false'
+  install-agentcore:
+    description: 'Install agentcore CLI'
+    default: 'false'
+  install-node:
+    description: 'Node.js version to install (empty to skip)'
+    default: ''
+runs:
+  using: 'composite'
+  steps:
+    - name: Install zip
+      if: inputs.install-zip == 'true'
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install -y zip
+    - uses: actions/setup-node@v4
+      if: inputs.install-node != ''
+      with:
+        node-version: ${{ inputs.install-node }}
+    - uses: unfor19/install-aws-cli-action@v1
+    - uses: astral-sh/setup-uv@v7
+      with:
+        enable-cache: true
+    - name: Cache agentcore
+      if: inputs.install-agentcore == 'true'
+      uses: actions/cache@v4
+      with:
+        path: ~/.local/share/uv/tools
+        key: uv-tools-agentcore-${{ runner.os }}
+    - name: Install agentcore
+      if: inputs.install-agentcore == 'true'
+      shell: bash
+      run: uv tool install bedrock-agentcore-starter-toolkit

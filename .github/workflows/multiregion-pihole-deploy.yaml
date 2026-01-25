@@ -27,14 +27,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup AWS CLI
-        uses: unfor19/install-aws-cli-action@v1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: ./.github/actions/setup-tools
         with:
-          node-version: '22'
-          cache: 'npm'
+          install-node: '22'
 
       - name: Install dependencies
         run: npm ci
@@ -152,14 +147,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup AWS CLI
-        uses: unfor19/install-aws-cli-action@v1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: ./.github/actions/setup-tools
         with:
-          node-version: '22'
-          cache: 'npm'
+          install-node: '22'
 
       - name: Install dependencies
         run: npm ci
