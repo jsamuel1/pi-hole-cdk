@@ -1,5 +1,5 @@
 {
-  "app": "npx ts-node --prefer-ts-exts bin/pi-hole-cdk.ts",
+  "app": "bunx ts-node --prefer-ts-exts bin/pi-hole-cdk.ts",
   "watch": {
     "include": ["**"],
     "exclude": [
