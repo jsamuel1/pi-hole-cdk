@@ -1,5 +1,5 @@
 {
-  "app": "bunx ts-node --prefer-ts-exts bin/pi-hole-cdk.ts",
+  "app": "bun run bin/pi-hole-cdk.ts",
   "watch": {
     "include": ["**"],
     "exclude": [
