@@ -62,7 +62,6 @@ export class PiHoleCognito extends Construct {
           scopes: [aws_cognito.OAuthScope.OPENID, aws_cognito.OAuthScope.EMAIL, aws_cognito.OAuthScope.PROFILE],
           callbackUrls: props.callbackUrls,
         },
-        authFlows: { userAuth: true },
         supportedIdentityProviders: [aws_cognito.UserPoolClientIdentityProvider.COGNITO],
       });
 
