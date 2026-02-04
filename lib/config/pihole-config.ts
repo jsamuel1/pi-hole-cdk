@@ -51,6 +51,10 @@ export interface PiHoleConfig {
   homeAssistantIp?: string;
   homeAssistantPort?: number;
 
+  // UniFi Controller Configuration (optional)
+  unifiControllerIp?: string;
+  unifiControllerPort?: number;
+
   // API access without Cognito auth (for agents/automation)
   apiAllowedCidrs?: string[];
 
@@ -86,4 +90,7 @@ export const DEFAULT_PIHOLE_CONFIG: PiHoleConfig = {
 
   // Home Assistant defaults
   homeAssistantPort: 8123,
+
+  // UniFi Controller defaults
+  unifiControllerPort: 443,
 };

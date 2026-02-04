@@ -319,6 +319,8 @@ export class PiHoleCdkStack extends cdk.Stack {
         cognitoDomainPrefix: props.appConfig.piHoleConfig.cognitoDomainPrefix,
         homeAssistantIp: props.appConfig.piHoleConfig.homeAssistantIp,
         homeAssistantPort: props.appConfig.piHoleConfig.homeAssistantPort,
+        unifiControllerIp: props.appConfig.piHoleConfig.unifiControllerIp,
+        unifiControllerPort: props.appConfig.piHoleConfig.unifiControllerPort,
         externalCognitoUserPoolArn: props.appConfig.piHoleConfig.externalCognitoUserPoolArn,
         externalCognitoClientId: props.appConfig.piHoleConfig.externalCognitoClientId,
         externalCognitoClientSecret: props.appConfig.piHoleConfig.externalCognitoClientSecret,

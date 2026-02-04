@@ -13,6 +13,9 @@ export interface PiHoleHttpsProps {
   cognitoDomainPrefix?: string;
   homeAssistantIp?: string;
   homeAssistantPort?: number;
+  // UniFi Controller config
+  unifiControllerIp?: string;
+  unifiControllerPort?: number;
   // External Cognito config
   externalCognitoUserPoolArn?: string;
   externalCognitoClientId?: string;
@@ -41,10 +44,14 @@ export class PiHoleHttps extends Construct {
 
     const regionalDomain = `pihole-${props.regionSubdomain}.${props.hostedZoneName}`;
     const haDomains = [`ha.${props.hostedZoneName}`, `homeassistant.${props.hostedZoneName}`];
+    const unifiDomains = [`unifi.${props.hostedZoneName}`];
 
     const certDomains = [`pihole.${props.hostedZoneName}`];
     if (props.homeAssistantIp) {
       certDomains.push(...haDomains);
+    }
+    if (props.unifiControllerIp) {
+      certDomains.push(...unifiDomains);
     }
 
     // Use existing certificate or create new one with DNS validation
@@ -180,6 +187,30 @@ export class PiHoleHttps extends Construct {
       haTargetGroup.addTarget(new aws_elasticloadbalancingv2_targets.IpTarget(props.homeAssistantIp, haPort, 'all'));
     }
 
+    // UniFi Controller target group (if configured) - HTTPS on port 443
+    // ALB terminates SSL, forwards to UniFi's HTTPS port (self-signed cert)
+    const unifiPort = props.unifiControllerPort || 443;
+    let unifiTargetGroup: aws_elasticloadbalancingv2.ApplicationTargetGroup | undefined;
+    if (props.unifiControllerIp) {
+      unifiTargetGroup = new aws_elasticloadbalancingv2.ApplicationTargetGroup(this, 'UnifiTarget', {
+        vpc: props.vpc,
+        port: unifiPort,
+        protocol: aws_elasticloadbalancingv2.ApplicationProtocol.HTTPS,
+        targetType: aws_elasticloadbalancingv2.TargetType.IP,
+        healthCheck: {
+          path: '/',
+          port: String(unifiPort),
+          protocol: aws_elasticloadbalancingv2.Protocol.HTTPS,
+          interval: Duration.seconds(30),
+          timeout: Duration.seconds(10),
+          healthyThresholdCount: 2,
+          unhealthyThresholdCount: 5,
+          healthyHttpCodes: '200-399',
+        },
+      });
+      unifiTargetGroup.addTarget(new aws_elasticloadbalancingv2_targets.IpTarget(props.unifiControllerIp, unifiPort, 'all'));
+    }
+
     // Helper to add CSP header for iframe embedding
     const addCspHeader = (listener: aws_elasticloadbalancingv2.ApplicationListener) => {
       const cfnListener = listener.node.defaultChild as aws_elasticloadbalancingv2.CfnListener;
@@ -234,6 +265,23 @@ export class PiHoleHttps extends Construct {
         });
       }
 
+      // UniFi Controller with Cognito OIDC auth
+      if (unifiTargetGroup) {
+        listener.addAction('UnifiRule', {
+          priority: 11,
+          conditions: [aws_elasticloadbalancingv2.ListenerCondition.hostHeaders(unifiDomains)],
+          action: aws_elasticloadbalancingv2.ListenerAction.authenticateOidc({
+            authorizationEndpoint: `https://${props.externalCognitoDomain}/oauth2/authorize`,
+            tokenEndpoint: `https://${props.externalCognitoDomain}/oauth2/token`,
+            userInfoEndpoint: `https://${props.externalCognitoDomain}/oauth2/userInfo`,
+            clientId: props.externalCognitoClientId,
+            clientSecret: SecretValue.unsafePlainText(props.externalCognitoClientSecret),
+            issuer,
+            next: aws_elasticloadbalancingv2.ListenerAction.forward([unifiTargetGroup]),
+          }),
+        });
+      }
+
       // Allow unauthenticated API access from specific CIDRs
       if (props.apiAllowedCidrs && props.apiAllowedCidrs.length > 0) {
         listener.addAction('ApiBypass', {
@@ -252,6 +300,7 @@ export class PiHoleHttps extends Construct {
           `https://${regionalDomain}/oauth2/idpresponse`,
           `https://pihole.${props.hostedZoneName}/oauth2/idpresponse`,
           ...(props.homeAssistantIp ? haDomains.map(d => `https://${d}/oauth2/idpresponse`) : []),
+          ...(props.unifiControllerIp ? unifiDomains.map(d => `https://${d}/oauth2/idpresponse`) : []),
         ],
       });
 
@@ -277,6 +326,20 @@ export class PiHoleHttps extends Construct {
             userPoolClient: this.cognito.userPoolClient,
             userPoolDomain: this.cognito.userPoolDomain,
             next: aws_elasticloadbalancingv2.ListenerAction.forward([haTargetGroup]),
+          }),
+        });
+      }
+
+      // UniFi Controller with Cognito auth
+      if (unifiTargetGroup) {
+        listener.addAction('UnifiRule', {
+          priority: 11,
+          conditions: [aws_elasticloadbalancingv2.ListenerCondition.hostHeaders(unifiDomains)],
+          action: new aws_elasticloadbalancingv2_actions.AuthenticateCognitoAction({
+            userPool: this.cognito.userPool,
+            userPoolClient: this.cognito.userPoolClient,
+            userPoolDomain: this.cognito.userPoolDomain,
+            next: aws_elasticloadbalancingv2.ListenerAction.forward([unifiTargetGroup]),
           }),
         });
       }

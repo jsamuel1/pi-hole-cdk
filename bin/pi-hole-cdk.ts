@@ -66,6 +66,8 @@ export class AppConfig
       localDnsSuffix: this.node.tryGetContext('local_dns_suffix'),
       homeAssistantIp: this.node.tryGetContext('home_assistant_ip'),
       homeAssistantPort: this.node.tryGetContext('home_assistant_port') || DEFAULT_PIHOLE_CONFIG.homeAssistantPort,
+      unifiControllerIp: this.node.tryGetContext('unifi_controller_ip'),
+      unifiControllerPort: this.node.tryGetContext('unifi_controller_port') || DEFAULT_PIHOLE_CONFIG.unifiControllerPort,
       apiAllowedCidrs: this.node.tryGetContext('api_allowed_cidrs')?.split(',').filter((c: string) => c),
       apiCognitoClientId: this.node.tryGetContext('api_cognito_client_id'),
     };
